@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'data/models/strategy.dart';
 import 'presentation/screens/home_screen.dart';
 import 'presentation/screens/detail_screen.dart';
+import 'presentation/screens/scan_screen.dart';
+import 'presentation/screens/scan_result_screen.dart';
 
 /// GoRouter の設定
 final router = GoRouter(
@@ -20,6 +22,21 @@ final router = GoRouter(
         final strategy = state.extra as Strategy;
         return DetailScreen(strategy: strategy);
       },
+    ),
+    GoRoute(
+      path: '/scan',
+      name: 'scan',
+      builder: (context, state) => const ScanScreen(),
+      routes: [
+        GoRoute(
+          path: 'result',
+          name: 'scan_result',
+          builder: (context, state) {
+            final barcode = state.extra as String;
+            return ScanResultScreen(barcode: barcode);
+          },
+        ),
+      ],
     ),
   ],
   errorBuilder: (context, state) => Scaffold(
