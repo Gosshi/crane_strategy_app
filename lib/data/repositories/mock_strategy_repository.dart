@@ -41,4 +41,21 @@ class MockStrategyRepository implements StrategyRepository {
     await Future.delayed(const Duration(milliseconds: 500));
     _products.add(product);
   }
+
+  @override
+  Future<List<Product>> searchProducts(String query) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    if (query.isEmpty) {
+      return _products;
+    }
+
+    final lowerQuery = query.toLowerCase();
+    return _products.where((product) {
+      final nameMatch = product.name.toLowerCase().contains(lowerQuery);
+      final tagMatch = product.tags.any(
+        (tag) => tag.toLowerCase().contains(lowerQuery),
+      );
+      return nameMatch || tagMatch;
+    }).toList();
+  }
 }
