@@ -148,7 +148,7 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
               right: 0,
               child: Column(
                 children: [
-                   const Text(
+                  const Text(
                     'Debug Actions',
                     style: TextStyle(color: Colors.white70),
                   ),
@@ -157,11 +157,13 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
                     spacing: 16,
                     children: [
                       ElevatedButton(
-                        onPressed: () => _handleBarcodeFound('4901234567890'), // 登録済み商品
+                        onPressed: () =>
+                            _handleBarcodeFound('4901234567890'), // 登録済み商品
                         child: const Text('Found(490...)'),
                       ),
                       ElevatedButton(
-                        onPressed: () => _handleBarcodeFound('0000000000000'), // 未登録
+                        onPressed: () =>
+                            _handleBarcodeFound('0000000000000'), // 未登録
                         child: const Text('Not Found'),
                       ),
                     ],

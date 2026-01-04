@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# Format check
+echo "Running dart format check..."
+if ! dart format --output=none --set-exit-if-changed .; then
+  echo "Error: Dart format check failed. Please run 'dart format .' and commit again."
+  exit 1
+fi
+
+# Test run
+echo "Running flutter test..."
+if ! flutter test; then
+  echo "Error: Flutter tests failed. Please fix tests and commit again."
+  exit 1
+fi
+
+echo "Pre-commit checks passed!"
+exit 0

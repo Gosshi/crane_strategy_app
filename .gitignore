@@ -20,6 +20,7 @@ migrate_working_dir/
 
 # VS Code
 .vscode/
+!.vscode/settings.json
 
 # Flutter/Dart/Pub related
 **/doc/api/

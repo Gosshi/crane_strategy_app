@@ -45,16 +45,9 @@ final router = GoRouter(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.error_outline,
-            size: 64,
-            color: Colors.grey,
-          ),
+          const Icon(Icons.error_outline, size: 64, color: Colors.grey),
           const SizedBox(height: 16),
-          Text(
-            'ページが見つかりません',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
+          Text('ページが見つかりません', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
           FilledButton(
             onPressed: () => context.go('/'),

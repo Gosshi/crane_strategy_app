@@ -22,23 +22,27 @@ class TestStrategyRepository extends MockStrategyRepository {
 }
 
 void main() {
-  testWidgets('HomeScreen displays app title and strategy list', (WidgetTester tester) async {
+  testWidgets('HomeScreen displays app title and strategy list', (
+    WidgetTester tester,
+  ) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          mockStrategyRepositoryProvider.overrideWithValue(TestStrategyRepository()),
+          mockStrategyRepositoryProvider.overrideWithValue(
+            TestStrategyRepository(),
+          ),
         ],
         child: const CraneStrategyApp(),
       ),
     );
 
     // データ読み込み完了まで待機 (pumpAndSettleだと画像読み込み等でタイムアウトするため pump を使用)
-    await tester.pump(); 
+    await tester.pump();
 
     // アプリタイトルが表示されていることを確認
     expect(find.text('クレーンゲーム攻略'), findsOneWidget);
-    
+
     // リストアイテムが表示されていることを確認
     expect(find.text('Test Strategy'), findsOneWidget);
   });

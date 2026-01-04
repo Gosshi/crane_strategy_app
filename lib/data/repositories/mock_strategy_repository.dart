@@ -11,7 +11,8 @@ class MockStrategyRepository {
       title: {'ja': '橋渡し・基本の縦ハメ', 'en': 'Vertical Stuck Method'},
       description: {
         'ja': '橋渡しの基本となる縦ハメの手順です。アームのパワーが強い場合に有効です。',
-        'en': 'Basic vertical stuck method for bridge setting. Effective when arm power is strong.'
+        'en':
+            'Basic vertical stuck method for bridge setting. Effective when arm power is strong.',
       },
       settingType: '橋渡し',
       thumbnailUrl: 'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
@@ -22,7 +23,8 @@ class MockStrategyRepository {
       title: {'ja': '橋渡し・横ハメのコツ', 'en': 'Horizontal Stuck Tips'},
       description: {
         'ja': '横にはまってしまった場合のリカバリー方法と、そこからの寄せについて解説します。',
-        'en': 'Recovery methods when stuck horizontally and how to move from there.'
+        'en':
+            'Recovery methods when stuck horizontally and how to move from there.',
       },
       settingType: '橋渡し',
       thumbnailUrl: 'https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
@@ -33,7 +35,8 @@ class MockStrategyRepository {
       title: {'ja': '3本爪・初期位置からの攻略', 'en': '3-Claw Initial Position'},
       description: {
         'ja': '3本爪機種で初期位置から確率無視で獲得するための寄せ技です。',
-        'en': 'Technique to win from initial position on 3-claw machines ignoring probability.'
+        'en':
+            'Technique to win from initial position on 3-claw machines ignoring probability.',
       },
       settingType: '3本爪',
       thumbnailUrl: 'https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg',

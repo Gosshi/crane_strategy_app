@@ -32,7 +32,7 @@ class MockTestRepository extends MockStrategyRepository {
         settingType: 'Type',
         thumbnailUrl: 'http://example.com/thumb.png',
         videoId: 'vid',
-      )
+      ),
     ];
   }
 }
@@ -46,15 +46,17 @@ void main() {
   });
   */
 
-  testWidgets('ScanResultScreen displays product when found', (WidgetTester tester) async {
+  testWidgets('ScanResultScreen displays product when found', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          mockStrategyRepositoryProvider.overrideWithValue(MockTestRepository()),
+          mockStrategyRepositoryProvider.overrideWithValue(
+            MockTestRepository(),
+          ),
         ],
-        child: const MaterialApp(
-          home: ScanResultScreen(barcode: 'found'),
-        ),
+        child: const MaterialApp(home: ScanResultScreen(barcode: 'found')),
       ),
     );
 
@@ -62,7 +64,6 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
     await tester.pump(); // データ取得完了
-
 
     // 商品名表示
     expect(find.text('Test Product'), findsOneWidget);
@@ -73,15 +74,17 @@ void main() {
     expect(find.text('Test Strategy'), findsOneWidget);
   });
 
-  testWidgets('ScanResultScreen displays not found message', (WidgetTester tester) async {
+  testWidgets('ScanResultScreen displays not found message', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          mockStrategyRepositoryProvider.overrideWithValue(MockTestRepository()),
+          mockStrategyRepositoryProvider.overrideWithValue(
+            MockTestRepository(),
+          ),
         ],
-        child: const MaterialApp(
-          home: ScanResultScreen(barcode: 'not_found'),
-        ),
+        child: const MaterialApp(home: ScanResultScreen(barcode: 'not_found')),
       ),
     );
 

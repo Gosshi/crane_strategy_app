@@ -8,26 +8,27 @@ import '../../data/models/strategy.dart';
 import '../widgets/strategy_card.dart';
 
 /// 指定されたバーコードの商品を検索するプロバイダー
-final productSearchProvider = FutureProvider.family<Product?, String>((ref, barcode) async {
+final productSearchProvider = FutureProvider.family<Product?, String>((
+  ref,
+  barcode,
+) async {
   final repository = ref.watch(mockStrategyRepositoryProvider);
   return repository.fetchProductByBarcode(barcode);
 });
 
 /// 商品に関連する攻略法を取得するプロバイダー
-final relatedStrategiesProvider = FutureProvider.family<List<Strategy>, List<String>>((ref, ids) async {
-  if (ids.isEmpty) return [];
-  final repository = ref.watch(mockStrategyRepositoryProvider);
-  return repository.fetchStrategiesByIds(ids);
-});
+final relatedStrategiesProvider =
+    FutureProvider.family<List<Strategy>, List<String>>((ref, ids) async {
+      if (ids.isEmpty) return [];
+      final repository = ref.watch(mockStrategyRepositoryProvider);
+      return repository.fetchStrategiesByIds(ids);
+    });
 
 /// スキャン結果画面
 class ScanResultScreen extends ConsumerWidget {
   final String barcode;
 
-  const ScanResultScreen({
-    super.key,
-    required this.barcode,
-  });
+  const ScanResultScreen({super.key, required this.barcode});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -43,7 +44,7 @@ class ScanResultScreen extends ConsumerWidget {
             // スキャン画面に戻らずホームに戻る場合は修正が必要だが、
             // ここではシンプルにpop（スキャン画面に戻ると再スキャンになるため、実際はホームまで戻るのがUX良いかも）
             // GoRouterなら context.go('/') でホームに戻れる
-             context.go('/');
+            context.go('/');
           },
         ),
       ),
@@ -64,9 +65,7 @@ class ScanResultScreen extends ConsumerWidget {
             ],
           ),
         ),
-        error: (err, stack) => Center(
-          child: Text('エラーが発生しました: $err'),
-        ),
+        error: (err, stack) => Center(child: Text('エラーが発生しました: $err')),
       ),
     );
   }
@@ -100,9 +99,15 @@ class ScanResultScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildProductDetail(BuildContext context, WidgetRef ref, Product product) {
+  Widget _buildProductDetail(
+    BuildContext context,
+    WidgetRef ref,
+    Product product,
+  ) {
     final theme = Theme.of(context);
-    final relatedStrategiesAsync = ref.watch(relatedStrategiesProvider(product.strategyIds));
+    final relatedStrategiesAsync = ref.watch(
+      relatedStrategiesProvider(product.strategyIds),
+    );
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -119,20 +124,26 @@ class ScanResultScreen extends ConsumerWidget {
                     height: 150,
                     child: CachedNetworkImage(
                       imageUrl: product.imageUrl,
-                      placeholder: (_, __) => const Center(child: CircularProgressIndicator()),
-                      errorWidget: (_, __, ___) => const Icon(Icons.image_not_supported, size: 50),
+                      placeholder: (_, __) =>
+                          const Center(child: CircularProgressIndicator()),
+                      errorWidget: (_, __, ___) =>
+                          const Icon(Icons.image_not_supported, size: 50),
                     ),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     product.name,
-                    style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'JAN: ${product.id}',
-                    style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: Colors.grey,
+                    ),
                   ),
                 ],
               ),
@@ -143,7 +154,9 @@ class ScanResultScreen extends ConsumerWidget {
           // 関連攻略法セクション
           Text(
             'この商品の攻略法',
-            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 12),
 
@@ -164,17 +177,19 @@ class ScanResultScreen extends ConsumerWidget {
                     child: StrategyCard(
                       strategy: strategy,
                       onTap: () {
-                         context.push('/detail', extra: strategy);
+                        context.push('/detail', extra: strategy);
                       },
                     ),
                   );
                 }).toList(),
               );
             },
-            loading: () => const Center(child: Padding(
-              padding: EdgeInsets.all(16),
-              child: CircularProgressIndicator(),
-            )),
+            loading: () => const Center(
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: CircularProgressIndicator(),
+              ),
+            ),
             error: (e, s) => Text('攻略法の読み込みエラー: $e'),
           ),
         ],
