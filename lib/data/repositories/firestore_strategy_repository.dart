@@ -67,4 +67,27 @@ class FirestoreStrategyRepository implements StrategyRepository {
         .doc(product.id)
         .set(product.toMap());
   }
+
+  @override
+  Future<List<Product>> searchProducts(String query) async {
+    // Firestoreでの全文検索は難しいため、簡易的に全件取得してフィルタリングする
+    // (データ量が少ないうちはこれで十分。多くなったらAlgolia等の導入が必要)
+    final snapshot = await _firestore.collection('products').get();
+    final allProducts = snapshot.docs
+        .map((doc) => Product.fromMap(doc.id, doc.data()))
+        .toList();
+
+    if (query.isEmpty) {
+      return allProducts;
+    }
+
+    final lowerQuery = query.toLowerCase();
+    return allProducts.where((product) {
+      final nameMatch = product.name.toLowerCase().contains(lowerQuery);
+      final tagMatch = product.tags.any(
+        (tag) => tag.toLowerCase().contains(lowerQuery),
+      );
+      return nameMatch || tagMatch;
+    }).toList();
+  }
 }

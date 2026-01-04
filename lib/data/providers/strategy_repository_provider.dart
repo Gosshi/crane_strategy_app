@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/strategy.dart';
+import '../models/product.dart'; // Product class
 import '../repositories/strategy_repository.dart';
 import '../repositories/mock_strategy_repository.dart';
 import '../repositories/firestore_strategy_repository.dart';
@@ -15,6 +16,15 @@ final strategyRepositoryProvider = Provider<StrategyRepository>((ref) {
   } else {
     return MockStrategyRepository();
   }
+});
+
+/// 検索クエリに基づいた商品リストプロバイダー
+final productSearchListProvider = FutureProvider.family<List<Product>, String>((
+  ref,
+  query,
+) async {
+  final repository = ref.watch(strategyRepositoryProvider);
+  return repository.searchProducts(query);
 });
 
 /// 攻略法リストの FutureProvider
