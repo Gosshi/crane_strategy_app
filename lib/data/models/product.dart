@@ -18,4 +18,19 @@ class Product {
     required this.imageUrl,
     required this.strategyIds,
   });
+
+  /// Firestoreのデータからモデルを作成
+  factory Product.fromMap(String id, Map<String, dynamic> map) {
+    return Product(
+      id: id,
+      name: map['name'] ?? '',
+      imageUrl: map['imageUrl'] ?? '',
+      strategyIds: List<String>.from(map['strategyIds'] ?? []),
+    );
+  }
+
+  /// モデルをFirestore用データに変換
+  Map<String, dynamic> toMap() {
+    return {'name': name, 'imageUrl': imageUrl, 'strategyIds': strategyIds};
+  }
 }

@@ -21,18 +21,24 @@
 - **Async**: `AsyncValue` でローディング・エラーをハンドリングする。
 - **UI**: Material 3 Design。
 
-## Data Model (Draft)
+## Data Model
 ### strategies (攻略法)
-- id: string
-- title: string
-- setting_type: string (橋渡し, 3本爪, etc)
-- state_tag: string (初期位置, 縦ハメ, 横ハメ, 詰み)
-- video_url: string (YouTube ID)
-- difficulty: number (1-5)
+- **id**: string
+- **title**: map<string, string> (Ex: `{'ja': '...', 'en': '...'}`)
+- **description**: map<string, string> (Ex: `{'ja': '...', 'en': '...'}`)
+- **setting_type**: string (橋渡し, 3本爪, etc)
+- **thumbnail_url**: string
+- **video_id**: string (YouTube ID)
 
-### posts (ユーザー投稿)
-- id: string
-- user_id: string
-- image_url: string
-- comment: string
-- created_at: timestamp
+### products (商品)
+- **id**: string (JAN/Barcode)
+- **name**: string
+- **image_url**: string
+- **strategy_ids**: list<string> (Reference to strategies)
+
+### posts (ユーザー投稿: Planned)
+- **id**: string
+- **user_id**: string
+- **image_url**: string
+- **comment**: string
+- **created_at**: timestamp

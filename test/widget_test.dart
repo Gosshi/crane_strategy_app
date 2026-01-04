@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:crane_strategy_app/main.dart';
+import 'package:crane_strategy_app/data/providers/strategy_repository_provider.dart';
 import 'package:crane_strategy_app/data/repositories/mock_strategy_repository.dart';
 import 'package:crane_strategy_app/data/models/strategy.dart';
 
@@ -29,7 +30,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          mockStrategyRepositoryProvider.overrideWithValue(
+          strategyRepositoryProvider.overrideWithValue(
             TestStrategyRepository(),
           ),
         ],
