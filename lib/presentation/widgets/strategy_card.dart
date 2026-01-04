@@ -12,14 +12,12 @@ class StrategyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    // DarkMode時は CardTheme で枠線や影が設定されているので、個別の指定は最小限に
     final title =
         strategy.title['ja'] ?? strategy.title.values.firstOrNull ?? '';
 
     return Card(
       clipBehavior: Clip.antiAlias,
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: onTap,
         child: Column(
@@ -34,26 +32,28 @@ class StrategyCard extends StatelessWidget {
                   CachedNetworkImage(
                     imageUrl: strategy.thumbnailUrl,
                     fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(
-                      color: colorScheme.surfaceContainerHighest,
-                      child: const Center(child: CircularProgressIndicator()),
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      color: colorScheme.surfaceContainerHighest,
-                      child: Icon(
-                        Icons.broken_image_outlined,
-                        size: 48,
-                        color: colorScheme.outline,
-                      ),
-                    ),
                   ),
-                  // 再生アイコンオーバーレイ
+                  // 再生アイコンオーバーレイ (グラデーション付き)
                   Center(
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.black54,
+                        gradient: LinearGradient(
+                          colors: [
+                            theme.colorScheme.primary.withOpacity(0.8),
+                            theme.colorScheme.secondary.withOpacity(0.8),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
                         shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: theme.colorScheme.primary.withOpacity(0.5),
+                            blurRadius: 8,
+                            spreadRadius: 2,
+                          ),
+                        ],
                       ),
                       child: const Icon(
                         Icons.play_arrow_rounded,
@@ -71,26 +71,31 @@ class StrategyCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 設定タイプのチップ
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      strategy.settingType,
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: colorScheme.onPrimaryContainer,
-                        fontWeight: FontWeight.w600,
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primaryContainer,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: theme.colorScheme.primary.withOpacity(0.5),
+                          ),
+                        ),
+                        child: Text(
+                          strategy.settingType,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: theme.colorScheme.onPrimaryContainer,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                   const SizedBox(height: 8),
-                  // タイトル
                   Text(
                     title,
                     style: theme.textTheme.titleMedium?.copyWith(
