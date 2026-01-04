@@ -53,7 +53,7 @@ app.*.map.json
 /android/.gradle/
 /android/local.properties
 /android/key.properties
-# /android/app/google-services.json
+/android/app/google-services.json
 
 # iOS related
 **/ios/Pods/
@@ -62,7 +62,7 @@ app.*.map.json
 **/ios/ServiceDefinitions.json
 **/ios/Runner/GeneratedPluginRegistrant.*
 **/ios/Flutter/flutter_export_environment.sh
-# **/ios/Runner/GoogleService-Info.plist
+**/ios/Runner/GoogleService-Info.plist
 
 # macOS related
 **/macos/Pods/
@@ -72,10 +72,10 @@ app.*.map.json
 # Firebase
 firebase.json
 .firebaserc
-# firebase_options.dart
-# lib/firebase_options.dart
-# google-services.json
-# GoogleService-Info.plist
+firebase_options.dart
+lib/firebase_options.dart
+google-services.json
+GoogleService-Info.plist
 .firebase/
 
 # Environment / Secrets
