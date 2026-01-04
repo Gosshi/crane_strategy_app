@@ -56,9 +56,7 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        '獲得日: ${item.acquiredAt.toString().split(' ')[0]}',
-                      ), // 簡易フォーマット
+                      Text('獲得日: ${item.acquiredAt.toString().split(' ')[0]}'),
                       if (item.note != null && item.note!.isNotEmpty)
                         Text('メモ: ${item.note!}'),
                     ],
