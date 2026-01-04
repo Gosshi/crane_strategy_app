@@ -46,6 +46,13 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>This app needs camera access to scan product barcodes.</string>
+	<string>バーコードをスキャンするためにカメラを使用します。</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>攻略情報を投稿するために画像をアップロードします。</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 </dict>
 </plist>
