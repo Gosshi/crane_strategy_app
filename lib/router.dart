@@ -5,6 +5,7 @@ import 'presentation/screens/home_screen.dart';
 import 'presentation/screens/detail_screen.dart';
 import 'presentation/screens/scan_screen.dart';
 import 'presentation/screens/scan_result_screen.dart';
+import 'presentation/screens/product_registration_screen.dart';
 
 /// GoRouter の設定
 final router = GoRouter(
@@ -34,6 +35,14 @@ final router = GoRouter(
           builder: (context, state) {
             final barcode = state.extra as String;
             return ScanResultScreen(barcode: barcode);
+          },
+        ),
+        GoRoute(
+          path: 'register',
+          name: 'product_register',
+          builder: (context, state) {
+            final barcode = state.extra as String;
+            return ProductRegistrationScreen(barcode: barcode);
           },
         ),
       ],

@@ -35,4 +35,10 @@ class MockStrategyRepository implements StrategyRepository {
       return null;
     }
   }
+
+  @override
+  Future<void> addProduct(Product product) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    _products.add(product);
+  }
 }

@@ -59,4 +59,12 @@ class FirestoreStrategyRepository implements StrategyRepository {
     }
     return null;
   }
+
+  @override
+  Future<void> addProduct(Product product) async {
+    await _firestore
+        .collection('products')
+        .doc(product.id)
+        .set(product.toMap());
+  }
 }

@@ -48,6 +48,9 @@ const List<Product> initialProducts = [
     id: '4901234567890', // ダミーJAN
     name: 'アニメフィギュア A賞',
     imageUrl: 'https://placehold.co/200x200.png?text=Figure+A',
+    categories: ['フィギュア'],
+    centerOfGravity: ['上', '裏'],
+    tags: ['人気アニメ', 'プライズ限定'],
     strategyIds: ['1', '2'],
   ),
 ];

@@ -11,4 +11,7 @@ abstract class StrategyRepository {
 
   /// バーコードから商品を検索する
   Future<Product?> fetchProductByBarcode(String barcode);
+
+  /// 商品を追加する
+  Future<void> addProduct(Product product);
 }
