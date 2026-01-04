@@ -33,9 +33,9 @@ class ScanResultScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // リポジトリを取得
-    final repository = ref.watch(strategyRepositoryProvider);
+    // final repository = ref.watch(strategyRepositoryProvider);
     final productAsync = ref.watch(productSearchProvider(barcode));
-    final theme = Theme.of(context);
+    // final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(

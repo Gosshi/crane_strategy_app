@@ -1,7 +1,9 @@
+import 'package:flutter/foundation.dart'; // kDebugMode
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../data/providers/strategy_repository_provider.dart';
+import '../../utils/seed_firestore.dart';
 import '../widgets/strategy_card.dart';
 
 /// 攻略法一覧画面
@@ -16,6 +18,54 @@ class HomeScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('クレーンゲーム攻略'),
+        actions: [
+          // デバッグモード時のみデータ投入ボタンを表示
+          if (kDebugMode)
+            IconButton(
+              icon: const Icon(Icons.cloud_upload),
+              tooltip: '初期データ投入',
+              onPressed: () async {
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('データ投入'),
+                    content: const Text(
+                      'Firestoreに初期データを投入しますか？\n既存のデータは上書きされます。',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: const Text('キャンセル'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        child: const Text('投入する'),
+                      ),
+                    ],
+                  ),
+                );
+
+                if (confirmed == true && context.mounted) {
+                  try {
+                    await seedFirestoreData();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('データ投入が完了しました')),
+                      );
+                      // データ再読み込みのためにプロバイダーをリフレッシュ
+                      ref.invalidate(strategiesProvider);
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text('エラー: $e')));
+                    }
+                  }
+                }
+              },
+            ),
+        ],
         centerTitle: true,
         elevation: 0,
         scrolledUnderElevation: 2,
