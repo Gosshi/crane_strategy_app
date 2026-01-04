@@ -40,8 +40,8 @@ class StrategyCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            theme.colorScheme.primary.withValues(alpha: 0.8),
-                            theme.colorScheme.secondary.withValues(alpha: 0.8),
+                            theme.colorScheme.primary.withOpacity(0.8),
+                            theme.colorScheme.secondary.withOpacity(0.8),
                           ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
@@ -49,9 +49,7 @@ class StrategyCard extends StatelessWidget {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: theme.colorScheme.primary.withValues(
-                              alpha: 0.5,
-                            ),
+                            color: theme.colorScheme.primary.withOpacity(0.5),
                             blurRadius: 8,
                             spreadRadius: 2,
                           ),
@@ -84,9 +82,7 @@ class StrategyCard extends StatelessWidget {
                           color: theme.colorScheme.primaryContainer,
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: theme.colorScheme.primary.withValues(
-                              alpha: 0.5,
-                            ),
+                            color: theme.colorScheme.primary.withOpacity(0.5),
                           ),
                         ),
                         child: Text(

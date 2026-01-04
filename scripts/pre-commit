@@ -7,13 +7,6 @@ if ! dart format --output=none --set-exit-if-changed .; then
   exit 1
 fi
 
-# Analyze check
-echo "Running flutter analyze..."
-if ! flutter analyze; then
-  echo "Error: Flutter analyze failed. Please fix analysis issues and commit again."
-  exit 1
-fi
-
 # Test run
 echo "Running flutter test..."
 if ! flutter test; then

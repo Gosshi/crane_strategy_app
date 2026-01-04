@@ -63,13 +63,10 @@ class AppTheme {
       cardTheme: CardThemeData(
         color: _surfaceColor,
         elevation: 4,
-        shadowColor: _primaryColor.withValues(alpha: 0.4), // ネオンっぽい影
+        shadowColor: _primaryColor.withOpacity(0.4), // ネオンっぽい影
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(
-            color: _primaryColor.withValues(alpha: 0.2),
-            width: 1,
-          ),
+          side: BorderSide(color: _primaryColor.withOpacity(0.2), width: 1),
         ),
       ),
 
@@ -109,7 +106,7 @@ class AppTheme {
         labelStyle: TextStyle(color: Colors.white),
         selectedColor: _primaryColor,
         secondarySelectedColor: _primaryColor,
-        side: BorderSide(color: _primaryColor.withValues(alpha: 0.5)),
+        side: BorderSide(color: _primaryColor.withOpacity(0.5)),
         shape: StadiumBorder(),
       ),
 
