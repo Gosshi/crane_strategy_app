@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/product.dart';
-import '../../data/repositories/strategy_repository.dart';
 import '../../data/providers/strategy_repository_provider.dart';
 import '../../presentation/screens/scan_result_screen.dart'; // productSearchProvider
 import 'package:go_router/go_router.dart';
