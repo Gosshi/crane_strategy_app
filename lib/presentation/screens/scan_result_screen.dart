@@ -14,8 +14,23 @@ final productSearchProvider = FutureProvider.family<Product?, String>((
   ref,
   barcode,
 ) async {
-  final repository = ref.watch(strategyRepositoryProvider);
-  return repository.fetchProductByBarcode(barcode);
+  debugPrint('Scanning product: $barcode');
+  try {
+    final repository = ref.watch(strategyRepositoryProvider);
+    final result = await repository
+        .fetchProductByBarcode(barcode)
+        .timeout(
+          const Duration(seconds: 5),
+          onTimeout: () {
+            throw Exception('Connection timeout');
+          },
+        );
+    debugPrint('Scan result: $result');
+    return result;
+  } catch (e) {
+    debugPrint('Scan error: $e');
+    rethrow;
+  }
 });
 
 /// 商品に関連する攻略法を取得するプロバイダー
