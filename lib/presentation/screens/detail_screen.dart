@@ -51,6 +51,8 @@ class _DetailScreenState extends State<DetailScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final title = widget.strategy.title['ja'] ?? widget.strategy.title.values.firstOrNull ?? '';
+    final description = widget.strategy.description['ja'] ?? widget.strategy.description.values.firstOrNull ?? '';
 
     return YoutubePlayerBuilder(
       onExitFullScreen: () {
@@ -75,7 +77,7 @@ class _DetailScreenState extends State<DetailScreen> {
         return Scaffold(
           appBar: AppBar(
             title: Text(
-              widget.strategy.title,
+              title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -89,13 +91,12 @@ class _DetailScreenState extends State<DetailScreen> {
               children: [
                 // YouTube プレーヤー
                 // Web の場合は AspectRatio でラップして表示
-                if (kIsWeb)
-                  AspectRatio(
-                    aspectRatio: 16 / 9,
-                    child: player,
-                  )
-                else
-                  player,
+                kIsWeb
+                    ? AspectRatio(
+                        aspectRatio: 16 / 9,
+                        child: player,
+                      )
+                    : player,
 
                 // コンテンツエリア
                 Padding(
@@ -121,7 +122,7 @@ class _DetailScreenState extends State<DetailScreen> {
 
                       // タイトル
                       Text(
-                        widget.strategy.title,
+                        title,
                         style: theme.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -142,7 +143,7 @@ class _DetailScreenState extends State<DetailScreen> {
                       ),
                       const SizedBox(height: 12),
 
-                      // 解説テキスト（ダミー）
+                      // 解説テキスト
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
@@ -153,7 +154,7 @@ class _DetailScreenState extends State<DetailScreen> {
                           ),
                         ),
                         child: Text(
-                          _getDescriptionText(widget.strategy.settingType),
+                          description,
                           style: theme.textTheme.bodyLarge?.copyWith(
                             height: 1.6,
                           ),
@@ -224,32 +225,5 @@ class _DetailScreenState extends State<DetailScreen> {
         ],
       ),
     );
-  }
-
-  String _getDescriptionText(String settingType) {
-    switch (settingType) {
-      case '橋渡し':
-        return '''橋渡し設定は、クレーンゲームの中でも基本的な設定の一つです。
-
-【縦ハメのコツ】
-1. まずは景品の端をアームで押し込む
-2. 景品が橋の隙間に落ち込む角度を作る
-3. 反対側を持ち上げて落とす
-
-重要なのは「一度で取ろうとしない」こと。少しずつ角度をつけていきましょう。''';
-      case '3本爪':
-        return '''3本爪設定は、アームの力が弱いため工夫が必要です。
-
-【攻略のコツ】
-1. 景品のバランスが崩れやすい位置を狙う
-2. 爪を景品の下にしっかり入れる
-3. 手前に引き出すイメージで操作
-
-確率機の場合もあるので、店員さんに確認してみるのも◎''';
-      default:
-        return '''この設定の攻略法を動画で確認してみましょう。
-
-景品の形状や重心によって最適な取り方が変わります。繰り返し練習することで、コツが掴めるようになります。''';
-    }
   }
 }

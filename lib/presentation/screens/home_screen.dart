@@ -94,6 +94,14 @@ class HomeScreen extends ConsumerWidget {
           ),
         ),
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          // TODO: バーコードスキャナー画面へ遷移
+          print('Scan button pressed');
+        },
+        icon: const Icon(Icons.qr_code_scanner),
+        label: const Text('スキャン'),
+      ),
     );
   }
 }

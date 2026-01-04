@@ -1,7 +1,8 @@
 /// 攻略法のデータモデル
 class Strategy {
   final String id;
-  final String title;
+  final Map<String, String> title;
+  final Map<String, String> description;
   final String settingType;
   final String thumbnailUrl;
   final String videoId;
@@ -9,6 +10,7 @@ class Strategy {
   const Strategy({
     required this.id,
     required this.title,
+    required this.description,
     required this.settingType,
     required this.thumbnailUrl,
     required this.videoId,
