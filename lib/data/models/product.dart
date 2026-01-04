@@ -9,6 +9,19 @@ class Product {
   /// 商品画像URL
   final String imageUrl;
 
+  /// 商品画像のストレージパス (アップロード用)
+  /// [imageUrl] はダウンロードURLだが、こちらは削除や更新時に使う
+  final String? imagePath;
+
+  /// カテゴリリスト (例: フィギュア, ぬいぐるみ)
+  final List<String> categories;
+
+  /// 重心情報リスト (例: 上, 中, 個体差あり)
+  final List<String> centerOfGravity;
+
+  /// タグリスト (例: Grandista, ウマ娘)
+  final List<String> tags;
+
   /// 関連する攻略法IDのリスト
   final List<String> strategyIds;
 
@@ -16,6 +29,10 @@ class Product {
     required this.id,
     required this.name,
     required this.imageUrl,
+    this.imagePath,
+    this.categories = const [],
+    this.centerOfGravity = const [],
+    this.tags = const [],
     required this.strategyIds,
   });
 
@@ -25,12 +42,24 @@ class Product {
       id: id,
       name: map['name'] ?? '',
       imageUrl: map['imageUrl'] ?? '',
+      imagePath: map['imagePath'],
+      categories: List<String>.from(map['categories'] ?? []),
+      centerOfGravity: List<String>.from(map['centerOfGravity'] ?? []),
+      tags: List<String>.from(map['tags'] ?? []),
       strategyIds: List<String>.from(map['strategyIds'] ?? []),
     );
   }
 
   /// モデルをFirestore用データに変換
   Map<String, dynamic> toMap() {
-    return {'name': name, 'imageUrl': imageUrl, 'strategyIds': strategyIds};
+    return {
+      'name': name,
+      'imageUrl': imageUrl,
+      'imagePath': imagePath,
+      'categories': categories,
+      'centerOfGravity': centerOfGravity,
+      'tags': tags,
+      'strategyIds': strategyIds,
+    };
   }
 }
