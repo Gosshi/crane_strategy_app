@@ -1,31 +1,35 @@
 # 変更内容の確認 (Walkthrough)
 
 ## 概要
-プロダクトの品質を担保するためのテストコード実装と、コミット時に自動で品質チェックを行うCI環境（Pre-commit Hook）を構築しました。
+アプリ全体のデザイン刷新における残りのタスク（アプリアイコン、スプラッシュ画面、詳細画面のブラッシュアップ）を完了しました。
+これにより、クレーンゲームらしい「ダーク＆ネオン」の世界観がアプリ全体に統一されました。
 
 ## 主な変更点
 
-### 1. テスト実装 (`test/`)
-- **Unit Tests**:
-  - `test/data/models/product_test.dart`: `Product` モデルの `fromMap`, `toMap` ロジックを検証。
-  - `test/data/repositories/strategy_repository_test.dart`: 商品検索 (`searchProducts`) の挙動（名前、タグ検索、空クエリ）を検証。
-- **Widget Tests**:
-  - `test/presentation/screens/home_screen_test.dart`: ホーム画面の検索UIの挙動を検証（入力 → 結果表示 → 空の結果）。
-  - `mocktail` パッケージ導入により、依存関係（リポジトリ）のモック化を実施。
+### 1. アセット & 起動画面
+- **アプリアイコン**:
+  - ネオンピンクのクレーンアームをモチーフにしたアイコンを生成 (`assets/icon/app_icon.png`)。
+  - `flutter_launcher_icons` により各プラットフォーム用アイコンを生成。
+- **スプラッシュ画面**:
+  - `flutter_native_splash` により、ダーク背景の起動画面を設定。
 
-### 2. CI / Tooling
-- **Pre-commit Hook**:
-  - `.git/hooks/pre-commit` を作成。
-  - Gitでコミットする際、自動で以下の順にチェックを実行。失敗するとコミットを中止。
-    1. **Format Check**: `dart format` (コード整形がされているか)
-    2. **Analyze Check**: `flutter analyze` (静的解析エラーがないか)
-    3. **Test Check**: `flutter test` (全テストが通過するか)
-- `scripts/pre-commit`: フックのソースを保存。
+### 2. 詳細画面 (`DetailScreen`)
+- **UI刷新**:
+  - `AppTheme` を適用し、ダークモードベースのデザインに変更。
+  - **YouTubeプレーヤー**: 背景色をテーマに合わせ調整。
+  - **チップ**: `StrategyCard` と共通のネオンボーダー付きスタイル (`_buildNeonChip`) を適用。
+  - **コンテンツ**:
+    - タイトルに `headlineSmall` を適用し、白文字で強調。
+    - 説明文をカード状のコンテナ (`surfaceContainer`) に格納し、可読性を向上。
+    - 「攻略のポイント」セクションタイトルにネオン風の装飾を追加 (`_buildSectionTitle`)。
+  - **ヒント**: グラデーション背景を使用し、情報の優先度を視覚的に表現。
+
+### 3. 設定ファイル
+- `pubspec.yaml`:
+  - `dev_dependencies` に `flutter_launcher_icons`, `flutter_native_splash` を追加。
+  - アイコン・スプラッシュ設定ブロックを追加。
 
 ## 動作確認結果
-- `flutter test` コマンドで全テスト (13件) が **PASS** することを確認 ✅
-- 手動でコミットしようとした際、テストが走ることを確認 (次のステップで実施) ✅
-
-## 解決した課題
-- テスト不在によるリグレッション（改修時のバグ混入）リスクの低減。
-- フォーマット漏れや静的解析エラーの混入防止。
+- **静的解析**: `flutter analyze` PASS ✅
+- **起動確認**: アイコンとスプラッシュ画面が変更されていること（実機/エミュレータにて要確認）。
+- **画面遷移**: ホーム → 詳細画面への遷移で、デザインのトーン＆マナーが統一されていること。
