@@ -7,24 +7,19 @@ class StrategyCard extends StatelessWidget {
   final Strategy strategy;
   final VoidCallback? onTap;
 
-  const StrategyCard({
-    super.key,
-    required this.strategy,
-    this.onTap,
-  });
+  const StrategyCard({super.key, required this.strategy, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final title = strategy.title['ja'] ?? strategy.title.values.firstOrNull ?? '';
+    final title =
+        strategy.title['ja'] ?? strategy.title.values.firstOrNull ?? '';
 
     return Card(
       clipBehavior: Clip.antiAlias,
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: onTap,
         child: Column(
@@ -41,9 +36,7 @@ class StrategyCard extends StatelessWidget {
                     fit: BoxFit.cover,
                     placeholder: (context, url) => Container(
                       color: colorScheme.surfaceContainerHighest,
-                      child: const Center(
-                        child: CircularProgressIndicator(),
-                      ),
+                      child: const Center(child: CircularProgressIndicator()),
                     ),
                     errorWidget: (context, url, error) => Container(
                       color: colorScheme.surfaceContainerHighest,

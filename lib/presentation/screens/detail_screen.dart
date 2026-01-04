@@ -8,10 +8,7 @@ import '../../data/models/strategy.dart';
 class DetailScreen extends StatefulWidget {
   final Strategy strategy;
 
-  const DetailScreen({
-    super.key,
-    required this.strategy,
-  });
+  const DetailScreen({super.key, required this.strategy});
 
   @override
   State<DetailScreen> createState() => _DetailScreenState();
@@ -51,8 +48,14 @@ class _DetailScreenState extends State<DetailScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final title = widget.strategy.title['ja'] ?? widget.strategy.title.values.firstOrNull ?? '';
-    final description = widget.strategy.description['ja'] ?? widget.strategy.description.values.firstOrNull ?? '';
+    final title =
+        widget.strategy.title['ja'] ??
+        widget.strategy.title.values.firstOrNull ??
+        '';
+    final description =
+        widget.strategy.description['ja'] ??
+        widget.strategy.description.values.firstOrNull ??
+        '';
 
     return YoutubePlayerBuilder(
       onExitFullScreen: () {
@@ -76,11 +79,7 @@ class _DetailScreenState extends State<DetailScreen> {
       builder: (context, player) {
         return Scaffold(
           appBar: AppBar(
-            title: Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+            title: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
             centerTitle: true,
             elevation: 0,
             scrolledUnderElevation: 2,
@@ -92,10 +91,7 @@ class _DetailScreenState extends State<DetailScreen> {
                 // YouTube プレーヤー
                 // Web の場合は AspectRatio でラップして表示
                 kIsWeb
-                    ? AspectRatio(
-                        aspectRatio: 16 / 9,
-                        child: player,
-                      )
+                    ? AspectRatio(aspectRatio: 16 / 9, child: player)
                     : player,
 
                 // コンテンツエリア
@@ -149,9 +145,7 @@ class _DetailScreenState extends State<DetailScreen> {
                         decoration: BoxDecoration(
                           color: colorScheme.surfaceContainerLow,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: colorScheme.outlineVariant,
-                          ),
+                          border: Border.all(color: colorScheme.outlineVariant),
                         ),
                         child: Text(
                           description,
@@ -218,9 +212,9 @@ class _DetailScreenState extends State<DetailScreen> {
           Text(
             label,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: textColor,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: textColor,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),

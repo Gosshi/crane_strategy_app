@@ -3,11 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'router.dart';
 
 void main() {
-  runApp(
-    const ProviderScope(
-      child: CraneStrategyApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: CraneStrategyApp()));
 }
 
 /// クレーンゲーム攻略アプリ
@@ -25,9 +21,7 @@ class CraneStrategyApp extends StatelessWidget {
           brightness: Brightness.light,
         ),
         useMaterial3: true,
-        appBarTheme: const AppBarTheme(
-          centerTitle: true,
-        ),
+        appBarTheme: const AppBarTheme(centerTitle: true),
         cardTheme: CardThemeData(
           elevation: 2,
           shape: RoundedRectangleBorder(
@@ -41,9 +35,7 @@ class CraneStrategyApp extends StatelessWidget {
           brightness: Brightness.dark,
         ),
         useMaterial3: true,
-        appBarTheme: const AppBarTheme(
-          centerTitle: true,
-        ),
+        appBarTheme: const AppBarTheme(centerTitle: true),
         cardTheme: CardThemeData(
           elevation: 2,
           shape: RoundedRectangleBorder(
