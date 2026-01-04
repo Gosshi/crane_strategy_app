@@ -6,7 +6,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../data/providers/strategy_repository_provider.dart';
 import '../../data/models/product.dart';
 import '../../data/models/strategy.dart';
+import '../../data/repositories/post_repository.dart';
 import '../widgets/strategy_card.dart';
+import 'post_composer_screen.dart'; // 新規作成
 
 final productSearchProvider = FutureProvider.family<Product?, String>((
   ref,
@@ -68,6 +70,25 @@ class ScanResultScreen extends ConsumerWidget {
           ),
         ),
         error: (err, stack) => Center(child: Text('エラーが発生しました: $err')),
+      ),
+      floatingActionButton: productAsync.when(
+        data: (product) {
+          if (product == null) return null;
+          return FloatingActionButton.extended(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) =>
+                      PostComposerScreen(productId: product.id),
+                ),
+              );
+            },
+            icon: const Icon(Icons.edit),
+            label: const Text('攻略を投稿'),
+          );
+        },
+        loading: () => null,
+        error: (_, __) => null,
       ),
     );
   }
@@ -194,6 +215,83 @@ class ScanResultScreen extends ConsumerWidget {
             ),
             error: (e, s) => Text('攻略法の読み込みエラー: $e'),
           ),
+
+          const SizedBox(height: 24),
+          const Divider(),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8.0),
+            child: Text(
+              'みんなの攻略情報',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+          ),
+
+          // 投稿リスト
+          Consumer(
+            builder: (context, ref, child) {
+              final postsAsync = ref.watch(postsStreamProvider(product.id));
+              return postsAsync.when(
+                data: (posts) {
+                  if (posts.isEmpty) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Text('まだ投稿はありません。\n最初の攻略情報を投稿しよう！'),
+                      ),
+                    );
+                  }
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: posts.length,
+                    itemBuilder: (context, index) {
+                      final post = posts[index];
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (post.imageUrl != null)
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 8),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.network(
+                                      post.imageUrl!,
+                                      height: 150,
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              if (post.text.isNotEmpty)
+                                Text(
+                                  post.text,
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                              const SizedBox(height: 4),
+                              Text(
+                                post.createdAt.toString().split('.')[0],
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (err, stack) => Center(child: Text('エラーが発生しました: $err')),
+              );
+            },
+          ),
+          const SizedBox(height: 80), // FAB用のスペース
         ],
       ),
     );

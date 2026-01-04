@@ -1,0 +1,159 @@
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
+import '../../data/models/post.dart';
+import '../../data/repositories/post_repository.dart';
+import '../../data/repositories/user_service.dart';
+
+class PostComposerScreen extends ConsumerStatefulWidget {
+  final String productId;
+
+  const PostComposerScreen({super.key, required this.productId});
+
+  @override
+  ConsumerState<PostComposerScreen> createState() => _PostComposerScreenState();
+}
+
+class _PostComposerScreenState extends ConsumerState<PostComposerScreen> {
+  final _textController = TextEditingController();
+  File? _imageFile;
+  bool _isUploading = false;
+  final _picker = ImagePicker();
+
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _imageFile = File(pickedFile.path);
+      });
+    }
+  }
+
+  Future<void> _submit() async {
+    final text = _textController.text.trim();
+    if (text.isEmpty && _imageFile == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('コメントまたは画像を入力してください')));
+      return;
+    }
+
+    setState(() {
+      _isUploading = true;
+    });
+
+    try {
+      // 1. 匿名ログイン確認 (未ログインならログイン)
+      final userService = ref.read(userServiceProvider);
+      var user = userService.currentUser;
+      if (user == null) {
+        final credential = await userService.signInAnonymously();
+        user = credential.user;
+      }
+
+      if (user == null) throw Exception('ログインに失敗しました');
+
+      // 2. 画像アップロード
+      String? imageUrl;
+      final postRepository = ref.read(postRepositoryProvider);
+
+      if (_imageFile != null) {
+        imageUrl = await postRepository.uploadImage(user.uid, _imageFile!);
+      }
+
+      // 3. 投稿作成
+      final post = Post(
+        id: '', // Firestore側でAuto ID割り当て
+        productId: widget.productId,
+        userId: user.uid,
+        text: text,
+        imageUrl: imageUrl,
+        createdAt: DateTime.now(),
+      );
+
+      await postRepository.addPost(post);
+
+      if (mounted) {
+        Navigator.pop(context); // 完了したら閉じる
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('投稿しました！')));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('エラーが発生しました: $e')));
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUploading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('攻略情報を投稿')),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextField(
+              controller: _textController,
+              decoration: const InputDecoration(
+                hintText: '獲得のコツや重心情報をシェアしよう...',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 5,
+            ),
+            const SizedBox(height: 16),
+            if (_imageFile != null)
+              Stack(
+                alignment: Alignment.topRight,
+                children: [
+                  Image.file(
+                    _imageFile!,
+                    height: 200,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, color: Colors.white),
+                    onPressed: () {
+                      setState(() {
+                        _imageFile = null;
+                      });
+                    },
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.black54,
+                    ),
+                  ),
+                ],
+              ),
+            ElevatedButton.icon(
+              onPressed: _pickImage,
+              icon: const Icon(Icons.camera_alt),
+              label: const Text('画像を追加'),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _isUploading ? null : _submit,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              child: _isUploading
+                  ? const CircularProgressIndicator()
+                  : const Text('投稿する'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
