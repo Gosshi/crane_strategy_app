@@ -19,5 +19,9 @@
         - [x] `docs/walkthrough.md` 作成
     - [x] UI調整 (HomeScreen, ScanResultScreen) <!-- id: 85 -->
 
+- [x] テスト実装 & CIセットアップ <!-- id: 90 -->
+    - [x] Unit/Widget Tests の実装 <!-- id: 91 -->
+    - [x] Pre-commit Hook (Format/Analyze/Test) の導入 <!-- id: 92 -->
+
 - [ ] (Future) 商品情報の編集・削除機能
     - [ ] JANコード変更（マイグレーション）対応

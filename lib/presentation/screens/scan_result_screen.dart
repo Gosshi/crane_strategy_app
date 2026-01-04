@@ -103,7 +103,7 @@ class ScanResultScreen extends ConsumerWidget {
           );
         },
         loading: () => null,
-        error: (_, __) => null,
+        error: (error, stackTrace) => null,
       ),
     );
   }
@@ -172,9 +172,9 @@ class ScanResultScreen extends ConsumerWidget {
                     height: 150,
                     child: CachedNetworkImage(
                       imageUrl: product.imageUrl,
-                      placeholder: (_, __) =>
+                      placeholder: (context, url) =>
                           const Center(child: CircularProgressIndicator()),
-                      errorWidget: (_, __, ___) =>
+                      errorWidget: (context, url, error) =>
                           const Icon(Icons.image_not_supported, size: 50),
                     ),
                   ),

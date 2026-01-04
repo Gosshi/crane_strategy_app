@@ -1,30 +1,31 @@
 # 変更内容の確認 (Walkthrough)
 
 ## 概要
-アプリ全体のデザインを刷新し、クレーンゲームらしい「ダーク＆ネオン」なテーマを適用しました。
-また、開発ドキュメント (`task.md`, `walkthrough.md`) を `docs/` ディレクトリに同期し、リポジトリ管理下に置く運用を開始しました。
+プロダクトの品質を担保するためのテストコード実装と、コミット時に自動で品質チェックを行うCI環境（Pre-commit Hook）を構築しました。
 
 ## 主な変更点
 
-### 1. デザイン刷新 (Design Overhaul)
-- **テーマ (`AppTheme`)**:
-  - ベースカラー: `Dark Slate` (#0F172A)
-  - アクセント: `Neon Pink` (#D946EF), `Violet` (#8B5CF6)
-  - ダークモードを基本設定 (`ThemeMode.dark`)。
-- **フォント**:
-  - `google_fonts` パッケージを導入。
-  - `M PLUS Rounded 1c` を採用し、親しみやすいポップな印象に。
-- **UIコンポーネント**:
-  - **`StrategyCard`**: サムネイル上に再生ボタン（グラデーション＆発光エフェクト）を追加。タグのデザインをネオン風に。
-  - **`HomeScreen` / `ScanResultScreen`**: 背景色とカードデザインの統一。
+### 1. テスト実装 (`test/`)
+- **Unit Tests**:
+  - `test/data/models/product_test.dart`: `Product` モデルの `fromMap`, `toMap` ロジックを検証。
+  - `test/data/repositories/strategy_repository_test.dart`: 商品検索 (`searchProducts`) の挙動（名前、タグ検索、空クエリ）を検証。
+- **Widget Tests**:
+  - `test/presentation/screens/home_screen_test.dart`: ホーム画面の検索UIの挙動を検証（入力 → 結果表示 → 空の結果）。
+  - `mocktail` パッケージ導入により、依存関係（リポジトリ）のモック化を実施。
 
-### 2. ドキュメンテーション同期
-- 以下のファイルを `docs/` にコピーし、Git管理対象に追加。
-  - `docs/task.md`
-  - `docs/walkthrough.md`
+### 2. CI / Tooling
+- **Pre-commit Hook**:
+  - `.git/hooks/pre-commit` を作成。
+  - Gitでコミットする際、自動で以下の順にチェックを実行。失敗するとコミットを中止。
+    1. **Format Check**: `dart format` (コード整形がされているか)
+    2. **Analyze Check**: `flutter analyze` (静的解析エラーがないか)
+    3. **Test Check**: `flutter test` (全テストが通過するか)
+- `scripts/pre-commit`: フックのソースを保存。
 
-## 動作確認済み
-- アプリ起動時にダークモードが適用されていること ✅
-- 日本語テキストが丸ゴシック体で表示されること ✅
-- ホーム画面の検索バー、カードリストのデザイン崩れがないこと ✅
-- スキャン結果画面のデザインが統一されていること ✅
+## 動作確認結果
+- `flutter test` コマンドで全テスト (13件) が **PASS** することを確認 ✅
+- 手動でコミットしようとした際、テストが走ることを確認 (次のステップで実施) ✅
+
+## 解決した課題
+- テスト不在によるリグレッション（改修時のバグ混入）リスクの低減。
+- フォーマット漏れや静的解析エラーの混入防止。

@@ -156,7 +156,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       width: 50,
                       height: 50,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const Icon(Icons.image),
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Icon(Icons.image),
                     )
                   : const Icon(Icons.image),
               title: Text(product.name),
