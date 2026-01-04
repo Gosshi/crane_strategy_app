@@ -46,6 +46,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             tooltip: '獲得履歴',
             onPressed: () => context.push('/collection'),
           ),
+          IconButton(
+            icon: const Icon(Icons.account_circle_outlined),
+            tooltip: 'アカウント',
+            onPressed: () => context.push('/account'),
+          ),
           // デバッグモード時のみデータ投入ボタンを表示
           if (kDebugMode)
             IconButton(
