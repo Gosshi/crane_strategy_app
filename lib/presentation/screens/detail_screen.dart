@@ -1,20 +1,25 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import '../../data/models/strategy.dart';
+import '../../data/models/collection_item.dart';
+import '../../data/providers/collection_repository_provider.dart';
+import '../../data/models/report.dart';
+import '../../data/providers/report_repository_provider.dart';
 
 /// 攻略法詳細画面
-class DetailScreen extends StatefulWidget {
+class DetailScreen extends ConsumerStatefulWidget {
   final Strategy strategy;
 
   const DetailScreen({super.key, required this.strategy});
 
   @override
-  State<DetailScreen> createState() => _DetailScreenState();
+  ConsumerState<DetailScreen> createState() => _DetailScreenState();
 }
 
-class _DetailScreenState extends State<DetailScreen> {
+class _DetailScreenState extends ConsumerState<DetailScreen> {
   late YoutubePlayerController _controller;
 
   @override
@@ -75,6 +80,37 @@ class _DetailScreenState extends State<DetailScreen> {
         return Scaffold(
           appBar: AppBar(
             title: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
+            actions: [
+              PopupMenuButton<String>(
+                onSelected: (value) {
+                  if (value == 'report') {
+                    _showReportDialog(context);
+                  }
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 'report',
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.flag_outlined,
+                          color: theme.colorScheme.error,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('情報の誤りを報告'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          floatingActionButton: FloatingActionButton.extended(
+            onPressed: () => _showAcquisitionDialog(context),
+            icon: const Icon(Icons.emoji_events),
+            label: const Text('獲得記録'),
+            backgroundColor: colorScheme.secondary,
+            foregroundColor: colorScheme.onSecondary,
           ),
           body: SingleChildScrollView(
             child: Column(
@@ -252,6 +288,204 @@ class _DetailScreenState extends State<DetailScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Future<void> _showAcquisitionDialog(BuildContext context) async {
+    final theme = Theme.of(context);
+    final shopNameController = TextEditingController();
+    final noteController = TextEditingController();
+
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: theme.colorScheme.surface,
+        title: Text(
+          '獲得を記録',
+          style: theme.textTheme.titleLarge?.copyWith(
+            color: theme.colorScheme.onSurface,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'おめでとうございます！🎉\n獲得した情報を記録しましょう。',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: shopNameController,
+              decoration: const InputDecoration(
+                labelText: '店舗名 (任意)',
+                prefixIcon: Icon(Icons.store),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: noteController,
+              decoration: const InputDecoration(
+                labelText: 'メモ (任意)',
+                prefixIcon: Icon(Icons.note),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('キャンセル'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final shopName = shopNameController.text;
+              final note = noteController.text;
+
+              // 簡易的なID生成 (本来はUUIDなどを使用)
+              final collectionId = DateTime.now().millisecondsSinceEpoch
+                  .toString();
+              // TODO: 実際のユーザーIDを使用する (Auth実装後)
+              const userId = 'guest_user';
+
+              final item = CollectionItem(
+                id: collectionId,
+                productId:
+                    widget.strategy.id, // Strategy ID を Product ID として使用 (仮)
+                // 正確には Strategy は Product ではないが、
+                // 現状のデータ構造では StrategyDetail から Product ID への参照が直接ない場合がある
+                // ここでは Strategy ID を記録しておく
+                acquiredAt: DateTime.now(),
+                shopName: shopName.isEmpty ? null : shopName,
+                note: note.isEmpty ? null : note,
+              );
+
+              try {
+                await ref
+                    .read(collectionRepositoryProvider)
+                    .addCollectionItem(userId, item);
+
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('獲得を記録しました！')));
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('エラーが発生しました: $e')));
+                }
+              }
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: theme.colorScheme.onPrimary,
+            ),
+            child: const Text('記録する'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showReportDialog(BuildContext context) async {
+    final theme = Theme.of(context);
+    final descriptionController = TextEditingController();
+    var selectedType = ReportType.wrongJan;
+
+    await showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            backgroundColor: theme.colorScheme.surface,
+            title: Text('情報の誤りを報告', style: theme.textTheme.titleMedium),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('報告理由を選択してください:'),
+                  const SizedBox(height: 8),
+                  DropdownButton<ReportType>(
+                    value: selectedType,
+                    isExpanded: true,
+                    items: const [
+                      DropdownMenuItem(
+                        value: ReportType.wrongJan,
+                        child: Text('JANコード・商品情報の間違い'),
+                      ),
+                      DropdownMenuItem(
+                        value: ReportType.inappropriateContent,
+                        child: Text('不適切なコンテンツ'),
+                      ),
+                      DropdownMenuItem(
+                        value: ReportType.other,
+                        child: Text('その他'),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      if (value != null) setState(() => selectedType = value);
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: descriptionController,
+                    decoration: const InputDecoration(
+                      labelText: '詳細 (任意)',
+                      alignLabelWithHint: true,
+                    ),
+                    maxLines: 3,
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                child: const Text('キャンセル'),
+                onPressed: () => Navigator.pop(context),
+              ),
+              TextButton(
+                child: const Text('送信'),
+                onPressed: () async {
+                  // TODO: Auth ID
+                  const userId = 'guest_user';
+                  final report = Report(
+                    id: DateTime.now().millisecondsSinceEpoch.toString(),
+                    targetProductId: widget.strategy.id,
+                    type: selectedType,
+                    description: descriptionController.text,
+                    reporterId: userId,
+                    createdAt: DateTime.now(),
+                  );
+
+                  try {
+                    await ref.read(reportRepositoryProvider).addReport(report);
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('報告を送信しました。ご協力ありがとうございます。'),
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text('エラーが発生しました: $e')));
+                    }
+                  }
+                },
+              ),
+            ],
+          );
+        },
       ),
     );
   }
