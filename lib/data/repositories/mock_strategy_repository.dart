@@ -2,8 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/strategy.dart';
 import '../models/product.dart';
 
+import 'strategy_repository.dart';
+
 /// ダミーデータを返すリポジトリ
-class MockStrategyRepository {
+class MockStrategyRepository implements StrategyRepository {
   // ダミーの攻略法データ
   final List<Strategy> _strategies = [
     const Strategy(
@@ -76,14 +78,3 @@ class MockStrategyRepository {
     }
   }
 }
-
-/// リポジトリのプロバイダー
-final mockStrategyRepositoryProvider = Provider<MockStrategyRepository>((ref) {
-  return MockStrategyRepository();
-});
-
-/// 攻略法リストの FutureProvider
-final strategiesProvider = FutureProvider<List<Strategy>>((ref) async {
-  final repository = ref.watch(mockStrategyRepositoryProvider);
-  return repository.fetchStrategies();
-});

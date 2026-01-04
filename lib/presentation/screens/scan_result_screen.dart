@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../../data/repositories/mock_strategy_repository.dart';
+
+import '../../data/providers/strategy_repository_provider.dart';
 import '../../data/models/product.dart';
 import '../../data/models/strategy.dart';
 import '../widgets/strategy_card.dart';
 
-/// 指定されたバーコードの商品を検索するプロバイダー
 final productSearchProvider = FutureProvider.family<Product?, String>((
   ref,
   barcode,
 ) async {
-  final repository = ref.watch(mockStrategyRepositoryProvider);
+  final repository = ref.watch(strategyRepositoryProvider);
   return repository.fetchProductByBarcode(barcode);
 });
 
@@ -20,7 +20,7 @@ final productSearchProvider = FutureProvider.family<Product?, String>((
 final relatedStrategiesProvider =
     FutureProvider.family<List<Strategy>, List<String>>((ref, ids) async {
       if (ids.isEmpty) return [];
-      final repository = ref.watch(mockStrategyRepositoryProvider);
+      final repository = ref.watch(strategyRepositoryProvider);
       return repository.fetchStrategiesByIds(ids);
     });
 
@@ -32,6 +32,8 @@ class ScanResultScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // リポジトリを取得
+    final repository = ref.watch(strategyRepositoryProvider);
     final productAsync = ref.watch(productSearchProvider(barcode));
     final theme = Theme.of(context);
 
