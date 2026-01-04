@@ -39,7 +39,6 @@ class _DetailScreenState extends State<DetailScreen> {
 
   @override
   void deactivate() {
-    // ページを離れる際にプレーヤーを一時停止
     _controller.pause();
     super.deactivate();
   }
@@ -59,7 +58,6 @@ class _DetailScreenState extends State<DetailScreen> {
 
     return YoutubePlayerBuilder(
       onExitFullScreen: () {
-        // フルスクリーン終了時にステータスバーを元に戻す
         SystemChrome.setPreferredOrientations(DeviceOrientation.values);
       },
       player: YoutubePlayer(
@@ -72,114 +70,113 @@ class _DetailScreenState extends State<DetailScreen> {
           bufferedColor: colorScheme.primaryContainer,
           backgroundColor: colorScheme.surfaceContainerHighest,
         ),
-        onReady: () {
-          debugPrint('YouTube Player is ready.');
-        },
       ),
       builder: (context, player) {
         return Scaffold(
           appBar: AppBar(
             title: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
-            centerTitle: true,
-            elevation: 0,
-            scrolledUnderElevation: 2,
           ),
           body: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // YouTube プレーヤー
-                // Web の場合は AspectRatio でラップして表示
+                // YouTube Player
                 kIsWeb
                     ? AspectRatio(aspectRatio: 16 / 9, child: player)
                     : player,
 
-                // コンテンツエリア
                 Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // 設定タイプのチップ
+                      // Tags (Chips)
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
                         children: [
-                          _buildChip(
+                          _buildNeonChip(
                             context,
-                            icon: Icons.settings,
                             label: widget.strategy.settingType,
-                            color: colorScheme.primaryContainer,
-                            textColor: colorScheme.onPrimaryContainer,
+                            icon: Icons.settings,
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
 
-                      // タイトル
+                      // Title
                       Text(
                         title,
                         style: theme.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 24),
 
-                      // 区切り線
-                      Divider(color: colorScheme.outlineVariant),
-                      const SizedBox(height: 16),
-
-                      // 解説セクション
-                      Text(
-                        '攻略のポイント',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.primary,
-                        ),
-                      ),
+                      // Section Title
+                      _buildSectionTitle(context, '攻略のポイント'),
                       const SizedBox(height: 12),
 
-                      // 解説テキスト
+                      // Description Box
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: colorScheme.surfaceContainerLow,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: colorScheme.outlineVariant),
+                          color: colorScheme.surfaceContainer,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: colorScheme.outline.withValues(alpha: 0.2),
+                          ),
                         ),
                         child: Text(
                           description,
                           style: theme.textTheme.bodyLarge?.copyWith(
-                            height: 1.6,
+                            height: 1.8,
+                            color: colorScheme.onSurface,
                           ),
                         ),
                       ),
                       const SizedBox(height: 24),
 
-                      // ヒントカード
-                      Card(
-                        color: colorScheme.tertiaryContainer,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.lightbulb_outline,
-                                color: colorScheme.onTertiaryContainer,
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  '動画を見ながら、アームの動きをよく観察してみましょう！',
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: colorScheme.onTertiaryContainer,
-                                  ),
-                                ),
-                              ),
+                      // Hint Card
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              colorScheme.tertiary.withValues(alpha: 0.2),
+                              colorScheme.tertiary.withValues(alpha: 0.05),
                             ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: colorScheme.tertiary.withValues(alpha: 0.3),
                           ),
                         ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.lightbulb_outline,
+                              color: colorScheme.tertiary,
+                              size: 28,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                '動画を見ながら、アームの動きや重心の位置をよく観察してみましょう！タイミングが重要です。',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: colorScheme.onSurface,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
+                      const SizedBox(height: 40),
                     ],
                   ),
                 ),
@@ -191,29 +188,67 @@ class _DetailScreenState extends State<DetailScreen> {
     );
   }
 
-  Widget _buildChip(
+  Widget _buildSectionTitle(BuildContext context, String text) {
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        Container(
+          width: 4,
+          height: 24,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primary,
+            borderRadius: BorderRadius.circular(2),
+            boxShadow: [
+              BoxShadow(
+                color: theme.colorScheme.primary.withValues(alpha: 0.6),
+                blurRadius: 8,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          text,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.primary,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNeonChip(
     BuildContext context, {
-    required IconData icon,
     required String label,
-    required Color color,
-    required Color textColor,
+    required IconData icon,
   }) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color,
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.5),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: theme.colorScheme.primary.withValues(alpha: 0.1),
+            blurRadius: 4,
+          ),
+        ],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: textColor),
+          Icon(icon, size: 16, color: theme.colorScheme.primary),
           const SizedBox(width: 6),
           Text(
             label,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: textColor,
-              fontWeight: FontWeight.w600,
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: theme.colorScheme.primary,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ],
