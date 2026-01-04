@@ -17,10 +17,11 @@ class StrategyCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final title = strategy.title['ja'] ?? strategy.title.values.firstOrNull ?? '';
 
     return Card(
-      elevation: 2,
       clipBehavior: Clip.antiAlias,
+      elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
@@ -98,7 +99,7 @@ class StrategyCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   // タイトル
                   Text(
-                    strategy.title,
+                    title,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
