@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/collection_item.dart';
 import '../../data/providers/collection_repository_provider.dart';
-// import 'package:intl/intl.dart'; // 日付フォーマット用 (別途追加が必要)
+import '../../data/providers/auth_provider.dart';
 
 class CollectionScreen extends ConsumerStatefulWidget {
   const CollectionScreen({super.key});
@@ -12,13 +12,17 @@ class CollectionScreen extends ConsumerStatefulWidget {
 }
 
 class _CollectionScreenState extends ConsumerState<CollectionScreen> {
-  // TODO: Auth実装後にユーザーIDを取得
-  final String userId = 'guest_user';
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final collectionAsync = ref.watch(collectionListProvider(userId));
+    final user = ref.watch(currentUserProvider);
+
+    // ログインしていない場合はローディングなどを表示
+    if (user == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    final collectionAsync = ref.watch(collectionListProvider(user.uid));
 
     return Scaffold(
       appBar: AppBar(title: const Text('獲得コレクション')),

@@ -8,6 +8,7 @@ import '../../data/models/collection_item.dart';
 import '../../data/providers/collection_repository_provider.dart';
 import '../../data/models/report.dart';
 import '../../data/providers/report_repository_provider.dart';
+import '../../data/providers/auth_provider.dart';
 
 /// 攻略法詳細画面
 class DetailScreen extends ConsumerStatefulWidget {
@@ -348,8 +349,17 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
               // 簡易的なID生成 (本来はUUIDなどを使用)
               final collectionId = DateTime.now().millisecondsSinceEpoch
                   .toString();
-              // TODO: 実際のユーザーIDを使用する (Auth実装後)
-              const userId = 'guest_user';
+
+              final user = ref.read(currentUserProvider);
+              if (user == null) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('ログインが必要です')));
+                }
+                return;
+              }
+              final userId = user.uid;
 
               final item = CollectionItem(
                 id: collectionId,
@@ -453,8 +463,16 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
               TextButton(
                 child: const Text('送信'),
                 onPressed: () async {
-                  // TODO: Auth ID
-                  const userId = 'guest_user';
+                  final user = ref.read(currentUserProvider);
+                  if (user == null) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('ログインが必要です')),
+                      );
+                    }
+                    return;
+                  }
+                  final userId = user.uid;
                   final report = Report(
                     id: DateTime.now().millisecondsSinceEpoch.toString(),
                     targetProductId: widget.strategy.id,

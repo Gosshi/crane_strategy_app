@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'router.dart';
 import 'theme/app_theme.dart';
+import 'data/providers/auth_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,8 +13,33 @@ void main() async {
 }
 
 /// クレーンゲーム攻略アプリ
-class CraneStrategyApp extends StatelessWidget {
+class CraneStrategyApp extends ConsumerStatefulWidget {
   const CraneStrategyApp({super.key});
+
+  @override
+  ConsumerState<CraneStrategyApp> createState() => _CraneStrategyAppState();
+}
+
+class _CraneStrategyAppState extends ConsumerState<CraneStrategyApp> {
+  @override
+  void initState() {
+    super.initState();
+    _initializeAuth();
+  }
+
+  Future<void> _initializeAuth() async {
+    // 匿名ログインを実行
+    // すでにログイン済みの場合は何もしない等の制御はRepository側でやっても良いが
+    // ここでは単純に signInAnonymously を呼ぶ (Firebase側で既存ユーザーなら維持される)
+    try {
+      final repo = ref.read(authRepositoryProvider);
+      if (repo.currentUser == null) {
+        await repo.signInAnonymously();
+      }
+    } catch (e) {
+      debugPrint('Auth initialization error: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
