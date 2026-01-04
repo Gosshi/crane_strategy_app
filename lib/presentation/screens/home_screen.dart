@@ -41,6 +41,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       appBar: AppBar(
         title: const Text('クレーンゲーム攻略'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.emoji_events_outlined),
+            tooltip: '獲得履歴',
+            onPressed: () => context.push('/collection'),
+          ),
           // デバッグモード時のみデータ投入ボタンを表示
           if (kDebugMode)
             IconButton(
