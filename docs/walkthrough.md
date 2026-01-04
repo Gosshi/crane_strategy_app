@@ -38,6 +38,18 @@
     - `flutter test test/auth_repository_test.dart` を実行し、認証ロジックのテストがパスすることを確認。
 
 
+### 5. Apple Sign-In (iOS)
+- **パッケージ**: `sign_in_with_apple` を導入。
+- **実装**: `AuthRepository` に `linkWithApple` / `signInWithApple` を実装し、iOS端末のみ `AccountScreen` に「Appleでサインイン」ボタンを表示。
+
+## ⚠️ 必要な設定 (iOS)
+Apple Sign-In を機能させるには、Xcodeでの設定が必要です。
+
+1. `ios/Runner.xcworkspace` を Xcode で開く。
+2. 左側のナビゲーターで `Runner` (Project) を選択し、TARGETS の `Runner` を選択。
+3. `Signing & Capabilities` タブを開く。
+4. `+ Capability` ボタンを押し、`Sign in with Apple` を追加する。
+
 ## ⚠️ 必要な設定 (Android)
 Android版でGoogleログインを使用するには、**SHA-1証明書フィンガープリント**をFirebaseコンソールに登録する必要があります。
 現状、開発環境でこの値が設定されていません。
