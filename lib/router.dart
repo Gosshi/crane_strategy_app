@@ -7,6 +7,7 @@ import 'presentation/screens/scan_screen.dart';
 import 'presentation/screens/scan_result_screen.dart';
 import 'presentation/screens/product_registration_screen.dart';
 import 'presentation/screens/collection_screen.dart';
+import 'presentation/screens/account_screen.dart';
 
 /// GoRouter の設定
 final router = GoRouter(
@@ -52,6 +53,11 @@ final router = GoRouter(
       path: '/collection',
       name: 'collection',
       builder: (context, state) => const CollectionScreen(),
+    ),
+    GoRoute(
+      path: '/account',
+      name: 'account',
+      builder: (context, state) => const AccountScreen(),
     ),
   ],
   errorBuilder: (context, state) => Scaffold(
