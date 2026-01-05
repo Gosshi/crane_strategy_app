@@ -1,31 +1,34 @@
-# User Content Expansion: YouTube Links
+# 実装計画: YouTube動画リンクによる攻略コンテンツ拡充
 
-## Goal Description
-Allow users to attach YouTube video URLs to their strategy posts. This enables crowdsourcing of "how-to-win" videos without hosting them directly, avoiding copyright and storage issues.
+## 目的
+ユーザーがYouTubeの攻略動画URLを投稿し、アプリ内で共有できる機能を実装します。
+これにより、自社で動画コンテンツを持たなくても、ユーザー間の集合知（UGC）によって攻略情報が充実するエコシステムを構築します。著作権リスクを回避しつつ、コンテンツ不足を解消することを目的とします。
 
-## User Review Required
+## 注意事項 (User Review Required)
 > [!NOTE]
-> **YouTube Links Only**
-> Currently restricting to YouTube URLs to ensure safety and ease of embedding (via `url_launcher` or future player integration).
+> **YouTubeリンク限定**
+> 安全性と埋め込みの容易さ（`url_launcher` や将来的なプレイヤー埋め込み）のため、当面はYouTubeのURLのみをサポート対象とします。
 
-## Proposed Changes
+## 変更内容 (Proposed Changes)
 
-### Data Model
+### データモデル
 #### [MODIFY] [post.dart](file:///Users/gota/Documents/src/crane_strategy_app/lib/data/models/post.dart)
-- Add `final String? youtubeUrl;` field.
-- Update `fromMap` and `toMap`.
+- `final String? youtubeUrl;` フィールドを追加。
+- `fromMap` および `toMap` メソッドを更新し、Firestoreとの読み書きに対応。
 
-### UI Components
+### UIコンポーネント
 #### [MODIFY] [post_composer_screen.dart](file:///Users/gota/Documents/src/crane_strategy_app/lib/presentation/screens/post_composer_screen.dart)
-- Add a `TextField` for YouTube URL.
-- Validate the URL (simple regex or `Uri.tryParse`).
+- YouTube URLを入力するための `TextField` を追加。
+- クリップボードからの貼り付けボタンを配置し、スマホでの入力負荷を軽減。
+- 簡易的なバリデーション（URL形式チェック）を追加。
 
 #### [MODIFY] [scan_result_screen.dart](file:///Users/gota/Documents/src/crane_strategy_app/lib/presentation/screens/scan_result_screen.dart)
-- Update the post list item to show a "Watch Video" button or chip if `youtubeUrl` is present.
-- Use `url_launcher` to open the link.
+- 投稿リストのアイテム表示を更新。
+- `youtubeUrl` が存在する場合、「動画を見る (YouTube)」ボタンを表示。
+- ボタンタップ時に `url_launcher` を使用して外部アプリ（またはブラウザ）で動画を開く処理を実装。
 
-## Verification Plan
-### Manual Verification
-- **Post Creation**: Create a post with a valid YouTube URL and verify it saves without error.
-- **Display**: Verify the post appears in the list with a "Video" indicator.
-- **Action**: Tap the indicator and verify it opens the YouTube app or browser.
+## 検証計画
+### 手動検証
+- **投稿作成**: 有効なYouTube URLを含む投稿を作成し、エラーなく保存されるか確認。
+- **表示確認**: 投稿リストに「動画を見る」ボタンが表示されるか確認。
+- **動作確認**: ボタンをタップし、YouTubeアプリ（またはブラウザ）が正常に起動するか確認。
