@@ -15,7 +15,9 @@ service cloud.firestore {
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
     }
     
-    // 通報: 認証済みなら誰でも作成可 (読み取りは不可=管理者のみ)
+    // 通報: 認証済みなら誰でも作成可
+    // 読み取りは Admin SDK (サーバーサイド) から行うため、クライアントからはアクセス拒否
+    // 将来的に管理画面アプリを作る場合はカスタムクレーム (request.auth.token.admin == true) 等を検討
     match /reports/{reportId} {
       allow create: if request.auth != null;
       allow read, update, delete: if false;
