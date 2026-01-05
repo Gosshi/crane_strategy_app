@@ -42,6 +42,11 @@
 - **パッケージ**: `sign_in_with_apple` を導入。
 - **実装**: `AuthRepository` に `linkWithApple` / `signInWithApple` を実装し、iOS端末のみ `AccountScreen` に「Appleでサインイン」ボタンを表示。
 
+### 6. その他修正 (依存関係・バグ修正)
+- **Google Sign-In v7対応**: iOSビルド競合解決のため `google_sign_in` を `^7.2.0` に更新し、コードをシングルトンパターン (`GoogleSignIn.instance`) に修正。
+- **画面遷移修正**: `MobileScanner` からの遷移バグを解消するため、`router.dart` のネスティング構造をフラット化 (`/scan/register` -> `/product_register`)。
+- **デバッグ改善**: スキャン画面の「Not Found」ボタンが毎回ランダムなコードを生成するように修正し、確実な動作確認を可能に。
+
 ## ⚠️ 必要な設定 (iOS)
 Apple Sign-In を機能させるには、Xcodeでの設定が必要です。
 

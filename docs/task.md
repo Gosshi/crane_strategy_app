@@ -10,7 +10,7 @@
 - [x] 商品登録 (CGM) 機能の実装
 - [x] キーワード検索機能の実装
 
-- [ ] デザイン・UXのブラッシュアップ <!-- id: 80 -->
+- [x] デザイン・UXのブラッシュアップ <!-- id: 80 -->
     - [x] `google_fonts` パッケージの追加 <!-- id: 81 -->
     - [x] `AppTheme` クラスの実装 (Dark/Neon) <!-- id: 82 -->
     - [x] `main.dart` へのテーマ適用 <!-- id: 83 -->
@@ -29,12 +29,34 @@
 
 - [ ] (Future) 商品情報の編集・削除機能 <!-- id: 100 -->
     - [ ] JANコード変更（マイグレーション）対応 <!-- id: 101 -->
+    - [ ] JANコードからの商品情報補完 (Amazon/Rakuten API等) <!-- id: 102 -->
 
 - [x] 獲得履歴 (コレクション) 機能の実装 <!-- id: 110 -->
     - [x] データモデル作成 (Acquisition/Collection) <!-- id: 111 -->
     - [x] 店舗名 (shopName) の保存 (null許容) <!-- id: 112 -->
     - [x] 獲得履歴一覧画面の実装 <!-- id: 113 -->
+    - [x] 商品詳細 (ScanResult) からの獲得記録 <!-- id: 114 -->
+    - [x] (Change) 動画詳細からの獲得記録を削除 (汎用攻略のため) <!-- id: 115 -->
+    - [x] 獲得日 (acquiredAt) の選択機能追加 <!-- id: 116 -->
 
 - [x] データ修正依頼 (通報) 機能の実装 <!-- id: 120 -->
     - [x] 通報/修正依頼 UI (JANコード間違い指摘など) <!-- id: 121 -->
     - [x] 管理者向け通知 または 自動フラグ処理 (Firestore保存のみ) <!-- id: 122 -->
+
+- [x] ユーザー認証 (Firebase Auth) の実装 <!-- id: 130 -->
+    - [x] `firebase_auth` パッケージの導入 <!-- id: 131 -->
+    - [x] 匿名認証 (Anonymous Auth) の実装 <!-- id: 132 -->
+    - [x] 認証状態の管理 (Riverpod provider) <!-- id: 133 -->
+    - [x] `guest_user` から実ユーザーIDへの置き換え <!-- id: 134 -->
+    - [x] (Option) Google/Emailログインへのアップグレード導線 <!-- id: 135 -->
+        - [x] `google_sign_in` パッケージの導入 <!-- id: 136 -->
+        - [x] AuthRepository に `linkWithGoogle` 実装 <!-- id: 137 -->
+        - [x] マイページ (AccountScreen) の作成と連携UI実装 <!-- id: 138 -->
+        - [x] iOS/Android ネイティブ設定 (URL Scheme, SHA-1) <!-- id: 139 -->
+    - [x] Apple Sign-In の追加 <!-- id: 140 -->
+        - [x] `sign_in_with_apple` パッケージ導入 <!-- id: 141 -->
+        - [x] AuthRepository に `linkWithApple` 実装 <!-- id: 142 -->
+        - [x] AccountScreen に Apple連携ボタン追加 <!-- id: 143 -->
+        - [x] iOS Capability (Sign in with Apple) 追加指示 <!-- id: 144 -->
+    - [x] 依存関係解消 (GoogleSignIn v7対応) <!-- id: 145 -->
+    - [x] 画面遷移バグ修正 (GoRouter階層フラット化) <!-- id: 146 -->
