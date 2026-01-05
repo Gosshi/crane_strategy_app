@@ -386,6 +386,35 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
                                   post.text,
                                   style: const TextStyle(fontSize: 14),
                                 ),
+                              if (post.youtubeUrl != null)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8.0),
+                                  child: FilledButton.icon(
+                                    onPressed: () async {
+                                      final uri = Uri.parse(post.youtubeUrl!);
+                                      if (!await launchUrl(
+                                        uri,
+                                        mode: LaunchMode.externalApplication,
+                                      )) {
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text('動画を開けませんでした'),
+                                            ),
+                                          );
+                                        }
+                                      }
+                                    },
+                                    icon: const Icon(Icons.play_circle_fill),
+                                    label: const Text('動画を見る (YouTube)'),
+                                    style: FilledButton.styleFrom(
+                                      backgroundColor: Colors.red,
+                                      foregroundColor: Colors.white,
+                                    ),
+                                  ),
+                                ),
                               const SizedBox(height: 4),
                               Text(
                                 post.createdAt.toString().split('.')[0],

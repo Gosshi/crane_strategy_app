@@ -17,6 +17,7 @@ class PostComposerScreen extends ConsumerStatefulWidget {
 
 class _PostComposerScreenState extends ConsumerState<PostComposerScreen> {
   final _textController = TextEditingController();
+  final _youtubeUrlController = TextEditingController(); // YouTube用
   File? _imageFile;
   bool _isUploading = false;
   final _picker = ImagePicker();
@@ -32,11 +33,25 @@ class _PostComposerScreenState extends ConsumerState<PostComposerScreen> {
 
   Future<void> _submit() async {
     final text = _textController.text.trim();
-    if (text.isEmpty && _imageFile == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('コメントまたは画像を入力してください')));
+    final youtubeUrl = _youtubeUrlController.text.trim();
+
+    if (text.isEmpty && _imageFile == null && youtubeUrl.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('コメント、画像、または動画URLを入力してください')),
+      );
       return;
+    }
+
+    // YouTube URLの簡易バリデーション (入力がある場合のみ)
+    if (youtubeUrl.isNotEmpty) {
+      final uri = Uri.tryParse(youtubeUrl);
+      if (uri == null ||
+          !youtubeUrl.contains('youtube') && !youtubeUrl.contains('youtu.be')) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('有効なYouTubeのURLを入力してください')),
+        );
+        return;
+      }
     }
 
     setState(() {
@@ -69,6 +84,7 @@ class _PostComposerScreenState extends ConsumerState<PostComposerScreen> {
         userId: user.uid,
         text: text,
         imageUrl: imageUrl,
+        youtubeUrl: youtubeUrl.isEmpty ? null : youtubeUrl,
         createdAt: DateTime.now(),
       );
 
@@ -113,6 +129,20 @@ class _PostComposerScreenState extends ConsumerState<PostComposerScreen> {
               maxLines: 5,
             ),
             const SizedBox(height: 16),
+
+            // YouTube URL入力
+            TextField(
+              controller: _youtubeUrlController,
+              decoration: const InputDecoration(
+                labelText: 'YouTube動画 (URL)',
+                hintText: 'https://www.youtube.com/watch?v=...',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.video_library, color: Colors.red),
+              ),
+              keyboardType: TextInputType.url,
+            ),
+            const SizedBox(height: 16),
+
             if (_imageFile != null)
               Stack(
                 alignment: Alignment.topRight,
