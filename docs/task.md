@@ -60,3 +60,9 @@
         - [x] iOS Capability (Sign in with Apple) 追加指示 <!-- id: 144 -->
     - [x] 依存関係解消 (GoogleSignIn v7対応) <!-- id: 145 -->
     - [x] 画面遷移バグ修正 (GoRouter階層フラット化) <!-- id: 146 -->
+
+- [x] Firestore セキュリティルールの設定 <!-- id: 150 -->
+    - [x] `users` コレクション (本人のみ書き込み可) <!-- id: 151 -->
+    - [x] `collections` コレクション (本人のみ読み書き可) <!-- id: 152 -->
+    - [x] `reports` コレクション (作成のみ可) <!-- id: 153 -->
+    - [x] `products` / `strategies` (読み取り専用 / 一部作成可?) <!-- id: 154 -->

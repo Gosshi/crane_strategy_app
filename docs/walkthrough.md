@@ -47,6 +47,13 @@
 - **画面遷移修正**: `MobileScanner` からの遷移バグを解消するため、`router.dart` のネスティング構造をフラット化 (`/scan/register` -> `/product_register`)。
 - **デバッグ改善**: スキャン画面の「Not Found」ボタンが毎回ランダムなコードを生成するように修正し、確実な動作確認を可能に。
 
+### 7. Firestore セキュリティルール
+- **ファイル作成**: `firestore.rules` を新規作成し、以下のポリシーを定義。
+    - **Users / Collections**: 所有者のみ読み書き可能。
+    - **Reports**: 誰でも作成可能 (読み取りは管理者のみ)。
+    - **Products / Strategies**: 誰でも閲覧可能 (書き込みは制限)。
+- **デプロイ**: `firebase deploy --only firestore:rules` により適用済み。
+
 ## ⚠️ 必要な設定 (iOS)
 Apple Sign-In を機能させるには、Xcodeでの設定が必要です。
 
