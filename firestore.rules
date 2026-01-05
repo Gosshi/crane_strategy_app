@@ -1,0 +1,37 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ユーザー情報: 本人のみ読み書き可
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // コレクション (獲得履歴): 本人のみ読み書き可
+    match /collections/{collectionId} {
+      // 読み取り・更新・削除: データの所有者のみ
+      allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      // 作成: 認証済み かつ 自分のIDで作成する場合のみ
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+    }
+    
+    // 通報: 認証済みなら誰でも作成可 (読み取りは不可=管理者のみ)
+    match /reports/{reportId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if false;
+    }
+    
+    // 商品情報: 誰でも閲覧可, 認証済みなら作成可
+    match /products/{productId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update, delete: if false; // 将来的には権限追加
+    }
+    
+    // 攻略法: 誰でも閲覧可, 書き込み不可
+    match /strategies/{strategyId} {
+      allow read: if true;
+      allow write: if false;
+    }
+  }
+}
