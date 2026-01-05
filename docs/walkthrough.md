@@ -1,30 +1,36 @@
-# Walkthrough: Gamification & UI Polish
+# ウォークスルー: ゲーミフィケーション & UI改善
 
-## Features Implemented
+## 実装された機能
 
-### 1. "GET!" Celebration (Confetti)
-- **Confetti Overlay**: Implemented `ConfettiOverlay` widget using `confetti` package.
-- **Scan Result**: Integrated confetti animation when a user successfully adds an item to their collection.
+### 1. "GET!" 演出 (Confetti / 紙吹雪)
+- **Confetti Overlay**: `confetti` パッケージを使用して、完了時の演出レイヤーを作成しました。
+- **スキャン結果画面**: コレクションへの追加成功時に、達成感を演出する紙吹雪アニメーションを統合しました。
 
-### 2. Rank System (Gamification)
-- **UserLevelService**: Created a service to calculate user rank based on collection count.
-  - **Beginner**: 0-4 items
-  - **Crane Gamer**: 5-19 items
-  - **Expert**: 20-49 items
-  - **God Hand**: 50+ items
-- **Account Screen**: Added a gradient Rank Badge and progress bar to show the user's current status and goal.
+### 2. ランクシステム (ゲーミフィケーション)
+- **UserLevelService**: 獲得数に基づいてユーザーランクを計算するサービスを作成しました。
+  - **ビギナー**: 0-4 個
+  - **クレーンゲーマー**: 5-19 個
+  - **熟練の攻略家**: 20-49 個
+  - **神の手**: 50個以上
+- **アカウント画面**: 現在のステータスと次の目標を示す、グラデーション付きのランクバッジとプログレスバーを追加しました。
 
-### 3. Visual Polish (Neon Theme)
-- **AppTheme**: Refined the theme to be more "Neon/Gaming" style.
-  - Added slight transparency and shadows to Cards.
-  - Enforced a dark, slate background.
-- **Rank Badge**: Designed a rich gradient container for the rank display.
+### 3. ビジュアル改善 (Neonテーマ)
+- **AppTheme**: より「ゲーミング」らしいスタイルにテーマを調整しました。
+  - カードにわずかな透明度と発光表現（Shadow）を追加。
+  - 全体的にダークスレートの背景色で統一。
+- **ランクバッジ**: ランク表示用にリッチなグラデーションコンテナをデザインしました。
 
-## Verification Results
-- **Animation**: Verified confetti plays on "GET!" button press.
-- **Rank**: Verified rank updates based on collection count (mock data testing).
-- **Theme**: Verified the app looks consistent with the new neon accents.
+### 4. ユーザビリティ改善 (Feedback対応)
+- **Pull-to-Refresh**: 獲得コレクション画面に「引っ張って更新」機能を追加しました。
+- **視認性向上**: 商品登録画面の「獲得済みとして記録」チェックボックスの背景色を、ダークモードでも見やすい色に修正しました。
+- **自動ログイン**: 未ログイン状態で商品を登録した際、バックグラウンドで自動的に匿名ログインを行い、コレクション追加が失敗しないようにロジックを修正しました。
 
-## Next Steps
-- Implement "Sound Effects" (SE) for button clicks and GET result (future).
-- Create a dedicated "Collection Gallery" view with 3D cover flow (future).
+## 検証結果
+- **アニメーション**: "GET!" 時に紙吹雪が舞うことを確認。
+- **ランク**: 獲得数に応じてランク表記が変わることを確認。
+- **テーマ**: アプリ全体がネオンアクセントで統一されていることを確認。
+- **リフレッシュ**: コレクション画面で下に引くとリストが更新されることを確認。
+
+## 次のステップ
+- **SE (効果音)**: ボタンクリックやGET時のサウンド追加（将来によりリッチな体験へ）。
+- **3Dカバーフロー**: コレクションを3Dで閲覧できるギャラリービュー（将来対応）。
