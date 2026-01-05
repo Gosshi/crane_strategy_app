@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:io';
 import '../../data/providers/auth_provider.dart';
 
 class AccountScreen extends ConsumerWidget {
@@ -94,6 +95,35 @@ class AccountScreen extends ConsumerWidget {
                       icon: const Icon(Icons.link),
                       label: const Text('Googleアカウントと連携'),
                     ),
+                    if (Platform.isIOS) ...[
+                      const SizedBox(height: 12),
+                      FilledButton.icon(
+                        onPressed: () async {
+                          try {
+                            await ref
+                                .read(authRepositoryProvider)
+                                .linkWithApple();
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('連携に成功しました！')),
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('連携エラー: $e')),
+                              );
+                            }
+                          }
+                        },
+                        style: FilledButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          foregroundColor: Colors.white,
+                        ),
+                        icon: const Icon(Icons.apple),
+                        label: const Text('Appleでサインイン'),
+                      ),
+                    ],
                   ],
                 ),
               ),

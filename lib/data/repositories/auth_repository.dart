@@ -6,5 +6,7 @@ abstract class AuthRepository {
   Future<UserCredential> signInAnonymously();
   Future<UserCredential> linkWithGoogle();
   Future<UserCredential> signInWithGoogle();
+  Future<UserCredential> linkWithApple();
+  Future<UserCredential> signInWithApple();
   Future<void> signOut();
 }

@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart' as gsi;
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'auth_repository.dart';
 
 class FirebaseAuthRepository implements AuthRepository {
@@ -66,6 +67,58 @@ class FirebaseAuthRepository implements AuthRepository {
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
+      );
+
+      return await _firebaseAuth.signInWithCredential(credential);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<UserCredential> linkWithApple() async {
+    try {
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+
+      final oauthProvider = OAuthProvider('apple.com');
+      final credential = oauthProvider.credential(
+        idToken: appleCredential.identityToken,
+        accessToken: appleCredential.authorizationCode,
+      );
+
+      final user = _firebaseAuth.currentUser;
+      if (user == null) {
+        throw FirebaseAuthException(
+          code: 'ERROR_NO_USER',
+          message: 'No user to link',
+        );
+      }
+
+      return await user.linkWithCredential(credential);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<UserCredential> signInWithApple() async {
+    try {
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+
+      final oauthProvider = OAuthProvider('apple.com');
+      final credential = oauthProvider.credential(
+        idToken: appleCredential.identityToken,
+        accessToken: appleCredential.authorizationCode,
       );
 
       return await _firebaseAuth.signInWithCredential(credential);
