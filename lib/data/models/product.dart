@@ -25,6 +25,10 @@ class Product {
   /// 関連する攻略法IDのリスト
   final List<String> strategyIds;
 
+  /// 作成者ID (Firebase Auth UID)
+  /// nullの場合は誰でも編集可能(既存データ)またはシステム作成
+  final String? creatorId;
+
   const Product({
     required this.id,
     required this.name,
@@ -34,6 +38,7 @@ class Product {
     this.centerOfGravity = const [],
     this.tags = const [],
     required this.strategyIds,
+    this.creatorId,
   });
 
   /// Firestoreのデータからモデルを作成
@@ -47,6 +52,7 @@ class Product {
       centerOfGravity: List<String>.from(map['centerOfGravity'] ?? []),
       tags: List<String>.from(map['tags'] ?? []),
       strategyIds: List<String>.from(map['strategyIds'] ?? []),
+      creatorId: map['creatorId'],
     );
   }
 
@@ -60,6 +66,7 @@ class Product {
       'centerOfGravity': centerOfGravity,
       'tags': tags,
       'strategyIds': strategyIds,
+      'creatorId': creatorId,
     };
   }
 }

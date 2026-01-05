@@ -98,6 +98,20 @@ class FirestoreStrategyRepository implements StrategyRepository {
   }
 
   @override
+  Future<void> updateProduct(Product product) async {
+    // ドキュメントが存在しない場合はエラーにしたいので、トランザクション内で存在確認を行う
+    final docRef = _firestore.collection('products').doc(product.id);
+    await _firestore.runTransaction((transaction) async {
+      final snapshot = await transaction.get(docRef);
+      if (!snapshot.exists) {
+        throw StateError('Product with id ${product.id} does not exist');
+      }
+      // Productモデル全体を渡すが、merge:true で既存ドキュメントにマージする
+      transaction.set(docRef, product.toMap(), SetOptions(merge: true));
+    });
+  }
+
+  @override
   Future<List<Product>> searchProducts(String query) async {
     // Firestoreでの全文検索は難しいため、簡易的に全件取得してフィルタリングする
     // (データ量が少ないうちはこれで十分。多くなったらAlgolia等の導入が必要)

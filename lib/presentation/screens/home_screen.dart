@@ -175,7 +175,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               onTap: () {
                 // スキャン結果画面へ遷移 (詳細表示)
                 // ScanResultScreenはスキャン結果として商品を表示する役割も兼ねている
-                context.push('/scan/result', extra: product.id);
+                context.push('/scan_result', extra: product.id);
               },
             );
           },

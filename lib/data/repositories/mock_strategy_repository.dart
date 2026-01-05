@@ -50,6 +50,17 @@ class MockStrategyRepository implements StrategyRepository {
   }
 
   @override
+  Future<void> updateProduct(Product product) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    final index = _products.indexWhere((p) => p.id == product.id);
+    if (index != -1) {
+      _products[index] = product;
+    } else {
+      throw Exception('Product not found');
+    }
+  }
+
+  @override
   Future<List<Product>> searchProducts(String query) async {
     await Future.delayed(const Duration(milliseconds: 300));
     if (query.isEmpty) {
