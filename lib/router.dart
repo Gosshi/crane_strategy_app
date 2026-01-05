@@ -30,24 +30,22 @@ final router = GoRouter(
       path: '/scan',
       name: 'scan',
       builder: (context, state) => const ScanScreen(),
-      routes: [
-        GoRoute(
-          path: 'result',
-          name: 'scan_result',
-          builder: (context, state) {
-            final barcode = state.extra as String;
-            return ScanResultScreen(barcode: barcode);
-          },
-        ),
-        GoRoute(
-          path: 'register',
-          name: 'product_register',
-          builder: (context, state) {
-            final barcode = state.extra as String;
-            return ProductRegistrationScreen(barcode: barcode);
-          },
-        ),
-      ],
+    ),
+    GoRoute(
+      path: '/scan_result',
+      name: 'scan_result',
+      builder: (context, state) {
+        final barcode = state.extra as String;
+        return ScanResultScreen(barcode: barcode);
+      },
+    ),
+    GoRoute(
+      path: '/product_register',
+      name: 'product_register',
+      builder: (context, state) {
+        final barcode = state.extra as String;
+        return ProductRegistrationScreen(barcode: barcode);
+      },
     ),
     GoRoute(
       path: '/collection',

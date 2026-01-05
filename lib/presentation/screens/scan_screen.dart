@@ -83,7 +83,7 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
     // context.go('/scan/result?code=$code') のようにパスパラメータを使用
     // ここではパス構成が決まっていないため、Router定義後に合わせるが、
     // 一般的に /scan/result/:code または query parameter で渡す
-    context.push('/scan/result', extra: code);
+    context.push('/scan_result', extra: code);
   }
 
   @override
@@ -162,8 +162,13 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
                         child: const Text('Found(490...)'),
                       ),
                       ElevatedButton(
-                        onPressed: () =>
-                            _handleBarcodeFound('0000000000000'), // 未登録
+                        onPressed: () {
+                          // 確実に「未登録」にするために現在時刻から生成
+                          final randomCode = DateTime.now()
+                              .millisecondsSinceEpoch
+                              .toString();
+                          _handleBarcodeFound(randomCode);
+                        },
                         child: const Text('Not Found'),
                       ),
                     ],

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart' as gsi;
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
@@ -23,17 +24,12 @@ class FirebaseAuthRepository implements AuthRepository {
   Future<UserCredential> linkWithGoogle() async {
     try {
       // Googleログインフローを開始
-      final googleUser = await gsi.GoogleSignIn().signIn();
-      if (googleUser == null) {
-        throw FirebaseAuthException(
-          code: 'ERROR_ABORTED_BY_USER',
-          message: 'Sign in aborted by user',
-        );
-      }
+      final googleUser = await gsi.GoogleSignIn.instance.authenticate();
+      // authenticate calls throws on cancellation/error, so googleUser is non-null here
 
-      final googleAuth = await googleUser.authentication;
+      final googleAuth = googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
+        accessToken: null,
         idToken: googleAuth.idToken,
       );
 
@@ -55,17 +51,12 @@ class FirebaseAuthRepository implements AuthRepository {
   @override
   Future<UserCredential> signInWithGoogle() async {
     try {
-      final googleUser = await gsi.GoogleSignIn().signIn();
-      if (googleUser == null) {
-        throw FirebaseAuthException(
-          code: 'ERROR_ABORTED_BY_USER',
-          message: 'Sign in aborted by user',
-        );
-      }
+      final googleUser = await gsi.GoogleSignIn.instance.authenticate();
+      // authenticate calls throws on cancellation/error, so googleUser is non-null here
 
-      final googleAuth = await googleUser.authentication;
+      final googleAuth = googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
+        accessToken: null,
         idToken: googleAuth.idToken,
       );
 
@@ -129,7 +120,11 @@ class FirebaseAuthRepository implements AuthRepository {
 
   @override
   Future<void> signOut() async {
-    await gsi.GoogleSignIn().signOut(); // Googleからもログアウト
+    try {
+      await gsi.GoogleSignIn.instance.signOut();
+    } catch (e) {
+      debugPrint('Google sign out failed: $e');
+    }
     await _firebaseAuth.signOut();
   }
 }

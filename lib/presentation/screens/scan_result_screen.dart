@@ -136,7 +136,7 @@ class ScanResultScreen extends ConsumerWidget {
               onPressed: () {
                 // context.go ではなく .push にすることで戻ってきたときに再読込を期待できる
                 // (ただしrouter構成上、/scan/register は /scan の下なので push が適切)
-                context.push('/scan/register', extra: barcode);
+                context.push('/product_register', extra: barcode);
               },
               icon: const Icon(Icons.add_circle_outline),
               label: const Text('この商品を登録する'),

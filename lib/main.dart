@@ -6,9 +6,19 @@ import 'router.dart';
 import 'theme/app_theme.dart';
 import 'data/providers/auth_provider.dart';
 
+import 'package:google_sign_in/google_sign_in.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // Google Sign-In (v7+) 必須の初期化
+  // 必要であれば clientId などをここで渡す
+  try {
+    await GoogleSignIn.instance.initialize();
+  } catch (e) {
+    debugPrint('GoogleSignIn initialize error (ignored): $e');
+  }
+
   runApp(const ProviderScope(child: CraneStrategyApp()));
 }
 
