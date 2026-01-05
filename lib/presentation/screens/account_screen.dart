@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:io';
 import '../../data/providers/auth_provider.dart';
+import '../../data/services/user_level_service.dart';
+import 'collection_screen.dart'; // collectionWithProductListProvider
 
 class AccountScreen extends ConsumerWidget {
   const AccountScreen({super.key});
@@ -38,6 +40,11 @@ class AccountScreen extends ConsumerWidget {
                     isAnonymous ? 'ゲストユーザー' : (user.displayName ?? 'ユーザー'),
                     style: theme.textTheme.titleLarge,
                   ),
+                  const SizedBox(height: 8),
+
+                  // ランク表示
+                  _buildRankSection(ref, user.uid, theme),
+
                   const SizedBox(height: 8),
                   Text(
                     'UID: ${user.uid}',
@@ -139,6 +146,81 @@ class AccountScreen extends ConsumerWidget {
           ],
         ],
       ),
+    );
+  }
+
+  Widget _buildRankSection(WidgetRef ref, String userId, ThemeData theme) {
+    var collectionAsync = ref.watch(collectionWithProductListProvider(userId));
+
+    return collectionAsync.when(
+      data: (items) {
+        final count = items.length;
+        final progress = UserLevelService.getProgress(count);
+        final currentRank = progress.currentRank;
+        final nextRank = progress.nextRank;
+
+        return Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Color(currentRank.color).withValues(alpha: 0.3),
+                    Color(currentRank.color).withValues(alpha: 0.1),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Color(currentRank.color), width: 1.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(currentRank.color).withValues(alpha: 0.4),
+                    blurRadius: 8,
+                    spreadRadius: 1,
+                  ),
+                ],
+              ),
+              child: Text(
+                currentRank.name,
+                style: TextStyle(
+                  color: Color(currentRank.color),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  shadows: [
+                    Shadow(color: Color(currentRank.color), blurRadius: 8),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            if (nextRank != null) ...[
+              LinearProgressIndicator(
+                value: progress.progress,
+                backgroundColor: Colors.grey[200],
+                color: Color(currentRank.color),
+                minHeight: 8,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '次のランクまであと ${progress.requiredCountForNext! - count} 個',
+                style: theme.textTheme.bodySmall,
+              ),
+            ] else
+              Text(
+                '最高ランク到達！',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: Colors.amber,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+          ],
+        );
+      },
+      loading: () => const CircularProgressIndicator(),
+      error: (e, s) => const SizedBox.shrink(),
     );
   }
 }

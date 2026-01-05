@@ -1,34 +1,36 @@
-# Walkthrough: Collection Features & Safe Product Editing
+# ウォークスルー: ゲーミフィケーション & UI改善
 
-## Features Implemented
+## 実装された機能
 
-### 1. Collection Gallery & Sharing
-- **Gallery View**: Added toggle between List and Grid view for collections.
-- **Sharing**: Integrated `share_plus` to share collection items with formatted text.
-- **Auto-Login**: Implemented anonymous authentication ensuring users can always add items.
+### 1. "GET!" 演出 (Confetti / 紙吹雪)
+- **Confetti Overlay**: `confetti` パッケージを使用して、完了時の演出レイヤーを作成しました。
+- **スキャン結果画面**: コレクションへの追加成功時に、達成感を演出する紙吹雪アニメーションを統合しました。
 
-### 2. Streamlined Product Registration
-- **Direct Collection**: Added "Also add to collection" checkbox in `ProductRegistrationScreen`.
-- **Scan Result**: Added "GET!" button in `ScanResultScreen`.
+### 2. ランクシステム (ゲーミフィケーション)
+- **UserLevelService**: 獲得数に基づいてユーザーランクを計算するサービスを作成しました。
+  - **ビギナー**: 0-4 個
+  - **クレーンゲーマー**: 5-19 個
+  - **熟練の攻略家**: 20-49 個
+  - **神の手**: 50個以上
+- **アカウント画面**: 現在のステータスと次の目標を示す、グラデーション付きのランクバッジとプログレスバーを追加しました。
 
-### 3. Safe Product Editing (Creator Only)
-- **Creator Ownership**: Added `creatorId` to `Product` model to track who registered the item.
-- **Security Rules**: Updated `firestore.rules` to allow updates only if `request.auth.uid == resource.data.creatorId`.
-- **Edit UI**: Implemented `ProductEditScreen` and added an "Edit" button in `ScanResultScreen` that appears *only* for the creator.
+### 3. ビジュアル改善 (Neonテーマ)
+- **AppTheme**: より「ゲーミング」らしいスタイルにテーマを調整しました。
+  - カードにわずかな透明度と発光表現（Shadow）を追加。
+  - 全体的にダークスレートの背景色で統一。
+- **ランクバッジ**: ランク表示用にリッチなグラデーションコンテナをデザインしました。
 
-### 4. Search & Navigation Fixes
-- **Bug Fix**: Corrected navigation routing from `HomeScreen` search results (`/scan/result` -> `/scan_result`).
-- **Dependencies**: Added `share_plus` and `cached_network_image`.
+### 4. ユーザビリティ改善 (Feedback対応)
+- **Pull-to-Refresh**: 獲得コレクション画面に「引っ張って更新」機能を追加しました。
+- **視認性向上**: 商品登録画面の「獲得済みとして記録」チェックボックスの背景色を、ダークモードでも見やすい色に修正しました。
+- **自動ログイン**: 未ログイン状態で商品を登録した際、バックグラウンドで自動的に匿名ログインを行い、コレクション追加が失敗しないようにロジックを修正しました。
 
-### 5. Review Feedback (Post-PR)
-- **Accessibility**: Added `semanticsLabel` to loading indicator in `ProductEditScreen`.
-- **Robustness**: Switched `updateProduct` from simple update to **Transaction** with existence check to ensure data integrity and prevent race conditions.
+## 検証結果
+- **アニメーション**: "GET!" 時に紙吹雪が舞うことを確認。
+- **ランク**: 獲得数に応じてランク表記が変わることを確認。
+- **テーマ**: アプリ全体がネオンアクセントで統一されていることを確認。
+- **リフレッシュ**: コレクション画面で下に引くとリストが更新されることを確認。
 
-## Verification Results
-- **Search**: Verified correct transition from search list to product detail.
-- **Editing**: Verified that only the creator sees the edit button and can successfully update product details.
-- **Security**: Confirmed Firestore rules prevent unauthorized updates.
-
-## Next Steps
-- Implement image uploading for product editing (currently text-only).
-- Handle existing products (migration or admin override).
+## 次のステップ
+- **SE (効果音)**: ボタンクリックやGET時のサウンド追加（将来によりリッチな体験へ）。
+- **3Dカバーフロー**: コレクションを3Dで閲覧できるギャラリービュー（将来対応）。

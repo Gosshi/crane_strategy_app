@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../data/models/product.dart';
 import '../../data/models/collection_item.dart';
 import '../../data/providers/strategy_repository_provider.dart';
@@ -72,8 +73,20 @@ class _ProductRegistrationScreenState
     });
 
     try {
+      // ユーザー確保 (未ログインなら匿名ログイン)
+      User? user = ref.read(currentUserProvider);
+      if (user == null) {
+        try {
+          final authRepo = ref.read(authRepositoryProvider);
+          await authRepo.signInAnonymously();
+          user = authRepo.currentUser;
+        } catch (e) {
+          debugPrint('Auto-login failed: $e');
+        }
+      }
+
       final repository = ref.read(strategyRepositoryProvider);
-      final user = ref.read(currentUserProvider);
+
       final product = Product(
         id: widget.barcode,
         name: name,
@@ -89,7 +102,6 @@ class _ProductRegistrationScreenState
 
       // コレクションへの追加
       if (_addToCollection) {
-        final user = ref.read(currentUserProvider);
         if (user != null) {
           final collectionRepo = ref.read(collectionRepositoryProvider);
           final newItem = CollectionItem(
@@ -100,6 +112,8 @@ class _ProductRegistrationScreenState
             note: null,
           );
           await collectionRepo.addCollectionItem(user.uid, newItem);
+        } else {
+          debugPrint('Collection add skipped: User is null');
         }
       }
 
@@ -144,6 +158,7 @@ class _ProductRegistrationScreenState
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(title: const Text('商品登録')),
       body: SingleChildScrollView(
@@ -151,10 +166,7 @@ class _ProductRegistrationScreenState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              'バーコード: ${widget.barcode}',
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
+            Text('バーコード: ${widget.barcode}', style: theme.textTheme.bodyLarge),
             const SizedBox(height: 16),
             TextField(
               controller: _nameController,
@@ -167,7 +179,7 @@ class _ProductRegistrationScreenState
 
             // コレクション追加オプション
             Card(
-              color: Colors.blue.shade50,
+              color: theme.colorScheme.primaryContainer.withValues(alpha: 0.2),
               elevation: 0,
               child: CheckboxListTile(
                 value: _addToCollection,

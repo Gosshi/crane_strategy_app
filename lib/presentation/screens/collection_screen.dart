@@ -56,33 +56,50 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
           ),
         ],
       ),
-      body: collectionAsync.when(
-        data: (items) {
-          if (items.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.emoji_events_outlined,
-                    size: 64,
-                    color: Colors.grey,
-                  ),
-                  const SizedBox(height: 16),
-                  Text('まだ獲得した景品はありません', style: theme.textTheme.titleMedium),
-                ],
-              ),
-            );
-          }
-
-          if (_isGridView) {
-            return _buildGridView(items);
-          } else {
-            return _buildListView(items);
-          }
+      body: RefreshIndicator(
+        onRefresh: () async {
+          // プロバイダーを再取得してリフレッシュさせる
+          return ref.refresh(
+            collectionWithProductListProvider(user.uid).future,
+          );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(child: Text('エラー: $error')),
+        child: collectionAsync.when(
+          data: (items) {
+            if (items.isEmpty) {
+              return Stack(
+                // ScrollableにするためにStackとListViewを組み合わせるか、LayoutBuilderを使う
+                children: [
+                  ListView(), // 空でもPull-to-refreshできるようにスクロール領域を確保
+                  Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.emoji_events_outlined,
+                          size: 64,
+                          color: Colors.grey,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'まだ獲得した景品はありません',
+                          style: theme.textTheme.titleMedium,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            }
+
+            if (_isGridView) {
+              return _buildGridView(items);
+            } else {
+              return _buildListView(items);
+            }
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) => Center(child: Text('エラー: $error')),
+        ),
       ),
     );
   }
