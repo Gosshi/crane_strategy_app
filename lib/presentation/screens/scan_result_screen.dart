@@ -15,6 +15,8 @@ import 'package:url_launcher/url_launcher.dart'; // Attribution link
 import '../../data/repositories/yahoo_shopping_repository.dart';
 import '../widgets/strategy_card.dart';
 import 'post_composer_screen.dart'; // 新規作成
+import 'package:confetti/confetti.dart';
+import '../widgets/confetti_overlay.dart';
 
 final productSearchProvider = FutureProvider.family<Product?, String>((
   ref,
@@ -40,6 +42,7 @@ final productSearchProvider = FutureProvider.family<Product?, String>((
 });
 
 /// 商品に関連する攻略法を取得するプロバイダー
+/// 商品に関連する攻略法を取得するプロバイダー
 final relatedStrategiesProvider =
     FutureProvider.family<List<Strategy>, List<String>>((ref, ids) async {
       if (ids.isEmpty) return [];
@@ -48,68 +51,92 @@ final relatedStrategiesProvider =
     });
 
 /// スキャン結果画面
-class ScanResultScreen extends ConsumerWidget {
+class ScanResultScreen extends ConsumerStatefulWidget {
   final String barcode;
 
   const ScanResultScreen({super.key, required this.barcode});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ScanResultScreen> createState() => _ScanResultScreenState();
+}
+
+class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
+  late ConfettiController _confettiController;
+
+  @override
+  void initState() {
+    super.initState();
+    _confettiController = ConfettiController(
+      duration: const Duration(seconds: 3),
+    );
+  }
+
+  @override
+  void dispose() {
+    _confettiController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     // リポジトリを取得
     // final repository = ref.watch(strategyRepositoryProvider);
-    final productAsync = ref.watch(productSearchProvider(barcode));
+    final productAsync = ref.watch(productSearchProvider(widget.barcode));
     // final theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('スキャン結果'),
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () {
-            // スキャン画面に戻らずホームに戻る場合は修正が必要だが、
-            // ここではシンプルにpop（スキャン画面に戻ると再スキャンになるため、実際はホームまで戻るのがUX良いかも）
-            // GoRouterなら context.go('/') でホームに戻れる
-            context.go('/');
-          },
-        ),
-      ),
-      body: productAsync.when(
-        data: (product) {
-          if (product == null) {
-            return _buildNotFound(context, ref);
-          }
-          return _buildProductDetail(context, ref, product);
-        },
-        loading: () => const Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text('商品を検索中...'),
-            ],
+    return ConfettiOverlay(
+      controller: _confettiController,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('スキャン結果'),
+          leading: IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () {
+              // スキャン画面に戻らずホームに戻る場合は修正が必要だが、
+              // ここではシンプルにpop（スキャン画面に戻ると再スキャンになるため、実際はホームまで戻るのがUX良いかも）
+              // GoRouterなら context.go('/') でホームに戻れる
+              context.go('/');
+            },
           ),
         ),
-        error: (err, stack) => Center(child: Text('エラーが発生しました: $err')),
-      ),
-      floatingActionButton: productAsync.when(
-        data: (product) {
-          if (product == null) return null;
-          return FloatingActionButton.extended(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) =>
-                      PostComposerScreen(productId: product.id),
-                ),
-              );
-            },
-            icon: const Icon(Icons.edit),
-            label: const Text('攻略を投稿'),
-          );
-        },
-        loading: () => null,
-        error: (error, stackTrace) => null,
+        body: productAsync.when(
+          data: (product) {
+            if (product == null) {
+              return _buildNotFound(context, ref);
+            }
+            return _buildProductDetail(context, ref, product);
+          },
+          loading: () => const Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('商品を検索中...'),
+              ],
+            ),
+          ),
+          error: (err, stack) => Center(child: Text('エラーが発生しました: $err')),
+        ),
+        floatingActionButton: productAsync.when(
+          data: (product) {
+            if (product == null) return null;
+            return FloatingActionButton.extended(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        PostComposerScreen(productId: product.id),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.edit),
+              label: const Text('攻略を投稿'),
+            );
+          },
+          loading: () => null,
+          error: (error, stackTrace) => null,
+        ),
       ),
     );
   }
@@ -151,6 +178,9 @@ class ScanResultScreen extends ConsumerWidget {
       );
       await collectionRepo.addCollectionItem(user.uid, newItem);
 
+      // 紙吹雪を再生
+      _confettiController.play();
+
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
@@ -173,7 +203,7 @@ class ScanResultScreen extends ConsumerWidget {
     // 今回は ConsumerStatefulWidget に変換するコストを避けるため、
     // 別途作成した `_YahooApiSearchSection` ウィジェットを呼び出す形にする。
 
-    return _YahooApiSearchSection(barcode: barcode);
+    return _YahooApiSearchSection(barcode: widget.barcode);
   }
 
   Widget _buildProductDetail(

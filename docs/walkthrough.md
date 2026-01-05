@@ -1,34 +1,30 @@
-# Walkthrough: Collection Features & Safe Product Editing
+# Walkthrough: Gamification & UI Polish
 
 ## Features Implemented
 
-### 1. Collection Gallery & Sharing
-- **Gallery View**: Added toggle between List and Grid view for collections.
-- **Sharing**: Integrated `share_plus` to share collection items with formatted text.
-- **Auto-Login**: Implemented anonymous authentication ensuring users can always add items.
+### 1. "GET!" Celebration (Confetti)
+- **Confetti Overlay**: Implemented `ConfettiOverlay` widget using `confetti` package.
+- **Scan Result**: Integrated confetti animation when a user successfully adds an item to their collection.
 
-### 2. Streamlined Product Registration
-- **Direct Collection**: Added "Also add to collection" checkbox in `ProductRegistrationScreen`.
-- **Scan Result**: Added "GET!" button in `ScanResultScreen`.
+### 2. Rank System (Gamification)
+- **UserLevelService**: Created a service to calculate user rank based on collection count.
+  - **Beginner**: 0-4 items
+  - **Crane Gamer**: 5-19 items
+  - **Expert**: 20-49 items
+  - **God Hand**: 50+ items
+- **Account Screen**: Added a gradient Rank Badge and progress bar to show the user's current status and goal.
 
-### 3. Safe Product Editing (Creator Only)
-- **Creator Ownership**: Added `creatorId` to `Product` model to track who registered the item.
-- **Security Rules**: Updated `firestore.rules` to allow updates only if `request.auth.uid == resource.data.creatorId`.
-- **Edit UI**: Implemented `ProductEditScreen` and added an "Edit" button in `ScanResultScreen` that appears *only* for the creator.
-
-### 4. Search & Navigation Fixes
-- **Bug Fix**: Corrected navigation routing from `HomeScreen` search results (`/scan/result` -> `/scan_result`).
-- **Dependencies**: Added `share_plus` and `cached_network_image`.
-
-### 5. Review Feedback (Post-PR)
-- **Accessibility**: Added `semanticsLabel` to loading indicator in `ProductEditScreen`.
-- **Robustness**: Switched `updateProduct` from simple update to **Transaction** with existence check to ensure data integrity and prevent race conditions.
+### 3. Visual Polish (Neon Theme)
+- **AppTheme**: Refined the theme to be more "Neon/Gaming" style.
+  - Added slight transparency and shadows to Cards.
+  - Enforced a dark, slate background.
+- **Rank Badge**: Designed a rich gradient container for the rank display.
 
 ## Verification Results
-- **Search**: Verified correct transition from search list to product detail.
-- **Editing**: Verified that only the creator sees the edit button and can successfully update product details.
-- **Security**: Confirmed Firestore rules prevent unauthorized updates.
+- **Animation**: Verified confetti plays on "GET!" button press.
+- **Rank**: Verified rank updates based on collection count (mock data testing).
+- **Theme**: Verified the app looks consistent with the new neon accents.
 
 ## Next Steps
-- Implement image uploading for product editing (currently text-only).
-- Handle existing products (migration or admin override).
+- Implement "Sound Effects" (SE) for button clicks and GET result (future).
+- Create a dedicated "Collection Gallery" view with 3D cover flow (future).
