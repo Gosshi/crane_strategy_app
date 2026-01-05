@@ -84,7 +84,15 @@ void main() {
       ),
     );
 
-    await tester.pump();
+    await tester.pump(); // Firestore lookup finished -> Yahoo Search starts
+
+    // Yahoo検索中のローディング確認
+    expect(find.text('Yahoo!ショッピングから情報を検索中...'), findsOneWidget);
+
+    // 500ms待機 (コード内の遅延) + タイムアウト待ち
+    await tester.pump(const Duration(milliseconds: 600));
+    // さらに非同期処理完了待ち
+    await tester.pumpAndSettle();
 
     expect(find.text('商品が見つかりませんでした'), findsOneWidget);
     expect(find.text('スキャンしたコード: not_found'), findsOneWidget);

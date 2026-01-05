@@ -7,8 +7,15 @@ import 'package:go_router/go_router.dart';
 
 class ProductRegistrationScreen extends ConsumerStatefulWidget {
   final String barcode;
+  final String? initialName;
+  final String? initialImageUrl;
 
-  const ProductRegistrationScreen({super.key, required this.barcode});
+  const ProductRegistrationScreen({
+    super.key,
+    required this.barcode,
+    this.initialName,
+    this.initialImageUrl,
+  });
 
   @override
   ConsumerState<ProductRegistrationScreen> createState() =>
@@ -17,9 +24,15 @@ class ProductRegistrationScreen extends ConsumerStatefulWidget {
 
 class _ProductRegistrationScreenState
     extends ConsumerState<ProductRegistrationScreen> {
-  final _nameController = TextEditingController();
+  late final TextEditingController _nameController;
   final _tagController = TextEditingController(); // タグ入力用
   bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.initialName ?? '');
+  }
 
   // カテゴリ選択肢
   final List<String> _categoryOptions = ['フィギュア', 'ぬいぐるみ', '雑貨', 'お菓子', 'その他'];
@@ -57,7 +70,7 @@ class _ProductRegistrationScreenState
       final product = Product(
         id: widget.barcode,
         name: name,
-        imageUrl: '', // 画像アップロードは未実装のため空文字
+        imageUrl: widget.initialImageUrl ?? '', // 画像アップロードは未実装のため順次対応
         categories: _selectedCategories,
         centerOfGravity: _selectedCoGs,
         tags: _tags,

@@ -7,6 +7,8 @@ import '../../data/providers/strategy_repository_provider.dart';
 import '../../data/models/product.dart';
 import '../../data/models/strategy.dart';
 import '../../data/repositories/post_repository.dart';
+import 'package:url_launcher/url_launcher.dart'; // Attribution link
+import '../../data/repositories/yahoo_shopping_repository.dart';
 import '../widgets/strategy_card.dart';
 import 'post_composer_screen.dart'; // 新規作成
 
@@ -70,7 +72,7 @@ class ScanResultScreen extends ConsumerWidget {
       body: productAsync.when(
         data: (product) {
           if (product == null) {
-            return _buildNotFound(context);
+            return _buildNotFound(context, ref);
           }
           return _buildProductDetail(context, ref, product);
         },
@@ -108,43 +110,15 @@ class ScanResultScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildNotFound(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.search_off, size: 80, color: Colors.grey),
-            const SizedBox(height: 24),
-            const Text(
-              '商品が見つかりませんでした',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'スキャンしたコード: $barcode',
-              style: const TextStyle(color: Colors.grey),
-            ),
-            const SizedBox(height: 32),
-            FilledButton(
-              onPressed: () => context.go('/'),
-              child: const Text('ホームに戻る'),
-            ),
-            const SizedBox(height: 16),
-            TextButton.icon(
-              onPressed: () {
-                // context.go ではなく .push にすることで戻ってきたときに再読込を期待できる
-                // (ただしrouter構成上、/scan/register は /scan の下なので push が適切)
-                context.push('/product_register', extra: barcode);
-              },
-              icon: const Icon(Icons.add_circle_outline),
-              label: const Text('この商品を登録する'),
-            ),
-          ],
-        ),
-      ),
-    );
+  Widget _buildNotFound(BuildContext context, WidgetRef ref) {
+    // Yahoo API検索の状態管理用 (本来は専用のProviderを作るべきだが簡易的にFutureBuilder等で対応、
+    // あるいはこのWidget自体をConsumerStatefulWidgetにするのが適切)
+    // ここではリファクタリングを避けるため、簡易的に即時実行するProviderを定義してwatchする形を取るか、
+    // あるいはConsumerStatefulWidgetに変換するのがベスト。
+    // 今回は ConsumerStatefulWidget に変換するコストを避けるため、
+    // 別途作成した `_YahooApiSearchSection` ウィジェットを呼び出す形にする。
+
+    return _YahooApiSearchSection(barcode: barcode);
   }
 
   Widget _buildProductDetail(
@@ -318,6 +292,181 @@ class ScanResultScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 80), // FAB用のスペース
         ],
+      ),
+    );
+  }
+}
+
+class _YahooApiSearchSection extends ConsumerStatefulWidget {
+  final String barcode;
+  const _YahooApiSearchSection({required this.barcode});
+
+  @override
+  ConsumerState<_YahooApiSearchSection> createState() =>
+      __YahooApiSearchSectionState();
+}
+
+class __YahooApiSearchSectionState
+    extends ConsumerState<_YahooApiSearchSection> {
+  // 状態: 0:未検索/検索中, 1:発見, 2:見つからず
+  // ただし初期表示で自動検索したい
+
+  // FutureProvider.family を使う手もあるが、
+  // ここで直接 Repository を呼んで state 管理する方がシンプル
+
+  bool _isLoading = true;
+  YahooProductItem? _yahooItem;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchYahoo();
+  }
+
+  Future<void> _searchYahoo() async {
+    try {
+      // ユーザー体験のため、あえて少し待つ（パッと切り替わると見落とすため）
+      // かつ Firestore 検索が Not Found だった直後なので。
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      final repo = ref.read(yahooShoppingRepositoryProvider);
+      final item = await repo.searchByJanCode(widget.barcode);
+      _yahooItem = item;
+    } catch (e) {
+      debugPrint('Yahoo Search Error: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Yahoo!ショッピングから情報を検索中...'),
+          ],
+        ),
+      );
+    }
+
+    if (_yahooItem != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.check_circle_outline,
+                size: 80,
+                color: Colors.green,
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                '商品情報が見つかりました！',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      if (_yahooItem!.imageUrl != null)
+                        Image.network(_yahooItem!.imageUrl!, height: 120),
+                      const SizedBox(height: 8),
+                      Text(
+                        _yahooItem!.name,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              FilledButton.icon(
+                onPressed: () {
+                  context.push(
+                    '/product_register',
+                    extra: {
+                      'barcode': widget.barcode,
+                      'initialName': _yahooItem!.name,
+                      'initialImageUrl': _yahooItem!.imageUrl,
+                    },
+                  );
+                },
+                icon: const Icon(Icons.edit),
+                label: const Text('この情報を使って登録'),
+              ),
+              const SizedBox(height: 16),
+              // Yahoo! Shopping Attribution
+              TextButton(
+                onPressed: () async {
+                  final Uri url = Uri.parse('https://shopping.yahoo.co.jp/');
+                  if (!await launchUrl(url)) {
+                    debugPrint('Could not launch $url');
+                  }
+                },
+                child: const Text(
+                  'Web Services by Yahoo! JAPAN',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Yahooでも見つからなかった場合 (従来の Not Found 画面)
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.search_off, size: 80, color: Colors.grey),
+            const SizedBox(height: 24),
+            const Text(
+              '商品が見つかりませんでした',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'スキャンしたコード: ${widget.barcode}',
+              style: const TextStyle(color: Colors.grey),
+            ),
+            const SizedBox(height: 32),
+            FilledButton(
+              onPressed: () => context.go('/'),
+              child: const Text('ホームに戻る'),
+            ),
+            const SizedBox(height: 16),
+            TextButton.icon(
+              onPressed: () {
+                context.push('/product_register', extra: widget.barcode);
+              },
+              icon: const Icon(Icons.add_circle_outline),
+              label: const Text('手動で登録する'),
+            ),
+          ],
+        ),
       ),
     );
   }
