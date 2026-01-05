@@ -7,6 +7,7 @@ import '../../data/providers/strategy_repository_provider.dart';
 import '../../data/models/product.dart';
 import '../../data/models/strategy.dart';
 import '../../data/repositories/post_repository.dart';
+import 'package:url_launcher/url_launcher.dart'; // Attribution link
 import '../../data/repositories/yahoo_shopping_repository.dart';
 import '../widgets/strategy_card.dart';
 import 'post_composer_screen.dart'; // 新規作成
@@ -408,6 +409,24 @@ class __YahooApiSearchSectionState
                 },
                 icon: const Icon(Icons.edit),
                 label: const Text('この情報を使って登録'),
+              ),
+              const SizedBox(height: 16),
+              // Yahoo! Shopping Attribution
+              TextButton(
+                onPressed: () async {
+                  final Uri url = Uri.parse('https://shopping.yahoo.co.jp/');
+                  if (!await launchUrl(url)) {
+                    debugPrint('Could not launch $url');
+                  }
+                },
+                child: const Text(
+                  'Web Services by Yahoo! JAPAN',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
               ),
             ],
           ),
