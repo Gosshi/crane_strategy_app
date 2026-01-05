@@ -99,13 +99,16 @@ class FirestoreStrategyRepository implements StrategyRepository {
 
   @override
   Future<void> updateProduct(Product product) async {
-    // updateを使用することで、ドキュメントが存在しない場合はエラーになる(意図通り)
-    // ただし、Productモデル全体を渡しているので set(..., SetOptions(merge: true)) でも良いが
-    // 厳密な更新セマンティクスとして update を使用する
-    await _firestore
-        .collection('products')
-        .doc(product.id)
-        .update(product.toMap());
+    // ドキュメントが存在しない場合はエラーにしたいので、トランザクション内で存在確認を行う
+    final docRef = _firestore.collection('products').doc(product.id);
+    await _firestore.runTransaction((transaction) async {
+      final snapshot = await transaction.get(docRef);
+      if (!snapshot.exists) {
+        throw StateError('Product with id ${product.id} does not exist');
+      }
+      // Productモデル全体を渡すが、merge:true で既存ドキュメントにマージする
+      transaction.set(docRef, product.toMap(), SetOptions(merge: true));
+    });
   }
 
   @override

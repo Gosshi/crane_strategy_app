@@ -20,6 +20,10 @@
 - **Bug Fix**: Corrected navigation routing from `HomeScreen` search results (`/scan/result` -> `/scan_result`).
 - **Dependencies**: Added `share_plus` and `cached_network_image`.
 
+### 5. Review Feedback (Post-PR)
+- **Accessibility**: Added `semanticsLabel` to loading indicator in `ProductEditScreen`.
+- **Robustness**: Switched `updateProduct` from simple update to **Transaction** with existence check to ensure data integrity and prevent race conditions.
+
 ## Verification Results
 - **Search**: Verified correct transition from search list to product detail.
 - **Editing**: Verified that only the creator sees the edit button and can successfully update product details.

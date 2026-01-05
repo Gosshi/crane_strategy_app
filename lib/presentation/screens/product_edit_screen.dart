@@ -222,7 +222,9 @@ class _ProductEditScreenState extends ConsumerState<ProductEditScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
               child: _isSubmitting
-                  ? const CircularProgressIndicator()
+                  ? const CircularProgressIndicator(
+                      semanticsLabel: '商品を更新しています',
+                    )
                   : const Text('更新する'),
             ),
           ],
