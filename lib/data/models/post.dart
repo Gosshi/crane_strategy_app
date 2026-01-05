@@ -7,6 +7,7 @@ class Post {
   final String userId;
   final String text;
   final String? imageUrl;
+  final String? youtubeUrl;
   final DateTime createdAt;
 
   const Post({
@@ -15,6 +16,7 @@ class Post {
     required this.userId,
     required this.text,
     this.imageUrl,
+    this.youtubeUrl,
     required this.createdAt,
   });
 
@@ -26,6 +28,7 @@ class Post {
       userId: map['userId'] ?? '',
       text: map['text'] ?? '',
       imageUrl: map['imageUrl'],
+      youtubeUrl: map['youtubeUrl'],
       createdAt: (map['createdAt'] as Timestamp).toDate(),
     );
   }
@@ -37,6 +40,7 @@ class Post {
       'userId': userId,
       'text': text,
       'imageUrl': imageUrl,
+      'youtubeUrl': youtubeUrl,
       'createdAt': Timestamp.fromDate(createdAt),
     };
   }

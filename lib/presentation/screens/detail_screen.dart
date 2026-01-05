@@ -4,8 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import '../../data/models/strategy.dart';
-import '../../data/models/collection_item.dart';
-import '../../data/providers/collection_repository_provider.dart';
 import '../../data/models/report.dart';
 import '../../data/providers/report_repository_provider.dart';
 import '../../data/providers/auth_provider.dart';
@@ -106,13 +104,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
               ),
             ],
           ),
-          floatingActionButton: FloatingActionButton.extended(
-            onPressed: () => _showAcquisitionDialog(context),
-            icon: const Icon(Icons.emoji_events),
-            label: const Text('獲得記録'),
-            backgroundColor: colorScheme.secondary,
-            foregroundColor: colorScheme.onSecondary,
-          ),
+
           body: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -287,116 +279,6 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
               color: theme.colorScheme.primary,
               fontWeight: FontWeight.bold,
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _showAcquisitionDialog(BuildContext context) async {
-    final theme = Theme.of(context);
-    final shopNameController = TextEditingController();
-    final noteController = TextEditingController();
-
-    await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: theme.colorScheme.surface,
-        title: Text(
-          '獲得を記録',
-          style: theme.textTheme.titleLarge?.copyWith(
-            color: theme.colorScheme.onSurface,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'おめでとうございます！🎉\n獲得した情報を記録しましょう。',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: shopNameController,
-              decoration: const InputDecoration(
-                labelText: '店舗名 (任意)',
-                prefixIcon: Icon(Icons.store),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: noteController,
-              decoration: const InputDecoration(
-                labelText: 'メモ (任意)',
-                prefixIcon: Icon(Icons.note),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('キャンセル'),
-          ),
-          FilledButton(
-            onPressed: () async {
-              final shopName = shopNameController.text;
-              final note = noteController.text;
-
-              // 簡易的なID生成 (本来はUUIDなどを使用)
-              final collectionId = DateTime.now().millisecondsSinceEpoch
-                  .toString();
-
-              final user = ref.read(currentUserProvider);
-              if (user == null) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('ログインが必要です')));
-                }
-                return;
-              }
-              final userId = user.uid;
-
-              final item = CollectionItem(
-                id: collectionId,
-                productId:
-                    widget.strategy.id, // Strategy ID を Product ID として使用 (仮)
-                // 正確には Strategy は Product ではないが、
-                // 現状のデータ構造では StrategyDetail から Product ID への参照が直接ない場合がある
-                // ここでは Strategy ID を記録しておく
-                acquiredAt: DateTime.now(),
-                shopName: shopName.isEmpty ? null : shopName,
-                note: note.isEmpty ? null : note,
-              );
-
-              try {
-                await ref
-                    .read(collectionRepositoryProvider)
-                    .addCollectionItem(userId, item);
-
-                if (context.mounted) {
-                  Navigator.of(context).pop();
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('獲得を記録しました！')));
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text('エラーが発生しました: $e')));
-                }
-              }
-            },
-            style: FilledButton.styleFrom(
-              backgroundColor: theme.colorScheme.primary,
-              foregroundColor: theme.colorScheme.onPrimary,
-            ),
-            child: const Text('記録する'),
           ),
         ],
       ),
