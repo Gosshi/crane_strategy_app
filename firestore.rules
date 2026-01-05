@@ -15,8 +15,13 @@ service cloud.firestore {
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
     }
     
-    // 通報: 認証済みなら誰でも作成可
-    // 読み取りは Admin SDK (サーバーサイド) から行うため、クライアントからはアクセス拒否
+    // product_cache: 誰でも読み取り可、作成は認証ユーザーのみ (更新・削除不可)
+    match /product_cache/{janCode} {
+      allow read: if true;
+      allow create: if request.auth != null;
+    }
+
+    // Reports: 作成のみ可 (Admin SDKで読むため) (サーバーサイド) から行うため、クライアントからはアクセス拒否
     // 将来的に管理画面アプリを作る場合はカスタムクレーム (request.auth.token.admin == true) 等を検討
     match /reports/{reportId} {
       allow create: if request.auth != null;
@@ -34,6 +39,12 @@ service cloud.firestore {
     match /strategies/{strategyId} {
       allow read: if true;
       allow write: if false;
+    }
+
+    // 投稿: 誰でも閲覧可, 認証済みなら作成可 (自分の投稿の削除などは要件次第だが一旦作成のみ許可)
+    match /posts/{postId} {
+      allow read: if true;
+      allow create: if request.auth != null;
     }
   }
 }
