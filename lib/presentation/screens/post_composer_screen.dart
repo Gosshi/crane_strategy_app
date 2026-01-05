@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Clipboard
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../data/models/post.dart';
@@ -131,15 +132,34 @@ class _PostComposerScreenState extends ConsumerState<PostComposerScreen> {
             const SizedBox(height: 16),
 
             // YouTube URL入力
-            TextField(
-              controller: _youtubeUrlController,
-              decoration: const InputDecoration(
-                labelText: 'YouTube動画 (URL)',
-                hintText: 'https://www.youtube.com/watch?v=...',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.video_library, color: Colors.red),
-              ),
-              keyboardType: TextInputType.url,
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _youtubeUrlController,
+                    decoration: const InputDecoration(
+                      labelText: 'YouTube動画 (URL)',
+                      hintText: 'https://...',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.video_library, color: Colors.red),
+                    ),
+                    keyboardType: TextInputType.url,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                IconButton.filledTonal(
+                  onPressed: () async {
+                    final data = await Clipboard.getData(Clipboard.kTextPlain);
+                    if (data?.text != null) {
+                      setState(() {
+                        _youtubeUrlController.text = data!.text!;
+                      });
+                    }
+                  },
+                  icon: const Icon(Icons.content_paste),
+                  tooltip: '貼り付け',
+                ),
+              ],
             ),
             const SizedBox(height: 16),
 
