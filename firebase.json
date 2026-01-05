@@ -1,0 +1,24 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "crane-strategy-app-6da7e",
+          "appId": "1:91920567276:android:c62a77b0cb696985550ec9",
+          "fileOutput": "android/app/google-services.json"
+        }
+      }
+    },
+    "dart": {
+      "lib/firebase_options.dart": {
+        "projectId": "crane-strategy-app-6da7e",
+        "configurations": {
+          "android": "1:91920567276:android:c62a77b0cb696985550ec9"
+        }
+      }
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  }
+}
