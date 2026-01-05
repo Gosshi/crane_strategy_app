@@ -9,12 +9,16 @@ class FirestoreCollectionRepository implements CollectionRepository {
 
   @override
   Future<void> addCollectionItem(String userId, CollectionItem item) async {
-    await _firestore
+    final collectionRef = _firestore
         .collection('users')
         .doc(userId)
-        .collection('collections')
-        .doc(item.id)
-        .set(item.toMap());
+        .collection('collections');
+
+    if (item.id.isNotEmpty) {
+      await collectionRef.doc(item.id).set(item.toMap());
+    } else {
+      await collectionRef.add(item.toMap());
+    }
   }
 
   @override

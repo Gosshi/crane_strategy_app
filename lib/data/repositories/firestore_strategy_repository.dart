@@ -52,6 +52,35 @@ class FirestoreStrategyRepository implements StrategyRepository {
   }
 
   @override
+  Future<List<Product>> fetchProductsByIds(List<String> ids) async {
+    if (ids.isEmpty) return [];
+
+    if (ids.length > 10) {
+      final List<Product> results = [];
+      for (var i = 0; i < ids.length; i += 10) {
+        final end = (i + 10 < ids.length) ? i + 10 : ids.length;
+        final chunk = ids.sublist(i, end);
+        final snapshot = await _firestore
+            .collection('products')
+            .where(FieldPath.documentId, whereIn: chunk)
+            .get();
+        results.addAll(
+          snapshot.docs.map((doc) => Product.fromMap(doc.id, doc.data())),
+        );
+      }
+      return results;
+    } else {
+      final snapshot = await _firestore
+          .collection('products')
+          .where(FieldPath.documentId, whereIn: ids)
+          .get();
+      return snapshot.docs
+          .map((doc) => Product.fromMap(doc.id, doc.data()))
+          .toList();
+    }
+  }
+
+  @override
   Future<Product?> fetchProductByBarcode(String barcode) async {
     final doc = await _firestore.collection('products').doc(barcode).get();
     if (doc.exists && doc.data() != null) {

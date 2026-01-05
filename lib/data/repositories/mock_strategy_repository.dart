@@ -25,6 +25,13 @@ class MockStrategyRepository implements StrategyRepository {
     return _strategies.where((s) => ids.contains(s.id)).toList();
   }
 
+  /// IDリストに紐づく商品リストを返す
+  @override
+  Future<List<Product>> fetchProductsByIds(List<String> ids) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    return _products.where((p) => ids.contains(p.id)).toList();
+  }
+
   /// バーコードから商品を検索する
   @override
   Future<Product?> fetchProductByBarcode(String barcode) async {
