@@ -18,6 +18,9 @@ abstract class StrategyRepository {
   /// 商品を追加する
   Future<void> addProduct(Product product);
 
+  /// 商品情報を更新する
+  Future<void> updateProduct(Product product);
+
   /// キーワードで商品を検索する (商品名またはタグ)
   Future<List<Product>> searchProducts(String query);
 }

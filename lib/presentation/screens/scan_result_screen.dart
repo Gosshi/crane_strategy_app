@@ -222,6 +222,22 @@ class ScanResultScreen extends ConsumerWidget {
                       color: Colors.grey,
                     ),
                   ),
+                  // 作成者のみ編集ボタンを表示
+                  if (ref.read(currentUserProvider)?.uid ==
+                      product.creatorId) ...[
+                    const SizedBox(height: 8),
+                    TextButton.icon(
+                      onPressed: () {
+                        context.push('/product_edit', extra: product);
+                      },
+                      icon: const Icon(Icons.edit, size: 16),
+                      label: const Text('編集する'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.grey,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

@@ -29,7 +29,9 @@ service cloud.firestore {
     match /products/{productId} {
       allow read: if true;
       allow create: if request.auth != null;
-      allow update, delete: if false; // 将来的には権限追加
+      // 更新: 認証済み かつ (自分が作成者 または 既存データで作成者がnull)
+      allow update: if request.auth != null && (resource.data.creatorId == request.auth.uid || resource.data.creatorId == null);
+      allow delete: if false; // 削除は管理者のみ (将来的)
     }
     
     // 攻略法: 誰でも閲覧可, 書き込み不可

@@ -98,6 +98,17 @@ class FirestoreStrategyRepository implements StrategyRepository {
   }
 
   @override
+  Future<void> updateProduct(Product product) async {
+    // updateを使用することで、ドキュメントが存在しない場合はエラーになる(意図通り)
+    // ただし、Productモデル全体を渡しているので set(..., SetOptions(merge: true)) でも良いが
+    // 厳密な更新セマンティクスとして update を使用する
+    await _firestore
+        .collection('products')
+        .doc(product.id)
+        .update(product.toMap());
+  }
+
+  @override
   Future<List<Product>> searchProducts(String query) async {
     // Firestoreでの全文検索は難しいため、簡易的に全件取得してフィルタリングする
     // (データ量が少ないうちはこれで十分。多くなったらAlgolia等の導入が必要)

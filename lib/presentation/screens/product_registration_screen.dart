@@ -73,6 +73,7 @@ class _ProductRegistrationScreenState
 
     try {
       final repository = ref.read(strategyRepositoryProvider);
+      final user = ref.read(currentUserProvider);
       final product = Product(
         id: widget.barcode,
         name: name,
@@ -81,6 +82,7 @@ class _ProductRegistrationScreenState
         centerOfGravity: _selectedCoGs,
         tags: _tags,
         strategyIds: [],
+        creatorId: user?.uid, // 作成者を記録
       );
 
       await repository.addProduct(product);
