@@ -23,17 +23,12 @@ class FirebaseAuthRepository implements AuthRepository {
   Future<UserCredential> linkWithGoogle() async {
     try {
       // Googleログインフローを開始
-      final googleUser = await gsi.GoogleSignIn().signIn();
-      if (googleUser == null) {
-        throw FirebaseAuthException(
-          code: 'ERROR_ABORTED_BY_USER',
-          message: 'Sign in aborted by user',
-        );
-      }
+      final googleUser = await gsi.GoogleSignIn.instance.authenticate();
+      // authenticate calls throws on cancellation/error, so googleUser is non-null here
 
-      final googleAuth = await googleUser.authentication;
+      final googleAuth = googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
+        accessToken: null,
         idToken: googleAuth.idToken,
       );
 
@@ -55,17 +50,12 @@ class FirebaseAuthRepository implements AuthRepository {
   @override
   Future<UserCredential> signInWithGoogle() async {
     try {
-      final googleUser = await gsi.GoogleSignIn().signIn();
-      if (googleUser == null) {
-        throw FirebaseAuthException(
-          code: 'ERROR_ABORTED_BY_USER',
-          message: 'Sign in aborted by user',
-        );
-      }
+      final googleUser = await gsi.GoogleSignIn.instance.authenticate();
+      // authenticate calls throws on cancellation/error, so googleUser is non-null here
 
-      final googleAuth = await googleUser.authentication;
+      final googleAuth = googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
+        accessToken: null,
         idToken: googleAuth.idToken,
       );
 
@@ -129,7 +119,9 @@ class FirebaseAuthRepository implements AuthRepository {
 
   @override
   Future<void> signOut() async {
-    await gsi.GoogleSignIn().signOut(); // Googleからもログアウト
+    try {
+      await gsi.GoogleSignIn.instance.signOut();
+    } catch (_) {} // Googleサインアウト失敗は無視してFirebaseサインアウトへ
     await _firebaseAuth.signOut();
   }
 }
