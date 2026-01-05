@@ -43,8 +43,27 @@ final router = GoRouter(
       path: '/product_register',
       name: 'product_register',
       builder: (context, state) {
-        final barcode = state.extra as String;
-        return ProductRegistrationScreen(barcode: barcode);
+        String barcode;
+        String? initialName;
+        String? initialImageUrl;
+
+        if (state.extra is String) {
+          barcode = state.extra as String;
+        } else if (state.extra is Map<String, dynamic>) {
+          final extra = state.extra as Map<String, dynamic>;
+          barcode = extra['barcode'] as String;
+          initialName = extra['initialName'] as String?;
+          initialImageUrl = extra['initialImageUrl'] as String?;
+        } else {
+          // fallback
+          barcode = '';
+        }
+
+        return ProductRegistrationScreen(
+          barcode: barcode,
+          initialName: initialName,
+          initialImageUrl: initialImageUrl,
+        );
       },
     ),
     GoRoute(

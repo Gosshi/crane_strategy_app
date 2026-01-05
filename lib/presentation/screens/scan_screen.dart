@@ -86,6 +86,49 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
     context.push('/scan_result', extra: code);
   }
 
+  void _showManualInputDialog() {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('JANコード手動入力'),
+          content: TextField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            autofocus: true,
+            decoration: const InputDecoration(
+              hintText: 'コードを入力してください',
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              if (value.isNotEmpty) {
+                Navigator.of(context).pop();
+                _handleBarcodeFound(value);
+              }
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('キャンセル'),
+            ),
+            TextButton(
+              onPressed: () {
+                final text = controller.text.trim();
+                if (text.isNotEmpty) {
+                  Navigator.of(context).pop();
+                  _handleBarcodeFound(text);
+                }
+              },
+              child: const Text('検索'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -136,6 +179,17 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
             child: IconButton(
               onPressed: () => context.pop(),
               icon: const Icon(Icons.close, color: Colors.white, size: 32),
+            ),
+          ),
+
+          // 手動入力ボタン
+          Positioned(
+            bottom: 40,
+            right: 32,
+            child: FloatingActionButton(
+              onPressed: _showManualInputDialog,
+              backgroundColor: Colors.white,
+              child: const Icon(Icons.keyboard, color: Colors.black),
             ),
           ),
 
