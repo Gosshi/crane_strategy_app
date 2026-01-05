@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart' as gsi;
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
@@ -121,7 +122,9 @@ class FirebaseAuthRepository implements AuthRepository {
   Future<void> signOut() async {
     try {
       await gsi.GoogleSignIn.instance.signOut();
-    } catch (_) {} // Googleサインアウト失敗は無視してFirebaseサインアウトへ
+    } catch (e) {
+      debugPrint('Google sign out failed: $e');
+    }
     await _firebaseAuth.signOut();
   }
 }
