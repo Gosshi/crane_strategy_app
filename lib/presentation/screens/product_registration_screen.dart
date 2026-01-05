@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/product.dart';
+import '../../data/models/collection_item.dart';
 import '../../data/providers/strategy_repository_provider.dart';
+import '../../data/providers/collection_repository_provider.dart';
+import '../../data/providers/auth_provider.dart';
 import '../../presentation/screens/scan_result_screen.dart'; // productSearchProvider
 import 'package:go_router/go_router.dart';
 
@@ -27,6 +30,9 @@ class _ProductRegistrationScreenState
   late final TextEditingController _nameController;
   final _tagController = TextEditingController(); // タグ入力用
   bool _isSubmitting = false;
+
+  // コレクションにも追加するかどうか
+  bool _addToCollection = true;
 
   @override
   void initState() {
@@ -79,10 +85,29 @@ class _ProductRegistrationScreenState
 
       await repository.addProduct(product);
 
+      // コレクションへの追加
+      if (_addToCollection) {
+        final user = ref.read(currentUserProvider);
+        if (user != null) {
+          final collectionRepo = ref.read(collectionRepositoryProvider);
+          final newItem = CollectionItem(
+            id: '', // 自動生成
+            productId: widget.barcode,
+            acquiredAt: DateTime.now(),
+            shopName: null,
+            note: null,
+          );
+          await collectionRepo.addCollectionItem(user.uid, newItem);
+        }
+      }
+
       if (mounted) {
+        final msg = _addToCollection ? '商品を登録し、コレクションに追加しました！' : '商品を登録しました！';
+
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('商品を登録しました！')));
+        ).showSnackBar(SnackBar(content: Text(msg)));
+
         // スキャン結果画面へ遷移 (GoRouterのrefreshを期待してpopではなくreplaceも検討だが、
         // 構成上 push されているので pop して refresh させるのが自然)
         // ただし ScanResultScreen は Stream ではなく Future なので、
@@ -134,6 +159,27 @@ class _ProductRegistrationScreenState
               decoration: const InputDecoration(
                 labelText: '商品名 *',
                 border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // コレクション追加オプション
+            Card(
+              color: Colors.blue.shade50,
+              elevation: 0,
+              child: CheckboxListTile(
+                value: _addToCollection,
+                onChanged: (value) {
+                  setState(() {
+                    _addToCollection = value ?? true;
+                  });
+                },
+                title: const Text(
+                  'これも獲得済みとして記録する',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: const Text('登録と同時に「獲得コレクション」にも追加されます'),
+                secondary: const Icon(Icons.emoji_events, color: Colors.orange),
               ),
             ),
             const SizedBox(height: 24),
@@ -233,7 +279,7 @@ class _ProductRegistrationScreenState
               ),
               child: _isSubmitting
                   ? const CircularProgressIndicator()
-                  : const Text('登録する'),
+                  : Text(_addToCollection ? '登録してGET！' : '登録する'),
             ),
           ],
         ),

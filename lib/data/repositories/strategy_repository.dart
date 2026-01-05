@@ -9,6 +9,9 @@ abstract class StrategyRepository {
   /// 指定されたIDリストに対応する攻略法を取得する
   Future<List<Strategy>> fetchStrategiesByIds(List<String> ids);
 
+  /// 指定されたIDリストに対応する商品を取得する
+  Future<List<Product>> fetchProductsByIds(List<String> ids);
+
   /// バーコードから商品を検索する
   Future<Product?> fetchProductByBarcode(String barcode);
 

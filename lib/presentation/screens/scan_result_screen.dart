@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../data/providers/strategy_repository_provider.dart';
 import '../../data/models/product.dart';
+import '../../data/models/collection_item.dart';
+import '../../data/providers/collection_repository_provider.dart';
+import '../../data/providers/auth_provider.dart';
 import '../../data/models/strategy.dart';
 import '../../data/repositories/post_repository.dart';
 import 'package:url_launcher/url_launcher.dart'; // Attribution link
@@ -110,6 +114,57 @@ class ScanResultScreen extends ConsumerWidget {
     );
   }
 
+  Future<void> _addToCollection(
+    BuildContext context,
+    WidgetRef ref,
+    Product product,
+  ) async {
+    // ユーザー取得 (nullなら匿名ログインを試みる)
+    User? user = ref.read(currentUserProvider);
+    if (user == null) {
+      try {
+        final repo = ref.read(authRepositoryProvider);
+        await repo.signInAnonymously();
+        user = repo.currentUser;
+      } catch (e) {
+        debugPrint('Auto-login failed: $e');
+      }
+    }
+
+    if (user == null) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('ログインが必要です (認証に失敗しました)')));
+      }
+      return;
+    }
+
+    try {
+      final collectionRepo = ref.read(collectionRepositoryProvider);
+      final newItem = CollectionItem(
+        id: '', // 自動生成
+        productId: product.id,
+        acquiredAt: DateTime.now(),
+        shopName: null,
+        note: null,
+      );
+      await collectionRepo.addCollectionItem(user.uid, newItem);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('${product.name} をGETしました！')));
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('エラー: $e')));
+      }
+    }
+  }
+
   Widget _buildNotFound(BuildContext context, WidgetRef ref) {
     // Yahoo API検索の状態管理用 (本来は専用のProviderを作るべきだが簡易的にFutureBuilder等で対応、
     // あるいはこのWidget自体をConsumerStatefulWidgetにするのが適切)
@@ -168,6 +223,21 @@ class ScanResultScreen extends ConsumerWidget {
                     ),
                   ),
                 ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          // コレクション追加ボタン
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () => _addToCollection(context, ref, product),
+              icon: const Icon(Icons.emoji_events),
+              label: const Text('この商品をGETした！'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12),
               ),
             ),
           ),

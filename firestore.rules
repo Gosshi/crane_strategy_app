@@ -5,14 +5,11 @@ service cloud.firestore {
     // ユーザー情報: 本人のみ読み書き可
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-    
-    // コレクション (獲得履歴): 本人のみ読み書き可
-    match /collections/{collectionId} {
-      // 読み取り・更新・削除: データの所有者のみ
-      allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
-      // 作成: 認証済み かつ 自分のIDで作成する場合のみ
-      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      
+      // コレクション (獲得履歴): 本人のみ読み書き可 (サブコレクション)
+      match /collections/{collectionId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
     }
     
     // product_cache: 誰でも読み取り可、作成は認証ユーザーのみ (更新・削除不可)
