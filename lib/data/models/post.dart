@@ -9,6 +9,7 @@ class Post {
   final String? imageUrl;
   final String? youtubeUrl;
   final DateTime createdAt;
+  final DateTime? updatedAt;
 
   const Post({
     required this.id,
@@ -18,6 +19,7 @@ class Post {
     this.imageUrl,
     this.youtubeUrl,
     required this.createdAt,
+    this.updatedAt,
   });
 
   /// Firestoreのデータからモデルを作成
@@ -30,6 +32,9 @@ class Post {
       imageUrl: map['imageUrl'],
       youtubeUrl: map['youtubeUrl'],
       createdAt: (map['createdAt'] as Timestamp).toDate(),
+      updatedAt: map['updatedAt'] != null
+          ? (map['updatedAt'] as Timestamp).toDate()
+          : null,
     );
   }
 
@@ -42,6 +47,30 @@ class Post {
       'imageUrl': imageUrl,
       'youtubeUrl': youtubeUrl,
       'createdAt': Timestamp.fromDate(createdAt),
+      if (updatedAt != null) 'updatedAt': Timestamp.fromDate(updatedAt!),
     };
+  }
+
+  /// コピーを作成（編集用）
+  Post copyWith({
+    String? id,
+    String? productId,
+    String? userId,
+    String? text,
+    String? imageUrl,
+    String? youtubeUrl,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return Post(
+      id: id ?? this.id,
+      productId: productId ?? this.productId,
+      userId: userId ?? this.userId,
+      text: text ?? this.text,
+      imageUrl: imageUrl ?? this.imageUrl,
+      youtubeUrl: youtubeUrl ?? this.youtubeUrl,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
   }
 }

@@ -40,10 +40,12 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // 投稿: 誰でも閲覧可, 認証済みなら作成可 (自分の投稿の削除などは要件次第だが一旦作成のみ許可)
+    // 投稿: 誰でも閲覧可, 認証済みなら作成可, 投稿者のみ編集・削除可
     match /posts/{postId} {
       allow read: if true;
       allow create: if request.auth != null;
+      // 更新・削除: 投稿者本人のみ許可
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
     }
   }
 }

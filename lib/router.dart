@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'data/models/strategy.dart';
 import 'data/models/product.dart'; // Import
+import 'data/models/post.dart'; // Import
 import 'presentation/screens/home_screen.dart';
 import 'presentation/screens/detail_screen.dart';
 import 'presentation/screens/scan_screen.dart';
 import 'presentation/screens/scan_result_screen.dart';
 import 'presentation/screens/product_registration_screen.dart';
 import 'presentation/screens/product_edit_screen.dart'; // Import
+import 'presentation/screens/post_edit_screen.dart'; // Import
 import 'presentation/screens/collection_screen.dart';
 import 'presentation/screens/account_screen.dart';
 
@@ -85,6 +87,14 @@ final router = GoRouter(
       path: '/account',
       name: 'account',
       builder: (context, state) => const AccountScreen(),
+    ),
+    GoRoute(
+      path: '/post_edit',
+      name: 'post_edit',
+      builder: (context, state) {
+        final post = state.extra as Post;
+        return PostEditScreen(post: post);
+      },
     ),
   ],
   errorBuilder: (context, state) => Scaffold(

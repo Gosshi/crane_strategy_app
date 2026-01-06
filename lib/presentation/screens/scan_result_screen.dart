@@ -361,6 +361,9 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
                     itemCount: posts.length,
                     itemBuilder: (context, index) {
                       final post = posts[index];
+                      final currentUser = ref.read(currentUserProvider);
+                      final isOwner = currentUser?.uid == post.userId;
+
                       return Card(
                         margin: const EdgeInsets.only(bottom: 8),
                         child: Padding(
@@ -416,12 +419,120 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
                                   ),
                                 ),
                               const SizedBox(height: 4),
-                              Text(
-                                post.createdAt.toString().split('.')[0],
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 12,
-                                ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    post.createdAt.toString().split('.')[0],
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  // 自分の投稿のみ編集・削除ボタンを表示
+                                  if (isOwner)
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        IconButton(
+                                          onPressed: () {
+                                            context.push(
+                                              '/post_edit',
+                                              extra: post,
+                                            );
+                                          },
+                                          icon: const Icon(
+                                            Icons.edit,
+                                            size: 18,
+                                          ),
+                                          tooltip: '編集',
+                                          visualDensity: VisualDensity.compact,
+                                          color: Colors.grey[600],
+                                        ),
+                                        IconButton(
+                                          onPressed: () async {
+                                            final shouldDelete =
+                                                await showDialog<bool>(
+                                                  context: context,
+                                                  builder: (context) => AlertDialog(
+                                                    title: const Text('投稿を削除'),
+                                                    content: const Text(
+                                                      'この投稿を削除してもよろしいですか？',
+                                                    ),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () =>
+                                                            Navigator.pop(
+                                                              context,
+                                                              false,
+                                                            ),
+                                                        child: const Text(
+                                                          'キャンセル',
+                                                        ),
+                                                      ),
+                                                      FilledButton(
+                                                        onPressed: () =>
+                                                            Navigator.pop(
+                                                              context,
+                                                              true,
+                                                            ),
+                                                        style:
+                                                            FilledButton.styleFrom(
+                                                              backgroundColor:
+                                                                  Colors.red,
+                                                            ),
+                                                        child: const Text('削除'),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+
+                                            if (shouldDelete == true) {
+                                              try {
+                                                final postRepository = ref.read(
+                                                  postRepositoryProvider,
+                                                );
+                                                await postRepository.deletePost(
+                                                  post.id,
+                                                );
+                                                if (context.mounted) {
+                                                  ScaffoldMessenger.of(
+                                                    context,
+                                                  ).showSnackBar(
+                                                    const SnackBar(
+                                                      content: Text(
+                                                        '投稿を削除しました',
+                                                      ),
+                                                    ),
+                                                  );
+                                                }
+                                              } catch (e) {
+                                                if (context.mounted) {
+                                                  ScaffoldMessenger.of(
+                                                    context,
+                                                  ).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(
+                                                        '削除エラー: $e',
+                                                      ),
+                                                    ),
+                                                  );
+                                                }
+                                              }
+                                            }
+                                          },
+                                          icon: const Icon(
+                                            Icons.delete,
+                                            size: 18,
+                                          ),
+                                          tooltip: '削除',
+                                          visualDensity: VisualDensity.compact,
+                                          color: Colors.red[400],
+                                        ),
+                                      ],
+                                    ),
+                                ],
                               ),
                             ],
                           ),
