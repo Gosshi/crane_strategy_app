@@ -1,11 +1,30 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// 効果音を管理するサービスクラス
 class AudioService {
+  static const String _soundEnabledKey = 'sound_enabled';
+
   final AudioPlayer _audioPlayer = AudioPlayer();
-  bool _soundEnabled = true;
   bool _isInitialized = false;
+  bool _soundEnabled = true;
+
+  AudioService() {
+    _loadSettings();
+  }
+
+  /// 設定を読み込む
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    _soundEnabled = prefs.getBool(_soundEnabledKey) ?? true;
+  }
+
+  /// 設定を保存する
+  Future<void> _saveSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_soundEnabledKey, _soundEnabled);
+  }
 
   /// 効果音のプリロード
   Future<void> preloadSounds() async {
@@ -46,15 +65,10 @@ class AudioService {
     }
   }
 
-  /// ボタンタップ音を再生（将来の拡張用）
-  Future<void> playButtonTap() async {
-    if (!_soundEnabled) return;
-    // 実装は後で追加
-  }
-
   /// 効果音の有効/無効を設定
-  void setSoundEnabled(bool enabled) {
+  Future<void> setSoundEnabled(bool enabled) async {
     _soundEnabled = enabled;
+    await _saveSettings();
   }
 
   /// 効果音が有効かどうかを取得

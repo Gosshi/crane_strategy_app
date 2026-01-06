@@ -6,11 +6,16 @@ import '../../data/providers/audio_service_provider.dart';
 import '../../data/services/user_level_service.dart';
 import 'collection_screen.dart'; // collectionWithProductListProvider
 
-class AccountScreen extends ConsumerWidget {
+class AccountScreen extends ConsumerStatefulWidget {
   const AccountScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AccountScreen> createState() => _AccountScreenState();
+}
+
+class _AccountScreenState extends ConsumerState<AccountScreen> {
+  @override
+  Widget build(BuildContext context) {
     final user = ref.watch(currentUserProvider);
     final theme = Theme.of(context);
 
@@ -148,7 +153,7 @@ class AccountScreen extends ConsumerWidget {
           const SizedBox(height: 24),
 
           // 効果音設定
-          _buildSoundSettingsSection(ref, theme),
+          _buildSoundSettingsSection(theme),
         ],
       ),
     );
@@ -229,7 +234,7 @@ class AccountScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSoundSettingsSection(WidgetRef ref, ThemeData theme) {
+  Widget _buildSoundSettingsSection(ThemeData theme) {
     final audioService = ref.watch(audioServiceProvider);
 
     return Column(
@@ -248,10 +253,9 @@ class AccountScreen extends ConsumerWidget {
             title: const Text('効果音'),
             subtitle: const Text('スキャンや獲得時の効果音を再生'),
             value: audioService.isSoundEnabled,
-            onChanged: (value) {
-              audioService.setSoundEnabled(value);
-              // 設定変更を反映するためにrefresh
-              ref.invalidate(audioServiceProvider);
+            onChanged: (value) async {
+              await audioService.setSoundEnabled(value);
+              setState(() {}); // UIを更新
             },
             secondary: Icon(
               audioService.isSoundEnabled ? Icons.volume_up : Icons.volume_off,
