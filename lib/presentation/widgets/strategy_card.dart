@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:intl/intl.dart';
 import '../../data/models/strategy.dart';
 
 /// 攻略法カードのUI部品
@@ -108,6 +109,14 @@ class StrategyCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  const SizedBox(height: 4),
+                  // 更新日時
+                  Text(
+                    _formatUpdatedAt(strategy.updatedAt),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -115,5 +124,11 @@ class StrategyCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// 更新日時をJST形式でフォーマット
+  String _formatUpdatedAt(DateTime dateTime) {
+    final formatter = DateFormat('yyyy年M月d日 HH:mm');
+    return '${formatter.format(dateTime)} 更新';
   }
 }

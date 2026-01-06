@@ -15,9 +15,13 @@ Future<void> seedFirestoreData() async {
   try {
     // 攻略法データの投入
     final strategiesBatch = firestore.batch();
+    final now = Timestamp.now();
+
     for (final strategy in initialStrategies) {
       final docRef = firestore.collection('strategies').doc(strategy.id);
-      strategiesBatch.set(docRef, strategy.toMap());
+      final data = strategy.toMap();
+      data['updatedAt'] = now; // 現在時刻で上書き
+      strategiesBatch.set(docRef, data);
     }
     await strategiesBatch.commit();
     debugPrint(

@@ -4,7 +4,7 @@ import '../models/strategy.dart';
 /// 初期データの定義
 /// FirestoreへのSeedingとMockリポジトリの両方で使用する
 
-const List<Strategy> initialStrategies = [
+final List<Strategy> initialStrategies = [
   Strategy(
     id: '1',
     title: {'ja': '橋渡し・基本の縦ハメ', 'en': 'Vertical Stuck Method'},
@@ -16,6 +16,7 @@ const List<Strategy> initialStrategies = [
     settingType: '橋渡し',
     thumbnailUrl: 'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
     videoId: 'dQw4w9WgXcQ',
+    updatedAt: DateTime(2026, 1, 6, 23, 0),
   ),
   Strategy(
     id: '2',
@@ -28,6 +29,7 @@ const List<Strategy> initialStrategies = [
     settingType: '橋渡し',
     thumbnailUrl: 'https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
     videoId: 'dQw4w9WgXcQ',
+    updatedAt: DateTime(2026, 1, 5, 14, 30),
   ),
   Strategy(
     id: '3',
@@ -40,10 +42,11 @@ const List<Strategy> initialStrategies = [
     settingType: '3本爪',
     thumbnailUrl: 'https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg',
     videoId: 'dQw4w9WgXcQ',
+    updatedAt: DateTime(2026, 1, 4, 10, 15),
   ),
 ];
 
-const List<Product> initialProducts = [
+final List<Product> initialProducts = [
   Product(
     id: '4901234567890', // ダミーJAN
     name: 'アニメフィギュア A賞',

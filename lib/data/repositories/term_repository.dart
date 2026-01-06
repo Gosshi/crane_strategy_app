@@ -12,9 +12,11 @@ class TermRepository {
   Future<List<Term>> fetchAllTerms() async {
     final snapshot = await _firestore.collection('terms').orderBy('name').get();
 
-    return snapshot.docs
+    final terms = snapshot.docs
         .map((doc) => Term.fromMap(doc.id, doc.data()))
         .toList();
+    print('[TermRepository] Fetched ${terms.length} terms');
+    return terms;
   }
 
   /// カテゴリ別に用語を取得

@@ -25,13 +25,14 @@ class MockTestRepository extends MockStrategyRepository {
   @override
   Future<List<Strategy>> fetchStrategiesByIds(List<String> ids) async {
     return [
-      const Strategy(
+      Strategy(
         id: '1',
         title: {'ja': 'Test Strategy'},
         description: {'ja': 'Desc'},
         settingType: 'Type',
         thumbnailUrl: 'http://example.com/thumb.png',
         videoId: 'vid',
+        updatedAt: DateTime.now(),
       ),
     ];
   }
