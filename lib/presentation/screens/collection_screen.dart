@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:share_plus/share_plus.dart';
+
 import '../../data/models/collection_item.dart';
 import '../../data/models/product.dart';
 import '../../data/providers/collection_repository_provider.dart';
 import '../../data/providers/strategy_repository_provider.dart';
 import '../../data/providers/auth_provider.dart';
+import '../../utils/share_utils.dart';
 import '../widgets/collection_grid_item.dart';
 
 /// コレクションアイテムと商品情報をまとめたクラス
@@ -259,20 +260,12 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
   }
 
   void _shareItem(CollectionWithProduct item) {
-    final name = item.product?.name ?? 'プライズ';
-    final shop = item.collectionItem.shopName ?? 'ゲームセンター';
-    final date = item.collectionItem.acquiredAt.toString().split(' ')[0];
-    final note = item.collectionItem.note ?? '';
-
-    final text =
-        '【$name】をGETしました！\n'
-        '店舗: $shop\n'
-        '獲得日: $date\n'
-        '$note\n'
-        '#クレーンゲーム攻略アプリ';
-
-    // ignore: deprecated_member_use
-    Share.share(text);
+    ShareUtils.shareCollectionItem(
+      productName: item.product?.name ?? 'プライズ',
+      shopName: item.collectionItem.shopName,
+      acquiredAt: item.collectionItem.acquiredAt,
+      note: item.collectionItem.note,
+    );
   }
 }
 

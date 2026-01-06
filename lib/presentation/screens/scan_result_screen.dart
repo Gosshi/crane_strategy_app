@@ -18,6 +18,7 @@ import '../widgets/strategy_card.dart';
 import 'post_composer_screen.dart'; // 新規作成
 import 'package:confetti/confetti.dart';
 import '../widgets/confetti_overlay.dart';
+import '../../utils/share_utils.dart';
 
 final productSearchProvider = FutureProvider.family<Product?, String>((
   ref,
@@ -258,6 +259,16 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
                       color: Colors.grey,
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  // 共有ボタン
+                  TextButton.icon(
+                    onPressed: () => ShareUtils.shareProduct(product),
+                    icon: const Icon(Icons.share, size: 16),
+                    label: const Text('この商品を共有'),
+                    style: TextButton.styleFrom(
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ),
                   // 作成者のみ編集ボタンを表示
                   if (ref.read(currentUserProvider)?.uid ==
                       product.creatorId) ...[
@@ -436,108 +447,133 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
                                       fontSize: 12,
                                     ),
                                   ),
-                                  // 自分の投稿のみ編集・削除ボタンを表示
-                                  if (isOwner)
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        IconButton(
-                                          onPressed: () {
-                                            context.push(
-                                              '/post_edit',
-                                              extra: post,
-                                            );
-                                          },
-                                          icon: const Icon(
-                                            Icons.edit,
-                                            size: 18,
-                                          ),
-                                          tooltip: '編集',
-                                          visualDensity: VisualDensity.compact,
-                                          color: Colors.grey[600],
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      // 共有ボタン
+                                      IconButton(
+                                        icon: const Icon(Icons.share, size: 18),
+                                        onPressed: () => ShareUtils.sharePost(
+                                          post,
+                                          productName: product.name,
                                         ),
-                                        IconButton(
-                                          onPressed: () async {
-                                            final shouldDelete =
-                                                await showDialog<bool>(
-                                                  context: context,
-                                                  builder: (context) => AlertDialog(
-                                                    title: const Text('投稿を削除'),
-                                                    content: const Text(
-                                                      'この投稿を削除してもよろしいですか？',
-                                                    ),
-                                                    actions: [
-                                                      TextButton(
-                                                        onPressed: () =>
-                                                            Navigator.pop(
-                                                              context,
-                                                              false,
-                                                            ),
-                                                        child: const Text(
-                                                          'キャンセル',
+                                        tooltip: '共有',
+                                        visualDensity: VisualDensity.compact,
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      // 自分の投稿のみ編集・削除ボタンを表示
+                                      if (isOwner)
+                                        Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            IconButton(
+                                              onPressed: () {
+                                                context.push(
+                                                  '/post_edit',
+                                                  extra: post,
+                                                );
+                                              },
+                                              icon: const Icon(
+                                                Icons.edit,
+                                                size: 18,
+                                              ),
+                                              tooltip: '編集',
+                                              visualDensity:
+                                                  VisualDensity.compact,
+                                              color: Colors.grey[600],
+                                            ),
+                                            IconButton(
+                                              onPressed: () async {
+                                                final shouldDelete =
+                                                    await showDialog<bool>(
+                                                      context: context,
+                                                      builder: (context) => AlertDialog(
+                                                        title: const Text(
+                                                          '投稿を削除',
                                                         ),
-                                                      ),
-                                                      FilledButton(
-                                                        onPressed: () =>
-                                                            Navigator.pop(
-                                                              context,
-                                                              true,
+                                                        content: const Text(
+                                                          'この投稿を削除してもよろしいですか？',
+                                                        ),
+                                                        actions: [
+                                                          TextButton(
+                                                            onPressed: () =>
+                                                                Navigator.pop(
+                                                                  context,
+                                                                  false,
+                                                                ),
+                                                            child: const Text(
+                                                              'キャンセル',
                                                             ),
-                                                        style:
-                                                            FilledButton.styleFrom(
-                                                              backgroundColor:
-                                                                  Colors.red,
+                                                          ),
+                                                          FilledButton(
+                                                            onPressed: () =>
+                                                                Navigator.pop(
+                                                                  context,
+                                                                  true,
+                                                                ),
+                                                            style:
+                                                                FilledButton.styleFrom(
+                                                                  backgroundColor:
+                                                                      Colors
+                                                                          .red,
+                                                                ),
+                                                            child: const Text(
+                                                              '削除',
                                                             ),
-                                                        child: const Text('削除'),
+                                                          ),
+                                                        ],
                                                       ),
-                                                    ],
-                                                  ),
-                                                );
+                                                    );
 
-                                            if (shouldDelete == true) {
-                                              try {
-                                                final postRepository = ref.read(
-                                                  postRepositoryProvider,
-                                                );
-                                                await postRepository.deletePost(
-                                                  post.id,
-                                                );
-                                                if (context.mounted) {
-                                                  ScaffoldMessenger.of(
-                                                    context,
-                                                  ).showSnackBar(
-                                                    const SnackBar(
-                                                      content: Text(
-                                                        '投稿を削除しました',
-                                                      ),
-                                                    ),
-                                                  );
+                                                if (shouldDelete == true) {
+                                                  try {
+                                                    final postRepository = ref
+                                                        .read(
+                                                          postRepositoryProvider,
+                                                        );
+                                                    await postRepository
+                                                        .deletePost(post.id);
+                                                    if (context.mounted) {
+                                                      ScaffoldMessenger.of(
+                                                        context,
+                                                      ).showSnackBar(
+                                                        const SnackBar(
+                                                          content: Text(
+                                                            '投稿を削除しました',
+                                                          ),
+                                                        ),
+                                                      );
+                                                    }
+                                                  } catch (e) {
+                                                    if (context.mounted) {
+                                                      ScaffoldMessenger.of(
+                                                        context,
+                                                      ).showSnackBar(
+                                                        SnackBar(
+                                                          content: Text(
+                                                            '削除エラー: $e',
+                                                          ),
+                                                        ),
+                                                      );
+                                                    }
+                                                  }
                                                 }
-                                              } catch (e) {
-                                                if (context.mounted) {
-                                                  ScaffoldMessenger.of(
-                                                    context,
-                                                  ).showSnackBar(
-                                                    SnackBar(
-                                                      content: Text(
-                                                        '削除エラー: $e',
-                                                      ),
-                                                    ),
-                                                  );
-                                                }
-                                              }
-                                            }
-                                          },
-                                          icon: const Icon(
-                                            Icons.delete,
-                                            size: 18,
-                                          ),
-                                          tooltip: '削除',
-                                          visualDensity: VisualDensity.compact,
-                                          color: Colors.red[400],
+                                              },
+                                              icon: const Icon(
+                                                Icons.delete,
+                                                size: 18,
+                                              ),
+                                              tooltip: '削除',
+                                              visualDensity:
+                                                  VisualDensity.compact,
+                                              color: Colors.red[400],
+                                            ),
+                                          ],
                                         ),
-                                      ],
-                                    ),
+                                    ],
+                                  ),
                                 ],
                               ),
                             ],
