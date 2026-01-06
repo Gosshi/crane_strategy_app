@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:io';
 import '../../data/providers/auth_provider.dart';
+import '../../data/providers/audio_service_provider.dart';
 import '../../data/services/user_level_service.dart';
 import 'collection_screen.dart'; // collectionWithProductListProvider
 
@@ -144,6 +145,10 @@ class AccountScreen extends ConsumerWidget {
               ),
             ),
           ],
+          const SizedBox(height: 24),
+
+          // 効果音設定
+          _buildSoundSettingsSection(ref, theme),
         ],
       ),
     );
@@ -221,6 +226,39 @@ class AccountScreen extends ConsumerWidget {
       },
       loading: () => const CircularProgressIndicator(),
       error: (e, s) => const SizedBox.shrink(),
+    );
+  }
+
+  Widget _buildSoundSettingsSection(WidgetRef ref, ThemeData theme) {
+    final audioService = ref.watch(audioServiceProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '設定',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.primary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Card(
+          child: SwitchListTile(
+            title: const Text('効果音'),
+            subtitle: const Text('スキャンや獲得時の効果音を再生'),
+            value: audioService.isSoundEnabled,
+            onChanged: (value) {
+              audioService.setSoundEnabled(value);
+              // 設定変更を反映するためにrefresh
+              ref.invalidate(audioServiceProvider);
+            },
+            secondary: Icon(
+              audioService.isSoundEnabled ? Icons.volume_up : Icons.volume_off,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

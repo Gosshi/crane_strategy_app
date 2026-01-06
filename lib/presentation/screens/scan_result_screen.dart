@@ -9,6 +9,7 @@ import '../../data/models/product.dart';
 import '../../data/models/collection_item.dart';
 import '../../data/providers/collection_repository_provider.dart';
 import '../../data/providers/auth_provider.dart';
+import '../../data/providers/audio_service_provider.dart';
 import '../../data/models/strategy.dart';
 import '../../data/repositories/post_repository.dart';
 import 'package:url_launcher/url_launcher.dart'; // Attribution link
@@ -104,6 +105,10 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
             if (product == null) {
               return _buildNotFound(context, ref);
             }
+            // 商品が見つかった時に効果音を再生（初回のみ）
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              ref.read(audioServiceProvider).playScanSuccess();
+            });
             return _buildProductDetail(context, ref, product);
           },
           loading: () => const Center(
@@ -178,8 +183,9 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
       );
       await collectionRepo.addCollectionItem(user.uid, newItem);
 
-      // 紙吹雪を再生
+      // 紙吹雪と効果音を再生
       _confettiController.play();
+      ref.read(audioServiceProvider).playAcquisitionSuccess();
 
       if (context.mounted) {
         ScaffoldMessenger.of(
