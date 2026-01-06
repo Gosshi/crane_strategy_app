@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 /// 攻略法のデータモデル
 class Strategy {
   final String id;
@@ -6,6 +8,7 @@ class Strategy {
   final String settingType;
   final String thumbnailUrl;
   final String videoId;
+  final DateTime updatedAt;
 
   const Strategy({
     required this.id,
@@ -14,6 +17,7 @@ class Strategy {
     required this.settingType,
     required this.thumbnailUrl,
     required this.videoId,
+    required this.updatedAt,
   });
 
   /// Firestoreのデータからモデルを作成
@@ -25,6 +29,9 @@ class Strategy {
       settingType: map['settingType'] ?? '',
       thumbnailUrl: map['thumbnailUrl'] ?? '',
       videoId: map['videoId'] ?? '',
+      updatedAt: map['updatedAt'] != null
+          ? (map['updatedAt'] as Timestamp).toDate()
+          : DateTime.now(),
     );
   }
 
@@ -36,6 +43,7 @@ class Strategy {
       'settingType': settingType,
       'thumbnailUrl': thumbnailUrl,
       'videoId': videoId,
+      'updatedAt': Timestamp.fromDate(updatedAt),
     };
   }
 }

@@ -12,10 +12,56 @@ class FirestoreStrategyRepository implements StrategyRepository {
 
   @override
   Future<List<Strategy>> fetchStrategies() async {
-    final snapshot = await _firestore.collection('strategies').get();
-    return snapshot.docs
-        .map((doc) => Strategy.fromMap(doc.id, doc.data()))
-        .toList();
+    try {
+      print('[FirestoreStrategyRepository] Fetching strategies...');
+      print(
+        '[FirestoreStrategyRepository] Firestore instance: ${_firestore.app.name}',
+      );
+      print(
+        '[FirestoreStrategyRepository] Project: ${_firestore.app.options.projectId}',
+      );
+
+      // キャッシュを使わずにサーバーから直接取得
+      final snapshot = await _firestore
+          .collection('strategies')
+          .get(const GetOptions(source: Source.server));
+      print(
+        '[FirestoreStrategyRepository] Retrieved ${snapshot.docs.length} documents from SERVER',
+      );
+
+      final strategies = <Strategy>[];
+      for (final doc in snapshot.docs) {
+        try {
+          print('[FirestoreStrategyRepository] Processing doc: ${doc.id}');
+          final strategy = Strategy.fromMap(doc.id, doc.data());
+          strategies.add(strategy);
+        } catch (e) {
+          print(
+            '[FirestoreStrategyRepository] Error parsing doc ${doc.id}: $e',
+          );
+          print('[FirestoreStrategyRepository] Doc data: ${doc.data()}');
+        }
+      }
+
+      print(
+        '[FirestoreStrategyRepository] Successfully parsed ${strategies.length} strategies',
+      );
+      return strategies;
+    } on FirebaseException catch (e) {
+      print('[FirestoreStrategyRepository] FirebaseException: ${e.code}');
+      print('[FirestoreStrategyRepository] Message: ${e.message}');
+      print('[FirestoreStrategyRepository] Plugin: ${e.plugin}');
+      if (e.code == 'permission-denied') {
+        print(
+          '[FirestoreStrategyRepository] PERMISSION DENIED - Check Firestore Rules!',
+        );
+      }
+      rethrow;
+    } catch (e, stackTrace) {
+      print('[FirestoreStrategyRepository] Error fetching strategies: $e');
+      print('[FirestoreStrategyRepository] Stack trace: $stackTrace');
+      rethrow;
+    }
   }
 
   @override

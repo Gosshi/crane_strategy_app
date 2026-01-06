@@ -42,6 +42,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         title: const Text('クレーンゲーム攻略'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.book_outlined),
+            tooltip: '用語集',
+            onPressed: () => context.push('/glossary'),
+          ),
+          IconButton(
             icon: const Icon(Icons.emoji_events_outlined),
             tooltip: '獲得履歴',
             onPressed: () => context.push('/collection'),

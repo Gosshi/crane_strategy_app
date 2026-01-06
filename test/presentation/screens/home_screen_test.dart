@@ -12,13 +12,14 @@ class MockHomeTestRepository extends MockStrategyRepository {
   @override
   Future<List<Strategy>> fetchStrategies() async {
     return [
-      const Strategy(
+      Strategy(
         id: '1',
         title: {'ja': 'Home Strategy'},
         description: {'ja': 'Desc'},
         settingType: 'Bridge',
         thumbnailUrl: 'thumb',
         videoId: 'vid',
+        updatedAt: DateTime.now(),
       ),
     ];
   }
