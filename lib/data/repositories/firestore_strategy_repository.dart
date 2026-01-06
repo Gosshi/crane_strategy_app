@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../utils/logger.dart';
 import '../models/product.dart';
 import '../models/strategy.dart';
 import 'strategy_repository.dart';
@@ -13,11 +14,11 @@ class FirestoreStrategyRepository implements StrategyRepository {
   @override
   Future<List<Strategy>> fetchStrategies() async {
     try {
-      print('[FirestoreStrategyRepository] Fetching strategies...');
-      print(
+      logger.d('[FirestoreStrategyRepository] Fetching strategies...');
+      logger.i(
         '[FirestoreStrategyRepository] Firestore instance: ${_firestore.app.name}',
       );
-      print(
+      logger.i(
         '[FirestoreStrategyRepository] Project: ${_firestore.app.options.projectId}',
       );
 
@@ -25,41 +26,44 @@ class FirestoreStrategyRepository implements StrategyRepository {
       final snapshot = await _firestore
           .collection('strategies')
           .get(const GetOptions(source: Source.server));
-      print(
+      logger.i(
         '[FirestoreStrategyRepository] Retrieved ${snapshot.docs.length} documents from SERVER',
       );
 
       final strategies = <Strategy>[];
       for (final doc in snapshot.docs) {
         try {
-          print('[FirestoreStrategyRepository] Processing doc: ${doc.id}');
+          logger.d('[FirestoreStrategyRepository] Processing doc: ${doc.id}');
           final strategy = Strategy.fromMap(doc.id, doc.data());
           strategies.add(strategy);
         } catch (e) {
-          print(
+          logger.e(
             '[FirestoreStrategyRepository] Error parsing doc ${doc.id}: $e',
           );
-          print('[FirestoreStrategyRepository] Doc data: ${doc.data()}');
+          logger.e('[FirestoreStrategyRepository] Doc data: ${doc.data()}');
         }
       }
 
-      print(
+      logger.i(
         '[FirestoreStrategyRepository] Successfully parsed ${strategies.length} strategies',
       );
       return strategies;
     } on FirebaseException catch (e) {
-      print('[FirestoreStrategyRepository] FirebaseException: ${e.code}');
-      print('[FirestoreStrategyRepository] Message: ${e.message}');
-      print('[FirestoreStrategyRepository] Plugin: ${e.plugin}');
+      logger.e('[FirestoreStrategyRepository] FirebaseException: ${e.code}');
+      logger.e('[FirestoreStrategyRepository] Message: ${e.message}');
+      logger.e('[FirestoreStrategyRepository] Plugin: ${e.plugin}');
       if (e.code == 'permission-denied') {
-        print(
+        logger.e(
           '[FirestoreStrategyRepository] PERMISSION DENIED - Check Firestore Rules!',
         );
       }
       rethrow;
     } catch (e, stackTrace) {
-      print('[FirestoreStrategyRepository] Error fetching strategies: $e');
-      print('[FirestoreStrategyRepository] Stack trace: $stackTrace');
+      logger.e(
+        '[FirestoreStrategyRepository] Error fetching strategies: $e',
+        error: e,
+        stackTrace: stackTrace,
+      );
       rethrow;
     }
   }
