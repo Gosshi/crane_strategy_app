@@ -253,8 +253,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
             title: const Text('効果音'),
             subtitle: const Text('スキャンや獲得時の効果音を再生'),
             value: audioService.isSoundEnabled,
-            onChanged: (value) async {
-              await audioService.setSoundEnabled(value);
+            onChanged: (value) {
+              audioService.setSoundEnabled(value);
               setState(() {}); // UIを更新
             },
             secondary: Icon(
