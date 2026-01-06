@@ -5,6 +5,7 @@ import 'firebase_options.dart';
 import 'router.dart';
 import 'theme/app_theme.dart';
 import 'data/providers/auth_provider.dart';
+import 'services/ad_manager.dart';
 
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -18,6 +19,13 @@ void main() async {
     await GoogleSignIn.instance.initialize();
   } catch (e) {
     debugPrint('GoogleSignIn initialize error (ignored): $e');
+  }
+
+  // AdMob初期化
+  try {
+    await AdManager().initialize();
+  } catch (e) {
+    debugPrint('AdManager initialize error (ignored): $e');
   }
 
   runApp(const ProviderScope(child: CraneStrategyApp()));

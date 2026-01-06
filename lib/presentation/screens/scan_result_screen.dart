@@ -14,6 +14,7 @@ import '../../data/models/strategy.dart';
 import '../../data/repositories/post_repository.dart';
 import 'package:url_launcher/url_launcher.dart'; // Attribution link
 import '../../data/repositories/yahoo_shopping_repository.dart';
+import '../../services/ad_manager.dart';
 import '../widgets/strategy_card.dart';
 import 'post_composer_screen.dart'; // 新規作成
 import 'package:confetti/confetti.dart';
@@ -109,6 +110,8 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
             // 商品が見つかった時に効果音を再生（初回のみ）
             WidgetsBinding.instance.addPostFrameCallback((_) {
               ref.read(audioServiceProvider).playScanSuccess();
+              // インタースティシャル広告を表示（3回に1回）
+              AdManager().showInterstitialAdIfReady(type: 'scan');
             });
             return _buildProductDetail(context, ref, product);
           },

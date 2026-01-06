@@ -2,10 +2,12 @@ import 'package:flutter/foundation.dart'; // kDebugMode
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../data/models/strategy.dart';
 import '../../data/models/product.dart'; // Product class
 import '../../data/providers/strategy_repository_provider.dart';
 import '../../utils/seed_firestore.dart';
+import '../../services/ad_manager.dart';
 import '../widgets/strategy_card.dart';
 
 /// 攻略法一覧画面
@@ -19,10 +21,28 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final _searchController = TextEditingController();
   String _searchQuery = '';
+  BannerAd? _bannerAd;
+  bool _isBannerAdLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBannerAd();
+  }
+
+  void _loadBannerAd() {
+    _bannerAd = AdManager().createBannerAd();
+    _bannerAd!.load().then((_) {
+      setState(() {
+        _isBannerAdLoaded = true;
+      });
+    });
+  }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _bannerAd?.dispose();
     super.dispose();
   }
 
@@ -144,6 +164,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ? _buildSearchResults(searchResultsAsync!)
                 : _buildStrategyList(strategiesAsync),
           ),
+
+          // バナー広告（TODO: プレミアムユーザーは非表示）
+          if (_isBannerAdLoaded && _bannerAd != null)
+            Container(
+              height: 50,
+              alignment: Alignment.center,
+              child: AdWidget(ad: _bannerAd!),
+            ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
