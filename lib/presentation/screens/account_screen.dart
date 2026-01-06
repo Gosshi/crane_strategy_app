@@ -2,14 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:io';
 import '../../data/providers/auth_provider.dart';
+import '../../data/providers/audio_service_provider.dart';
 import '../../data/services/user_level_service.dart';
 import 'collection_screen.dart'; // collectionWithProductListProvider
 
-class AccountScreen extends ConsumerWidget {
+class AccountScreen extends ConsumerStatefulWidget {
   const AccountScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AccountScreen> createState() => _AccountScreenState();
+}
+
+class _AccountScreenState extends ConsumerState<AccountScreen> {
+  @override
+  Widget build(BuildContext context) {
     final user = ref.watch(currentUserProvider);
     final theme = Theme.of(context);
 
@@ -144,6 +150,10 @@ class AccountScreen extends ConsumerWidget {
               ),
             ),
           ],
+          const SizedBox(height: 24),
+
+          // 効果音設定
+          _buildSoundSettingsSection(theme),
         ],
       ),
     );
@@ -221,6 +231,38 @@ class AccountScreen extends ConsumerWidget {
       },
       loading: () => const CircularProgressIndicator(),
       error: (e, s) => const SizedBox.shrink(),
+    );
+  }
+
+  Widget _buildSoundSettingsSection(ThemeData theme) {
+    final audioService = ref.watch(audioServiceProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '設定',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.primary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Card(
+          child: SwitchListTile(
+            title: const Text('効果音'),
+            subtitle: const Text('スキャンや獲得時の効果音を再生'),
+            value: audioService.isSoundEnabled,
+            onChanged: (value) {
+              audioService.setSoundEnabled(value);
+              setState(() {}); // UIを更新
+            },
+            secondary: Icon(
+              audioService.isSoundEnabled ? Icons.volume_up : Icons.volume_off,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
