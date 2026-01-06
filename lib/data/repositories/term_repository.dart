@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../utils/logger.dart';
 import '../models/term.dart';
 
 /// 用語データのリポジトリ
@@ -15,7 +16,7 @@ class TermRepository {
     final terms = snapshot.docs
         .map((doc) => Term.fromMap(doc.id, doc.data()))
         .toList();
-    print('[TermRepository] Fetched ${terms.length} terms');
+    logger.i('[TermRepository] Fetched ${terms.length} terms');
     return terms;
   }
 
