@@ -28,9 +28,30 @@ class PostRepository {
         });
   }
 
+  /// 投稿をIDで取得
+  Future<Post?> getPostById(String postId) async {
+    final doc = await _firestore.collection('posts').doc(postId).get();
+    if (doc.exists && doc.data() != null) {
+      return Post.fromMap(doc.id, doc.data()!);
+    }
+    return null;
+  }
+
   /// 投稿を作成
   Future<void> addPost(Post post) async {
     await _firestore.collection('posts').add(post.toMap());
+  }
+
+  /// 投稿を更新
+  Future<void> updatePost(Post post) async {
+    final updateData = post.toMap();
+    updateData['updatedAt'] = FieldValue.serverTimestamp();
+    await _firestore.collection('posts').doc(post.id).update(updateData);
+  }
+
+  /// 投稿を削除
+  Future<void> deletePost(String postId) async {
+    await _firestore.collection('posts').doc(postId).delete();
   }
 
   /// 画像をアップロードし、ダウンロードURLを返す
@@ -58,4 +79,13 @@ final postsStreamProvider = StreamProvider.family<List<Post>, String>((
 ) {
   final repository = ref.watch(postRepositoryProvider);
   return repository.watchPostsByProductId(productId);
+});
+
+/// 投稿IDで単一の投稿を取得するプロバイダー
+final postByIdProvider = FutureProvider.family<Post?, String>((
+  ref,
+  postId,
+) async {
+  final repository = ref.watch(postRepositoryProvider);
+  return repository.getPostById(postId);
 });
