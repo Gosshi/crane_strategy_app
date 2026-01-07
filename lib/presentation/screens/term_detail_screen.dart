@@ -16,6 +16,15 @@ class TermDetailScreen extends ConsumerWidget {
 
   const TermDetailScreen({super.key, required this.termId});
 
+  /// Get localized text from multilingual map
+  String _getLocalizedText(Map<String, String> textMap, BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
+    return textMap[locale] ??
+        textMap['ja'] ??
+        textMap['en'] ??
+        textMap.values.first;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
@@ -39,7 +48,7 @@ class TermDetailScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      term.name,
+                      _getLocalizedText(term.name, context),
                       style: theme.textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -92,7 +101,10 @@ class TermDetailScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(term.description, style: theme.textTheme.bodyLarge),
+                Text(
+                  _getLocalizedText(term.description, context),
+                  style: theme.textTheme.bodyLarge,
+                ),
 
                 // 関連用語
                 if (term.relatedTermIds.isNotEmpty) ...[

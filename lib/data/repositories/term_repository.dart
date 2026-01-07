@@ -41,9 +41,16 @@ class TermRepository {
 
     final lowerQuery = query.toLowerCase();
     return allTerms.where((term) {
-      return term.name.toLowerCase().contains(lowerQuery) ||
-          (term.reading?.contains(lowerQuery) ?? false) ||
-          term.description.toLowerCase().contains(lowerQuery);
+      // Search in all language variations
+      final nameMatch = term.name.values.any(
+        (name) => name.toLowerCase().contains(lowerQuery),
+      );
+      final descriptionMatch = term.description.values.any(
+        (desc) => desc.toLowerCase().contains(lowerQuery),
+      );
+      final readingMatch = term.reading?.contains(lowerQuery) ?? false;
+
+      return nameMatch || descriptionMatch || readingMatch;
     }).toList();
   }
 

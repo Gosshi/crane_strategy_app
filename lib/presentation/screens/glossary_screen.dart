@@ -23,6 +23,15 @@ class _GlossaryScreenState extends ConsumerState<GlossaryScreen> {
   String _searchQuery = '';
   String? _selectedCategory;
 
+  /// Get localized text from multilingual map
+  String _getLocalizedText(Map<String, String> textMap) {
+    final locale = Localizations.localeOf(context).languageCode;
+    return textMap[locale] ??
+        textMap['ja'] ??
+        textMap['en'] ??
+        textMap.values.first;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -97,9 +106,13 @@ class _GlossaryScreenState extends ConsumerState<GlossaryScreen> {
                 if (_searchQuery.isNotEmpty) {
                   final query = _searchQuery.toLowerCase();
                   filteredTerms = filteredTerms.where((term) {
-                    return term.name.toLowerCase().contains(query) ||
+                    final name = _getLocalizedText(term.name).toLowerCase();
+                    final description = _getLocalizedText(
+                      term.description,
+                    ).toLowerCase();
+                    return name.contains(query) ||
                         (term.reading?.contains(query) ?? false) ||
-                        term.description.toLowerCase().contains(query);
+                        description.contains(query);
                   }).toList();
                 }
 
@@ -158,7 +171,7 @@ class _GlossaryScreenState extends ConsumerState<GlossaryScreen> {
         title: Row(
           children: [
             Text(
-              term.name,
+              _getLocalizedText(term.name),
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -175,7 +188,7 @@ class _GlossaryScreenState extends ConsumerState<GlossaryScreen> {
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 8),
           child: Text(
-            term.description,
+            _getLocalizedText(term.description),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
