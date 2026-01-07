@@ -15,10 +15,12 @@ class PostRepository {
       _storage = storage ?? FirebaseStorage.instance;
 
   /// 指定された商品の投稿リストを取得 (作成日時降順)
+  /// deletedAtがnullのもの（削除されていないもの）のみ取得
   Stream<List<Post>> watchPostsByProductId(String productId) {
     return _firestore
         .collection('posts')
         .where('productId', isEqualTo: productId)
+        .where('deletedAt', isNull: true) // 削除済みを除外
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) {
@@ -49,9 +51,11 @@ class PostRepository {
     await _firestore.collection('posts').doc(post.id).update(updateData);
   }
 
-  /// 投稿を削除
+  /// 投稿を削除（論理削除）
   Future<void> deletePost(String postId) async {
-    await _firestore.collection('posts').doc(postId).delete();
+    await _firestore.collection('posts').doc(postId).update({
+      'deletedAt': FieldValue.serverTimestamp(),
+    });
   }
 
   /// 画像をアップロードし、ダウンロードURLを返す
