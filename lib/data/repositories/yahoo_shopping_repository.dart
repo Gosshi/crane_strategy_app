@@ -74,7 +74,7 @@ class YahooShoppingRepository {
         queryParameters: {
           'appid': _clientId,
           'jan_code': janCode,
-          'image_size': '300',
+          'image_size': '600', // 300→600に変更で高画質化
         },
       );
 
