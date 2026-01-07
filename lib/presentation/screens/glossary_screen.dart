@@ -164,16 +164,18 @@ class _GlossaryScreenState extends ConsumerState<GlossaryScreen> {
   }) {
     final isSelected = _selectedCategory == value;
 
-    return FilterChip(
-      label: Text(label),
-      selected: isSelected,
-      onSelected: (selected) {
-        setState(() {
-          _selectedCategory = selected ? value : null;
-        });
-      },
-      backgroundColor: theme.colorScheme.surface,
-      selectedColor: theme.colorScheme.primaryContainer,
+    return Flexible(
+      child: FilterChip(
+        label: Text(label, overflow: TextOverflow.ellipsis),
+        selected: isSelected,
+        onSelected: (selected) {
+          setState(() {
+            _selectedCategory = selected ? value : null;
+          });
+        },
+        selectedColor: theme.colorScheme.primaryContainer,
+        checkmarkColor: theme.colorScheme.onPrimaryContainer,
+      ),
     );
   }
 
