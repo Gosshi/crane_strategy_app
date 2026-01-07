@@ -142,6 +142,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String get noTermsFound => 'No matching terms found';
 
   @override
+  String get editPost => 'Edit Post';
+
+  @override
+  String get saveChanges => 'Save Changes';
+
+  @override
+  String get categoryBasic => 'Basic Terms';
+
+  @override
+  String get categoryTechnique => 'Techniques';
+
+  @override
+  String get categoryPrize => 'Prizes';
+
+  @override
+  String get categoryMachine => 'Machine/Settings';
+
+  @override
   String get scanResult => 'Scan Result';
 
   @override

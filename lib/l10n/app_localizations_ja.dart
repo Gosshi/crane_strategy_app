@@ -142,6 +142,24 @@ class AppLocalizationsJa extends AppLocalizations {
   String get noTermsFound => '該当する用語が見つかりません';
 
   @override
+  String get editPost => '投稿を編集';
+
+  @override
+  String get saveChanges => '変更を保存';
+
+  @override
+  String get categoryBasic => '基本用語';
+
+  @override
+  String get categoryTechnique => '技術・攻略';
+
+  @override
+  String get categoryPrize => '景品関連';
+
+  @override
+  String get categoryMachine => '機械・設定';
+
+  @override
   String get scanResult => 'スキャン結果';
 
   @override

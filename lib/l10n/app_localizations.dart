@@ -361,6 +361,42 @@ abstract class AppLocalizations {
   /// **'No matching terms found'**
   String get noTermsFound;
 
+  /// No description provided for @editPost.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Post'**
+  String get editPost;
+
+  /// No description provided for @saveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get saveChanges;
+
+  /// No description provided for @categoryBasic.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic Terms'**
+  String get categoryBasic;
+
+  /// No description provided for @categoryTechnique.
+  ///
+  /// In en, this message translates to:
+  /// **'Techniques'**
+  String get categoryTechnique;
+
+  /// No description provided for @categoryPrize.
+  ///
+  /// In en, this message translates to:
+  /// **'Prizes'**
+  String get categoryPrize;
+
+  /// No description provided for @categoryMachine.
+  ///
+  /// In en, this message translates to:
+  /// **'Machine/Settings'**
+  String get categoryMachine;
+
   /// No description provided for @scanResult.
   ///
   /// In en, this message translates to:
