@@ -1,8 +1,8 @@
-import 'dart:io';
+// import 'dart:io'; // 画像投稿機能無効化のため未使用
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Clipboard
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
+// import 'package:image_picker/image_picker.dart'; // 画像投稿機能無効化のため未使用
 import '../../data/models/post.dart';
 import '../../data/repositories/post_repository.dart';
 import '../../data/repositories/user_service.dart';
@@ -19,38 +19,54 @@ class PostComposerScreen extends ConsumerStatefulWidget {
 class _PostComposerScreenState extends ConsumerState<PostComposerScreen> {
   final _textController = TextEditingController();
   final _youtubeUrlController = TextEditingController(); // YouTube用
-  File? _imageFile;
+  // 画像投稿機能は一旦無効化（肖像権対策）
+  // File? _imageFile;
   bool _isUploading = false;
-  final _picker = ImagePicker();
+  // final _picker = ImagePicker();
 
-  Future<void> _pickImage() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _imageFile = File(pickedFile.path);
-      });
-    }
-  }
+  // Future<void> _pickImage() async {
+  //   final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+  //   if (pickedFile != null) {
+  //     setState(() {
+  //       _imageFile = File(pickedFile.path);
+  //     });
+  //   }
+  // }
 
   Future<void> _submit() async {
     final text = _textController.text.trim();
     final youtubeUrl = _youtubeUrlController.text.trim();
 
-    if (text.isEmpty && _imageFile == null && youtubeUrl.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('コメント、画像、または動画URLを入力してください')),
-      );
+    if (text.isEmpty && youtubeUrl.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('コメントまたは動画URLを入力してください')));
       return;
     }
 
-    // YouTube URLの簡易バリデーション (入力がある場合のみ)
+    // YouTube URLの厳密なバリデーション (YouTube限定)
     if (youtubeUrl.isNotEmpty) {
       final uri = Uri.tryParse(youtubeUrl);
-      if (uri == null ||
-          !youtubeUrl.contains('youtube') && !youtubeUrl.contains('youtu.be')) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('有効なYouTubeのURLを入力してください')),
-        );
+      if (uri == null || uri.host.isEmpty) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('有効なURLを入力してくださ い')));
+        return;
+      }
+
+      // YouTubeドメインのみ許可
+      final host = uri.host.toLowerCase();
+      final isYoutube =
+          host == 'youtube.com' ||
+          host == 'www.youtube.com' ||
+          host == 'youtu.be' ||
+          host == 'www.youtu.be' ||
+          host == 'm.youtube.com';
+
+      if (!isYoutube) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('YouTube動画のURLのみ対応しています')));
         return;
       }
     }
@@ -70,13 +86,13 @@ class _PostComposerScreenState extends ConsumerState<PostComposerScreen> {
 
       if (user == null) throw Exception('ログインに失敗しました');
 
-      // 2. 画像アップロード
+      // 2. 画像アップロード（無効化中）
       String? imageUrl;
       final postRepository = ref.read(postRepositoryProvider);
 
-      if (_imageFile != null) {
-        imageUrl = await postRepository.uploadImage(user.uid, _imageFile!);
-      }
+      // if (_imageFile != null) {
+      //   imageUrl = await postRepository.uploadImage(user.uid, _imageFile!);
+      // }
 
       // 3. 投稿作成
       final post = Post(
@@ -163,34 +179,35 @@ class _PostComposerScreenState extends ConsumerState<PostComposerScreen> {
             ),
             const SizedBox(height: 16),
 
-            if (_imageFile != null)
-              Stack(
-                alignment: Alignment.topRight,
-                children: [
-                  Image.file(
-                    _imageFile!,
-                    height: 200,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white),
-                    onPressed: () {
-                      setState(() {
-                        _imageFile = null;
-                      });
-                    },
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.black54,
-                    ),
-                  ),
-                ],
-              ),
-            ElevatedButton.icon(
-              onPressed: _pickImage,
-              icon: const Icon(Icons.camera_alt),
-              label: const Text('画像を追加'),
-            ),
+            // 画像投稿機能は一旦無効化（肖像権対策）
+            // if (_imageFile != null)
+            //   Stack(
+            //     alignment: Alignment.topRight,
+            //     children: [
+            //       Image.file(
+            //         _imageFile!,
+            //         height: 200,
+            //         width: double.infinity,
+            //         fit: BoxFit.cover,
+            //       ),
+            //       IconButton(
+            //         icon: const Icon(Icons.close, color: Colors.white),
+            //         onPressed: () {
+            //           setState(() {
+            //             _imageFile = null;
+            //           });
+            //         },
+            //         style: IconButton.styleFrom(
+            //           backgroundColor: Colors.black54,
+            //         ),
+            //       ),
+            //     ],
+            //   ),
+            // ElevatedButton.icon(
+            //   onPressed: _pickImage,
+            //   icon: const Icon(Icons.camera_alt),
+            //   label: const Text('画像を追加'),
+            // ),
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: _isUploading ? null : _submit,
