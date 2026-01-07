@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../data/models/term.dart';
 import '../../data/providers/term_repository_provider.dart';
+import '../../l10n/app_localizations.dart';
 
 /// 全用語を取得するプロバイダー
 final allTermsProvider = FutureProvider<List<Term>>((ref) async {
@@ -22,13 +23,22 @@ class _GlossaryScreenState extends ConsumerState<GlossaryScreen> {
   String _searchQuery = '';
   String? _selectedCategory;
 
+  /// Get localized text from multilingual map
+  String _getLocalizedText(Map<String, String> textMap) {
+    final locale = Localizations.localeOf(context).languageCode;
+    return textMap[locale] ??
+        textMap['ja'] ??
+        textMap['en'] ??
+        textMap.values.first;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final termsAsync = ref.watch(allTermsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('用語集')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.glossaryTitle)),
       body: Column(
         children: [
           // 検索バー
@@ -36,7 +46,7 @@ class _GlossaryScreenState extends ConsumerState<GlossaryScreen> {
             padding: const EdgeInsets.all(16),
             child: TextField(
               decoration: InputDecoration(
-                hintText: '用語を検索...',
+                hintText: AppLocalizations.of(context)!.searchTerms,
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -58,7 +68,11 @@ class _GlossaryScreenState extends ConsumerState<GlossaryScreen> {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
-                _buildCategoryChip(label: 'すべて', value: null, theme: theme),
+                _buildCategoryChip(
+                  label: AppLocalizations.of(context)!.allCategory,
+                  value: null,
+                  theme: theme,
+                ),
                 const SizedBox(width: 8),
                 ...TermCategory.labels.entries.map((entry) {
                   return Padding(
@@ -92,14 +106,20 @@ class _GlossaryScreenState extends ConsumerState<GlossaryScreen> {
                 if (_searchQuery.isNotEmpty) {
                   final query = _searchQuery.toLowerCase();
                   filteredTerms = filteredTerms.where((term) {
-                    return term.name.toLowerCase().contains(query) ||
+                    final name = _getLocalizedText(term.name).toLowerCase();
+                    final description = _getLocalizedText(
+                      term.description,
+                    ).toLowerCase();
+                    return name.contains(query) ||
                         (term.reading?.contains(query) ?? false) ||
-                        term.description.toLowerCase().contains(query);
+                        description.contains(query);
                   }).toList();
                 }
 
                 if (filteredTerms.isEmpty) {
-                  return const Center(child: Text('該当する用語が見つかりません'));
+                  return Center(
+                    child: Text(AppLocalizations.of(context)!.noTermsFound),
+                  );
                 }
 
                 return ListView.builder(
@@ -112,7 +132,11 @@ class _GlossaryScreenState extends ConsumerState<GlossaryScreen> {
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => Center(child: Text('エラー: $error')),
+              error: (error, stack) => Center(
+                child: Text(
+                  AppLocalizations.of(context)!.error(error.toString()),
+                ),
+              ),
             ),
           ),
         ],
@@ -147,7 +171,7 @@ class _GlossaryScreenState extends ConsumerState<GlossaryScreen> {
         title: Row(
           children: [
             Text(
-              term.name,
+              _getLocalizedText(term.name),
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -164,7 +188,7 @@ class _GlossaryScreenState extends ConsumerState<GlossaryScreen> {
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 8),
           child: Text(
-            term.description,
+            _getLocalizedText(term.description),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),

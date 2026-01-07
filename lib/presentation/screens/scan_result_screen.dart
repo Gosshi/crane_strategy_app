@@ -21,6 +21,7 @@ import 'post_composer_screen.dart'; // 新規作成
 import 'package:confetti/confetti.dart';
 import '../widgets/confetti_overlay.dart';
 import '../../utils/share_utils.dart';
+import '../../l10n/app_localizations.dart';
 
 final productSearchProvider = FutureProvider.family<Product?, String>((
   ref,
@@ -92,7 +93,7 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
       controller: _confettiController,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('スキャン結果'),
+          title: Text(AppLocalizations.of(context)!.scanResult),
           leading: IconButton(
             icon: const Icon(Icons.close),
             onPressed: () {
@@ -127,17 +128,19 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
             });
             return _buildProductDetail(context, ref, product);
           },
-          loading: () => const Center(
+          loading: () => Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 CircularProgressIndicator(),
                 SizedBox(height: 16),
-                Text('商品を検索中...'),
+                Text(AppLocalizations.of(context)!.searching),
               ],
             ),
           ),
-          error: (err, stack) => Center(child: Text('エラーが発生しました: $err')),
+          error: (err, stack) => Center(
+            child: Text(AppLocalizations.of(context)!.error(err.toString())),
+          ),
         ),
         floatingActionButton: productAsync.when(
           data: (product) {
@@ -152,7 +155,7 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
                 );
               },
               icon: const Icon(Icons.edit),
-              label: const Text('攻略を投稿'),
+              label: Text(AppLocalizations.of(context)!.postStrategy),
             );
           },
           loading: () => null,
@@ -181,9 +184,9 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
 
     if (user == null) {
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('ログインが必要です (認証に失敗しました)')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.loginRequired)),
+        );
       }
       return;
     }
@@ -204,15 +207,19 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
       ref.read(audioServiceProvider).playAcquisitionSuccess();
 
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('${product.name} をGETしました！')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.gotIt(product.name)),
+          ),
+        );
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('エラー: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.error(e.toString())),
+          ),
+        );
       }
     }
   }
@@ -279,7 +286,7 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
                   TextButton.icon(
                     onPressed: () => ShareUtils.shareProduct(product),
                     icon: const Icon(Icons.share, size: 16),
-                    label: const Text('この商品を共有'),
+                    label: Text(AppLocalizations.of(context)!.shareProduct),
                     style: TextButton.styleFrom(
                       visualDensity: VisualDensity.compact,
                     ),
@@ -293,7 +300,7 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
                         context.push('/product_edit', extra: product);
                       },
                       icon: const Icon(Icons.edit, size: 16),
-                      label: const Text('編集する'),
+                      label: Text(AppLocalizations.of(context)!.editProduct),
                       style: TextButton.styleFrom(
                         foregroundColor: Colors.grey,
                         visualDensity: VisualDensity.compact,
@@ -311,7 +318,7 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
             child: ElevatedButton.icon(
               onPressed: () => _addToCollection(context, ref, product),
               icon: const Icon(Icons.emoji_events),
-              label: const Text('この商品をGETした！'),
+              label: Text(AppLocalizations.of(context)!.gotThisProduct),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
                 foregroundColor: Colors.white,
@@ -333,10 +340,12 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
           relatedStrategiesAsync.when(
             data: (strategies) {
               if (strategies.isEmpty) {
-                return const Card(
+                return Card(
                   child: Padding(
                     padding: EdgeInsets.all(16),
-                    child: Text('関連する攻略法はまだありません'),
+                    child: Text(
+                      AppLocalizations.of(context)!.noRelatedStrategies,
+                    ),
                   ),
                 );
               }
@@ -360,7 +369,9 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
                 child: CircularProgressIndicator(),
               ),
             ),
-            error: (e, s) => Text('攻略法の読み込みエラー: $e'),
+            error: (e, s) => Text(
+              AppLocalizations.of(context)!.loadStrategyError(e.toString()),
+            ),
           ),
 
           const SizedBox(height: 24),
@@ -380,10 +391,10 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
               return postsAsync.when(
                 data: (posts) {
                   if (posts.isEmpty) {
-                    return const Center(
+                    return Center(
                       child: Padding(
                         padding: EdgeInsets.all(16.0),
-                        child: Text('まだ投稿はありません。\n最初の攻略情報を投稿しよう！'),
+                        child: Text(AppLocalizations.of(context)!.noPostsYet),
                       ),
                     );
                   }
@@ -435,15 +446,23 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
                                           ScaffoldMessenger.of(
                                             context,
                                           ).showSnackBar(
-                                            const SnackBar(
-                                              content: Text('動画を開けませんでした'),
+                                            SnackBar(
+                                              content: Text(
+                                                AppLocalizations.of(
+                                                  context,
+                                                )!.cannotOpenVideo,
+                                              ),
                                             ),
                                           );
                                         }
                                       }
                                     },
                                     icon: const Icon(Icons.play_circle_fill),
-                                    label: const Text('動画を見る (YouTube)'),
+                                    label: Text(
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.watchVideoYouTube,
+                                    ),
                                     style: FilledButton.styleFrom(
                                       backgroundColor: Colors.red,
                                       foregroundColor: Colors.white,
@@ -599,7 +618,11 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
                   );
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (err, stack) => Center(child: Text('エラーが発生しました: $err')),
+                error: (err, stack) => Center(
+                  child: Text(
+                    AppLocalizations.of(context)!.error(err.toString()),
+                  ),
+                ),
               );
             },
           ),
@@ -659,13 +682,13 @@ class __YahooApiSearchSectionState
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             CircularProgressIndicator(),
             SizedBox(height: 16),
-            Text('Yahoo!ショッピングから情報を検索中...'),
+            Text(AppLocalizations.of(context)!.yahooSearching),
           ],
         ),
       );
@@ -721,7 +744,7 @@ class __YahooApiSearchSectionState
                   );
                 },
                 icon: const Icon(Icons.edit),
-                label: const Text('この情報を使って登録'),
+                label: Text(AppLocalizations.of(context)!.registerWithThis),
               ),
               const SizedBox(height: 16),
               // Yahoo! Shopping Attribution
@@ -768,7 +791,7 @@ class __YahooApiSearchSectionState
             const SizedBox(height: 32),
             FilledButton(
               onPressed: () => context.go('/'),
-              child: const Text('ホームに戻る'),
+              child: Text(AppLocalizations.of(context)!.returnHome),
             ),
             const SizedBox(height: 16),
             TextButton.icon(
@@ -776,7 +799,7 @@ class __YahooApiSearchSectionState
                 context.push('/product_register', extra: widget.barcode);
               },
               icon: const Icon(Icons.add_circle_outline),
-              label: const Text('手動で登録する'),
+              label: Text(AppLocalizations.of(context)!.manualRegister),
             ),
           ],
         ),

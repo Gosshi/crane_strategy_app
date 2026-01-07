@@ -7,6 +7,7 @@ import '../../data/providers/premium_provider.dart';
 import '../../data/services/user_level_service.dart';
 import '../widgets/reward_ad_button.dart';
 import 'collection_screen.dart'; // collectionWithProductListProvider
+import '../../l10n/app_localizations.dart';
 
 class AccountScreen extends ConsumerStatefulWidget {
   const AccountScreen({super.key});
@@ -28,7 +29,9 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     final isAnonymous = user.isAnonymous;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('アカウント設定')),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.accountSettings),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -45,7 +48,9 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    isAnonymous ? 'ゲストユーザー' : (user.displayName ?? 'ユーザー'),
+                    isAnonymous
+                        ? AppLocalizations.of(context)!.guestUser
+                        : (user.displayName ?? 'ユーザー'),
                     style: theme.textTheme.titleLarge,
                   ),
                   const SizedBox(height: 8),
@@ -86,7 +91,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
-                    const Text('データを永続化するために、\nGoogleアカウントと連携しましょう。'),
+                    Text(AppLocalizations.of(context)!.linkGoogleAccount),
                     const SizedBox(height: 16),
                     FilledButton.icon(
                       onPressed: () async {
@@ -96,19 +101,29 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                               .linkWithGoogle();
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('連携に成功しました！')),
+                              SnackBar(
+                                content: Text(
+                                  AppLocalizations.of(context)!.linkSuccess,
+                                ),
+                              ),
                             );
                           }
                         } catch (e) {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('連携エラー: $e')),
+                              SnackBar(
+                                content: Text(
+                                  AppLocalizations.of(
+                                    context,
+                                  )!.linkError(e.toString()),
+                                ),
+                              ),
                             );
                           }
                         }
                       },
                       icon: const Icon(Icons.link),
-                      label: const Text('Googleアカウントと連携'),
+                      label: Text(AppLocalizations.of(context)!.linkWithGoogle),
                     ),
                     if (Platform.isIOS) ...[
                       const SizedBox(height: 12),
@@ -120,13 +135,23 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                                 .linkWithApple();
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('連携に成功しました！')),
+                                SnackBar(
+                                  content: Text(
+                                    AppLocalizations.of(context)!.linkSuccess,
+                                  ),
+                                ),
                               );
                             }
                           } catch (e) {
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('連携エラー: $e')),
+                                SnackBar(
+                                  content: Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    )!.linkError(e.toString()),
+                                  ),
+                                ),
                               );
                             }
                           }
@@ -136,7 +161,9 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                           foregroundColor: Colors.white,
                         ),
                         icon: const Icon(Icons.apple),
-                        label: const Text('Appleでサインイン'),
+                        label: Text(
+                          AppLocalizations.of(context)!.signInWithApple,
+                        ),
                       ),
                     ],
                   ],
@@ -144,11 +171,11 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
               ),
             ),
           ] else ...[
-            const Card(
+            Card(
               child: ListTile(
                 leading: Icon(Icons.check_circle, color: Colors.green),
-                title: Text('アカウント連携済み'),
-                subtitle: Text('データは安全に保存されています。'),
+                title: Text(AppLocalizations.of(context)!.accountLinked),
+                subtitle: Text(AppLocalizations.of(context)!.dataIsSafe),
               ),
             ),
           ],
@@ -257,8 +284,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         const SizedBox(height: 8),
         Card(
           child: SwitchListTile(
-            title: const Text('効果音'),
-            subtitle: const Text('スキャンや獲得時の効果音を再生'),
+            title: Text(AppLocalizations.of(context)!.soundEffects),
+            subtitle: Text(AppLocalizations.of(context)!.playSoundOnScan),
             value: audioService.isSoundEnabled,
             onChanged: (value) {
               audioService.setSoundEnabled(value);
@@ -281,7 +308,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'プレミアム機能',
+          AppLocalizations.of(context)!.premiumFeatures,
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
             color: theme.colorScheme.primary,
@@ -310,17 +337,25 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                           if (remaining != null) {
                             final hours = remaining.inHours;
                             final minutes = remaining.inMinutes.remainder(60);
-                            return Text('残り時間: $hours時間$minutes分');
+                            return Text(
+                              AppLocalizations.of(
+                                context,
+                              )!.remainingTime(hours, minutes),
+                            );
                           }
-                          return const Text('サブスクリプション有効');
+                          return Text(
+                            AppLocalizations.of(context)!.subscriptionActive,
+                          );
                         },
-                        loading: () => const Text('読み込み中...'),
-                        error: (_, _) => const Text('24時間解放中'),
+                        loading: () =>
+                            Text(AppLocalizations.of(context)!.loading),
+                        error: (_, _) =>
+                            Text(AppLocalizations.of(context)!.limited24Hours),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  const Card(
+                  SizedBox(height: 8),
+                  Card(
                     child: Padding(
                       padding: EdgeInsets.all(16),
                       child: Column(
@@ -333,7 +368,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                                 size: 20,
                               ),
                               SizedBox(width: 8),
-                              Text('広告なし'),
+                              Text(AppLocalizations.of(context)!.noAds),
                             ],
                           ),
                           SizedBox(height: 8),
@@ -345,7 +380,9 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                                 size: 20,
                               ),
                               SizedBox(width: 8),
-                              Text('限定バッジ（Phase 2で実装予定）'),
+                              Text(
+                                AppLocalizations.of(context)!.exclusiveBadge,
+                              ),
                             ],
                           ),
                         ],
@@ -357,7 +394,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
             }
             return Column(
               children: [
-                const Card(
+                Card(
                   child: Padding(
                     padding: EdgeInsets.all(16),
                     child: Column(
@@ -367,13 +404,19 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         SizedBox(height: 8),
-                        Text('プレミアム特典:', style: TextStyle(fontSize: 12)),
+                        Text(
+                          AppLocalizations.of(context)!.premiumBenefits,
+                          style: TextStyle(fontSize: 12),
+                        ),
                         SizedBox(height: 4),
                         Row(
                           children: [
                             Icon(Icons.check, size: 16, color: Colors.green),
                             SizedBox(width: 4),
-                            Text('全ての広告が非表示', style: TextStyle(fontSize: 12)),
+                            Text(
+                              AppLocalizations.of(context)!.allAdsHidden,
+                              style: TextStyle(fontSize: 12),
+                            ),
                           ],
                         ),
                         SizedBox(height: 4),
@@ -405,16 +448,16 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
               ],
             );
           },
-          loading: () => const Card(
+          loading: () => Card(
             child: ListTile(
               leading: CircularProgressIndicator(),
-              title: Text('読み込み中...'),
+              title: Text(AppLocalizations.of(context)!.loading),
             ),
           ),
-          error: (_, _) => const Card(
+          error: (_, _) => Card(
             child: ListTile(
               leading: Icon(Icons.error, color: Colors.red),
-              title: Text('エラーが発生しました'),
+              title: Text(AppLocalizations.of(context)!.errorOccurred),
             ),
           ),
         ),

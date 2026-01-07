@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:crane_strategy_app/l10n/app_localizations.dart';
 import 'package:crane_strategy_app/data/repositories/mock_strategy_repository.dart';
 import 'package:crane_strategy_app/data/providers/strategy_repository_provider.dart';
 import 'package:crane_strategy_app/data/models/strategy.dart';
@@ -55,7 +57,17 @@ void main() {
         overrides: [
           strategyRepositoryProvider.overrideWithValue(MockTestRepository()),
         ],
-        child: const MaterialApp(home: ScanResultScreen(barcode: 'found')),
+        child: MaterialApp(
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('ja')],
+          locale: const Locale('ja'),
+          home: const ScanResultScreen(barcode: 'found'),
+        ),
       ),
     );
 
@@ -81,7 +93,17 @@ void main() {
         overrides: [
           strategyRepositoryProvider.overrideWithValue(MockTestRepository()),
         ],
-        child: const MaterialApp(home: ScanResultScreen(barcode: 'not_found')),
+        child: MaterialApp(
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('ja')],
+          locale: const Locale('ja'),
+          home: const ScanResultScreen(barcode: 'not_found'),
+        ),
       ),
     );
 

@@ -3,9 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 /// 用語データモデル
 class Term {
   final String id;
-  final String name;
-  final String? reading;
-  final String description;
+  final Map<String, String> name; // Multilingual: {"ja": "橋渡し", "en": "Bridge"}
+  final String? reading; // Japanese reading only
+  final Map<String, String> description; // Multilingual
   final String category;
   final String? imageUrl;
   final List<String> relatedTermIds;
@@ -28,15 +28,28 @@ class Term {
   factory Term.fromMap(String id, Map<String, dynamic> map) {
     return Term(
       id: id,
-      name: map['name'] ?? '',
+      name: _parseMultilingualField(map['name']),
       reading: map['reading'],
-      description: map['description'] ?? '',
+      description: _parseMultilingualField(map['description']),
       category: map['category'] ?? 'basic',
       imageUrl: map['imageUrl'],
       relatedTermIds: List<String>.from(map['relatedTermIds'] ?? []),
       createdAt: (map['createdAt'] as Timestamp).toDate(),
       updatedAt: (map['updatedAt'] as Timestamp).toDate(),
     );
+  }
+
+  /// Parse multilingual field - supports both String (legacy) and Map (new)
+  static Map<String, String> _parseMultilingualField(dynamic field) {
+    if (field == null) {
+      return {'ja': ''};
+    } else if (field is String) {
+      // Legacy format: treat as Japanese
+      return {'ja': field};
+    } else if (field is Map) {
+      return Map<String, String>.from(field);
+    }
+    return {'ja': ''};
   }
 
   /// モデルをFirestore用データに変換
