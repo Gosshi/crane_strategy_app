@@ -63,7 +63,7 @@ class _CraneStrategyAppState extends ConsumerState<CraneStrategyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'クレーンゲーム攻略',
+      title: 'クレナビ',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,

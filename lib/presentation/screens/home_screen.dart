@@ -59,7 +59,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('クレーンゲーム攻略'),
+        title: const Text('クレナビ'),
         actions: [
           IconButton(
             icon: const Icon(Icons.book_outlined),

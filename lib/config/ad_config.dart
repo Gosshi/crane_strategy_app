@@ -17,17 +17,17 @@ class AdConfig {
   /// iOS バナー広告ユニットID
   static const String iosBannerAdUnitId = isTestMode
       ? 'ca-app-pub-3940256099942544/2934735716' // Googleテスト広告ID
-      : 'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY'; // TODO: 本番IDに置き換え
+      : 'ca-app-pub-5037180740248986/3751138129'; // 本番ID
 
   /// iOS インタースティシャル広告ユニットID
   static const String iosInterstitialAdUnitId = isTestMode
       ? 'ca-app-pub-3940256099942544/4411468910'
-      : 'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY'; // TODO: 本番IDに置き換え
+      : 'ca-app-pub-5037180740248986/3438795864'; // 本番ID
 
   /// iOS リワード広告ユニットID
   static const String iosRewardedAdUnitId = isTestMode
       ? 'ca-app-pub-3940256099942544/1712485313'
-      : 'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY'; // TODO: 本番IDに置き換え
+      : 'ca-app-pub-5037180740248986/5559043810'; // 本番ID
 
   // ========================================
   // Android広告ユニットID
@@ -36,17 +36,17 @@ class AdConfig {
   /// Android バナー広告ユニットID
   static const String androidBannerAdUnitId = isTestMode
       ? 'ca-app-pub-3940256099942544/6300978111' // Googleテスト広告ID
-      : 'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY'; // TODO: 本番IDに置き換え
+      : 'ca-app-pub-5037180740248986/4130072769'; // 本番ID
 
   /// Android インタースティシャル広告ユニットID
   static const String androidInterstitialAdUnitId = isTestMode
       ? 'ca-app-pub-3940256099942544/1033173712'
-      : 'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY'; // TODO: 本番IDに置き換え
+      : 'ca-app-pub-5037180740248986/3886869491'; // 本番ID
 
   /// Android リワード広告ユニットID
   static const String androidRewardedAdUnitId = isTestMode
       ? 'ca-app-pub-3940256099942544/5224354917'
-      : 'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY'; // TODO: 本番IDに置き換え
+      : 'ca-app-pub-5037180740248986/6827376530'; // 本番ID
 
   // ========================================
   // プラットフォーム別広告ユニットID取得
