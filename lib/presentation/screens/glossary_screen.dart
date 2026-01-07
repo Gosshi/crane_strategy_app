@@ -185,17 +185,25 @@ class _GlossaryScreenState extends ConsumerState<GlossaryScreen> {
       child: ListTile(
         title: Row(
           children: [
-            Text(
-              _getLocalizedText(term.name),
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+            Flexible(
+              child: Text(
+                _getLocalizedText(term.name),
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             if (term.reading != null) ...[
               const SizedBox(width: 8),
-              Text(
-                '（${term.reading}）',
-                style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+              Flexible(
+                child: Text(
+                  '（${term.reading}）',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: Colors.grey,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ],
