@@ -6,6 +6,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../data/models/strategy.dart';
 import '../../data/models/product.dart'; // Product class
 import '../../data/providers/strategy_repository_provider.dart';
+import '../../data/providers/premium_provider.dart';
 import '../../utils/seed_firestore.dart';
 import '../../services/ad_manager.dart';
 import '../widgets/strategy_card.dart';
@@ -165,13 +166,36 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 : _buildStrategyList(strategiesAsync),
           ),
 
-          // バナー広告（TODO: プレミアムユーザーは非表示）
-          if (_isBannerAdLoaded && _bannerAd != null)
-            Container(
-              height: 50,
-              alignment: Alignment.center,
-              child: AdWidget(ad: _bannerAd!),
-            ),
+          // バナー広告（プレミアムユーザーは非表示）
+          Consumer(
+            builder: (context, ref, child) {
+              final isPremiumAsync = ref.watch(isPremiumProvider);
+              return isPremiumAsync.when(
+                data: (isPremium) {
+                  if (_isBannerAdLoaded && _bannerAd != null && !isPremium) {
+                    return Container(
+                      height: 50,
+                      alignment: Alignment.center,
+                      child: AdWidget(ad: _bannerAd!),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+                loading: () => const SizedBox.shrink(),
+                error: (_, _) {
+                  // Error時は広告を表示（フォールバック）
+                  if (_isBannerAdLoaded && _bannerAd != null) {
+                    return Container(
+                      height: 50,
+                      alignment: Alignment.center,
+                      child: AdWidget(ad: _bannerAd!),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              );
+            },
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
