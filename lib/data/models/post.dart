@@ -10,6 +10,10 @@ class Post {
   final String? youtubeUrl;
   final DateTime createdAt;
   final DateTime? updatedAt;
+  final DateTime? deletedAt; // 論理削除用
+
+  /// 削除済みかどうか
+  bool get isDeleted => deletedAt != null;
 
   const Post({
     required this.id,
@@ -20,6 +24,7 @@ class Post {
     this.youtubeUrl,
     required this.createdAt,
     this.updatedAt,
+    this.deletedAt,
   });
 
   /// Firestoreのデータからモデルを作成
@@ -35,6 +40,9 @@ class Post {
       updatedAt: map['updatedAt'] != null
           ? (map['updatedAt'] as Timestamp).toDate()
           : null,
+      deletedAt: map['deletedAt'] != null
+          ? (map['deletedAt'] as Timestamp).toDate()
+          : null,
     );
   }
 
@@ -48,6 +56,7 @@ class Post {
       'youtubeUrl': youtubeUrl,
       'createdAt': Timestamp.fromDate(createdAt),
       if (updatedAt != null) 'updatedAt': Timestamp.fromDate(updatedAt!),
+      if (deletedAt != null) 'deletedAt': Timestamp.fromDate(deletedAt!),
     };
   }
 
@@ -61,6 +70,7 @@ class Post {
     String? youtubeUrl,
     DateTime? createdAt,
     DateTime? updatedAt,
+    DateTime? deletedAt,
   }) {
     return Post(
       id: id ?? this.id,
@@ -71,6 +81,7 @@ class Post {
       youtubeUrl: youtubeUrl ?? this.youtubeUrl,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
     );
   }
 }
