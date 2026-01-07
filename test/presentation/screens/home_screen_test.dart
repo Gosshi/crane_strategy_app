@@ -60,7 +60,7 @@ void main() {
     // Initial load might need pump
     await tester.pumpAndSettle();
 
-    expect(find.text('クレーンゲーム攻略'), findsOneWidget);
+    expect(find.text('クレナビ'), findsOneWidget);
     expect(find.text('Home Strategy'), findsOneWidget);
     expect(find.byType(TextField), findsOneWidget);
   });

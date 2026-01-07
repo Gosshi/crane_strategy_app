@@ -1,5 +1,5 @@
 name: crane_strategy_app
-description: "A new Flutter project."
+description: "クレナビ - UFOキャッチャー攻略＆コレクションアプリ"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -57,6 +57,7 @@ dependencies:
   audioplayers: ^6.1.0
   intl: ^0.19.0
   logger: ^2.5.0
+  google_mobile_ads: ^5.0.0
 
 dev_dependencies:
   flutter_test:
