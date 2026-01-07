@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:io';
 import '../../data/providers/auth_provider.dart';
 import '../../data/providers/audio_service_provider.dart';
+import '../../data/providers/premium_provider.dart';
 import '../../data/services/user_level_service.dart';
+import '../widgets/reward_ad_button.dart';
 import 'collection_screen.dart'; // collectionWithProductListProvider
 
 class AccountScreen extends ConsumerStatefulWidget {
@@ -152,6 +154,11 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
           ],
           const SizedBox(height: 24),
 
+          // プレミアムステータスセクション
+          _buildPremiumSection(theme),
+
+          const SizedBox(height: 24),
+
           // 効果音設定
           _buildSoundSettingsSection(theme),
         ],
@@ -259,6 +266,155 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
             },
             secondary: Icon(
               audioService.isSoundEnabled ? Icons.volume_up : Icons.volume_off,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPremiumSection(ThemeData theme) {
+    final isPremiumAsync = ref.watch(isPremiumProvider);
+    final remainingTimeAsync = ref.watch(remainingPremiumTimeProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'プレミアム機能',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.primary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        isPremiumAsync.when(
+          data: (isPremium) {
+            if (isPremium) {
+              return Column(
+                children: [
+                  Card(
+                    color: Colors.amber.withValues(alpha: 0.2),
+                    child: ListTile(
+                      leading: const Icon(
+                        Icons.stars,
+                        color: Colors.amber,
+                        size: 32,
+                      ),
+                      title: const Text(
+                        'プレミアム会員',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: remainingTimeAsync.when(
+                        data: (remaining) {
+                          if (remaining != null) {
+                            final hours = remaining.inHours;
+                            final minutes = remaining.inMinutes.remainder(60);
+                            return Text('残り時間: $hours時間$minutes分');
+                          }
+                          return const Text('サブスクリプション有効');
+                        },
+                        loading: () => const Text('読み込み中...'),
+                        error: (_, _) => const Text('24時間解放中'),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Card(
+                    child: Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.check_circle,
+                                color: Colors.green,
+                                size: 20,
+                              ),
+                              SizedBox(width: 8),
+                              Text('広告なし'),
+                            ],
+                          ),
+                          SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.check_circle,
+                                color: Colors.green,
+                                size: 20,
+                              ),
+                              SizedBox(width: 8),
+                              Text('限定バッジ（Phase 2で実装予定）'),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }
+            return Column(
+              children: [
+                const Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        Text(
+                          '広告を見て24時間プレミアム機能を体験！',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(height: 8),
+                        Text('プレミアム特典:', style: TextStyle(fontSize: 12)),
+                        SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Icon(Icons.check, size: 16, color: Colors.green),
+                            SizedBox(width: 4),
+                            Text('全ての広告が非表示', style: TextStyle(fontSize: 12)),
+                          ],
+                        ),
+                        SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Icon(Icons.check, size: 16, color: Colors.green),
+                            SizedBox(width: 4),
+                            Text(
+                              '限定バッジ（Phase 2）',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                RewardAdButton(
+                  title: '広告を見て24時間プレミアム体験',
+                  onRewarded: () async {
+                    await ref
+                        .read(premiumServiceProvider)
+                        .unlockPremiumFor24Hours();
+                    ref.invalidate(isPremiumProvider);
+                    ref.invalidate(remainingPremiumTimeProvider);
+                  },
+                ),
+              ],
+            );
+          },
+          loading: () => const Card(
+            child: ListTile(
+              leading: CircularProgressIndicator(),
+              title: Text('読み込み中...'),
+            ),
+          ),
+          error: (_, _) => const Card(
+            child: ListTile(
+              leading: Icon(Icons.error, color: Colors.red),
+              title: Text('エラーが発生しました'),
             ),
           ),
         ),

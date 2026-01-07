@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../services/ad_manager.dart';
+import '../../utils/logger.dart';
 
 /// リワード広告視聴ボタンウィジェット
 ///
@@ -31,10 +32,13 @@ class RewardAdButton extends ConsumerWidget {
       ),
       onPressed: () async {
         // リワード広告を表示
+        logger.d('[RewardAdButton] Requesting reward ad');
         final reward = await AdManager().showRewardedAd();
+        logger.d('[RewardAdButton] Reward result: $reward');
 
         if (reward != null) {
           // 広告を視聴したので報酬を付与
+          logger.i('[RewardAdButton] Calling onRewarded callback');
           onRewarded();
 
           if (context.mounted) {
@@ -48,6 +52,7 @@ class RewardAdButton extends ConsumerWidget {
           }
         } else {
           // 広告が表示できなかったか、ユーザーがキャンセルした
+          logger.w('[RewardAdButton] Reward is null');
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(

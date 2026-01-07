@@ -10,6 +10,7 @@ import '../../data/models/collection_item.dart';
 import '../../data/providers/collection_repository_provider.dart';
 import '../../data/providers/auth_provider.dart';
 import '../../data/providers/audio_service_provider.dart';
+import '../../data/providers/premium_provider.dart';
 import '../../data/models/strategy.dart';
 import '../../data/repositories/post_repository.dart';
 import 'package:url_launcher/url_launcher.dart'; // Attribution link
@@ -110,8 +111,19 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
             // 商品が見つかった時に効果音を再生（初回のみ）
             WidgetsBinding.instance.addPostFrameCallback((_) {
               ref.read(audioServiceProvider).playScanSuccess();
-              // インタースティシャル広告を表示（3回に1回）
-              AdManager().showInterstitialAdIfReady(type: 'scan');
+              // プレミアムユーザーはインタースティシャル広告をスキップ
+              final isPremiumAsync = ref.read(isPremiumProvider);
+              isPremiumAsync.when(
+                data: (isPremium) {
+                  if (!isPremium) {
+                    AdManager().showInterstitialAdIfReady(type: 'scan');
+                  }
+                },
+                loading: () =>
+                    AdManager().showInterstitialAdIfReady(type: 'scan'),
+                error: (_, _) =>
+                    AdManager().showInterstitialAdIfReady(type: 'scan'),
+              );
             });
             return _buildProductDetail(context, ref, product);
           },
