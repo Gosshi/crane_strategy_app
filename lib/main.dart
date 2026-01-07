@@ -81,6 +81,7 @@ class _CraneStrategyAppState extends ConsumerState<CraneStrategyApp> {
         Locale('zh', 'TW'), // 繁体中文
         Locale('ko'), // 韓国語
       ],
+      // デバイスの言語設定に従う（明示的なlocaleは削除）
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: ThemeMode.dark,

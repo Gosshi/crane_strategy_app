@@ -91,7 +91,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
-                    const Text('データを永続化するために、\nGoogleアカウントと連携しましょう。'),
+                    Text(AppLocalizations.of(context)!.linkGoogleAccount),
                     const SizedBox(height: 16),
                     FilledButton.icon(
                       onPressed: () async {
@@ -101,19 +101,29 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                               .linkWithGoogle();
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('連携に成功しました！')),
+                              SnackBar(
+                                content: Text(
+                                  AppLocalizations.of(context)!.linkSuccess,
+                                ),
+                              ),
                             );
                           }
                         } catch (e) {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('連携エラー: $e')),
+                              SnackBar(
+                                content: Text(
+                                  AppLocalizations.of(
+                                    context,
+                                  )!.linkError(e.toString()),
+                                ),
+                              ),
                             );
                           }
                         }
                       },
                       icon: const Icon(Icons.link),
-                      label: const Text('Googleアカウントと連携'),
+                      label: Text(AppLocalizations.of(context)!.linkWithGoogle),
                     ),
                     if (Platform.isIOS) ...[
                       const SizedBox(height: 12),
@@ -125,13 +135,23 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                                 .linkWithApple();
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('連携に成功しました！')),
+                                SnackBar(
+                                  content: Text(
+                                    AppLocalizations.of(context)!.linkSuccess,
+                                  ),
+                                ),
                               );
                             }
                           } catch (e) {
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('連携エラー: $e')),
+                                SnackBar(
+                                  content: Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    )!.linkError(e.toString()),
+                                  ),
+                                ),
                               );
                             }
                           }
@@ -141,7 +161,9 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                           foregroundColor: Colors.white,
                         ),
                         icon: const Icon(Icons.apple),
-                        label: const Text('Appleでサインイン'),
+                        label: Text(
+                          AppLocalizations.of(context)!.signInWithApple,
+                        ),
                       ),
                     ],
                   ],
@@ -149,11 +171,11 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
               ),
             ),
           ] else ...[
-            const Card(
+            Card(
               child: ListTile(
                 leading: Icon(Icons.check_circle, color: Colors.green),
-                title: Text('アカウント連携済み'),
-                subtitle: Text('データは安全に保存されています。'),
+                title: Text(AppLocalizations.of(context)!.accountLinked),
+                subtitle: Text(AppLocalizations.of(context)!.dataIsSafe),
               ),
             ),
           ],
