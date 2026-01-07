@@ -87,18 +87,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 final confirmed = await showDialog<bool>(
                   context: context,
                   builder: (context) => AlertDialog(
-                    title: const Text('データ投入'),
+                    title: Text(AppLocalizations.of(context)!.dataSeeding),
                     content: const Text(
                       'Firestoreに初期データを投入しますか？\n既存のデータは上書きされます。',
                     ),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context, false),
-                        child: const Text('キャンセル'),
+                        child: Text(AppLocalizations.of(context)!.cancel),
                       ),
                       TextButton(
                         onPressed: () => Navigator.pop(context, true),
-                        child: const Text('投入する'),
+                        child: Text(AppLocalizations.of(context)!.seed),
                       ),
                     ],
                   ),
@@ -109,15 +109,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     await seedFirestoreData();
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('データ投入が完了しました')),
+                        SnackBar(
+                          content: Text(
+                            AppLocalizations.of(context)!.seedSuccess,
+                          ),
+                        ),
                       );
                       ref.invalidate(strategiesProvider);
                     }
                   } catch (e) {
                     if (context.mounted) {
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text('エラー: $e')));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            AppLocalizations.of(context)!.error(e.toString()),
+                          ),
+                        ),
+                      );
                     }
                   }
                 }
@@ -211,7 +219,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return searchResultsAsync.when(
       data: (products) {
         if (products.isEmpty) {
-          return const Center(child: Text('見つかりませんでした'));
+          return Center(child: Text(AppLocalizations.of(context)!.notFound));
         }
         return ListView.builder(
           itemCount: products.length,
@@ -240,7 +248,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, stack) => Center(child: Text('エラー: $err')),
+      error: (err, stack) => Center(
+        child: Text(AppLocalizations.of(context)!.error(err.toString())),
+      ),
     );
   }
 
@@ -248,7 +258,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return strategiesAsync.when(
       data: (strategies) {
         if (strategies.isEmpty) {
-          return const Center(child: Text('攻略法がまだありません'));
+          return Center(
+            child: Text(AppLocalizations.of(context)!.noStrategiesYet),
+          );
         }
         return ListView.builder(
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -268,7 +280,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Center(child: Text('エラーが発生しました: $error')),
+      error: (error, stack) => Center(
+        child: Text(AppLocalizations.of(context)!.error(error.toString())),
+      ),
     );
   }
 }
