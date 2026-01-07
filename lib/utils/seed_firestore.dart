@@ -15,9 +15,13 @@ Future<void> seedFirestoreData() async {
   try {
     // 攻略法データの投入
     final strategiesBatch = firestore.batch();
+    final now = Timestamp.now();
+
     for (final strategy in initialStrategies) {
       final docRef = firestore.collection('strategies').doc(strategy.id);
-      strategiesBatch.set(docRef, strategy.toMap());
+      final data = strategy.toMap();
+      data['updatedAt'] = now; // 現在時刻で上書き
+      strategiesBatch.set(docRef, data);
     }
     await strategiesBatch.commit();
     debugPrint(
@@ -32,6 +36,15 @@ Future<void> seedFirestoreData() async {
     }
     await productsBatch.commit();
     debugPrint('Products seeding completed: ${initialProducts.length} items');
+
+    // 用語データの投入
+    final termsBatch = firestore.batch();
+    for (final term in initialTerms) {
+      final docRef = firestore.collection('terms').doc(term.id);
+      termsBatch.set(docRef, term.toMap());
+    }
+    await termsBatch.commit();
+    debugPrint('Terms seeding completed: ${initialTerms.length} items');
   } catch (e) {
     debugPrint('Seeding failed: $e');
     rethrow;

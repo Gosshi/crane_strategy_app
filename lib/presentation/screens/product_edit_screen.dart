@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/product.dart';
 import '../../data/providers/strategy_repository_provider.dart';
-import '../../data/repositories/user_service.dart';
+import '../../data/providers/auth_provider.dart';
 import 'package:go_router/go_router.dart';
 
 class ProductEditScreen extends ConsumerStatefulWidget {
@@ -18,6 +18,7 @@ class _ProductEditScreenState extends ConsumerState<ProductEditScreen> {
   late final TextEditingController _nameController;
   final _tagController = TextEditingController();
   bool _isSubmitting = false;
+  bool _hasPermission = true;
 
   final List<String> _categoryOptions = ['フィギュア', 'ぬいぐるみ', '雑貨', 'お菓子', 'その他'];
   final List<String> _cogOptions = ['上', '中', '下', '表', '裏', '個体差あり', '不明'];
@@ -33,6 +34,35 @@ class _ProductEditScreenState extends ConsumerState<ProductEditScreen> {
     _selectedCategories = List.from(widget.product.categories);
     _selectedCoGs = List.from(widget.product.centerOfGravity);
     _tags = List.from(widget.product.tags);
+
+    // 権限チェックを非同期で実行
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkPermission();
+    });
+  }
+
+  void _checkPermission() {
+    final currentUser = ref.read(currentUserProvider);
+    final creatorId = widget.product.creatorId;
+
+    // creatorIdがnullの場合は誰でも編集可能（レガシーデータ対応）
+    if (creatorId != null && currentUser?.uid != creatorId) {
+      setState(() {
+        _hasPermission = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('この商品を編集する権限がありません'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      // 少し待ってから戻る
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) {
+          context.pop();
+        }
+      });
+    }
   }
 
   @override
@@ -121,52 +151,23 @@ class _ProductEditScreenState extends ConsumerState<ProductEditScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 権限チェック：creatorIdが存在し、かつ現在のユーザーと一致しない場合
-    final currentUser = ref.watch(userServiceProvider).currentUser;
-    final creatorId = widget.product.creatorId;
-
-    if (creatorId != null && currentUser?.uid != creatorId) {
+    // 権限がない場合は読み込み中表示（自動的にpopされる）
+    if (!_hasPermission) {
       return Scaffold(
-        appBar: AppBar(title: const Text('権限エラー')),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.lock_outline, size: 80, color: Colors.grey[400]),
-                const SizedBox(height: 24),
-                const Text(
-                  'この商品を編集する権限がありません',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '商品は作成者のみが編集できます',
-                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 32),
-                FilledButton.icon(
-                  onPressed: () => context.pop(),
-                  icon: const Icon(Icons.arrow_back),
-                  label: const Text('戻る'),
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 12,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+        appBar: AppBar(title: const Text('商品情報の編集')),
+        body: const Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.lock, size: 64, color: Colors.grey),
+              SizedBox(height: 16),
+              Text('編集権限がありません'),
+            ],
           ),
         ),
       );
     }
 
-    // 権限がある場合は通常の編集画面を表示
     return Scaffold(
       appBar: AppBar(title: const Text('商品情報の編集')),
       body: SingleChildScrollView(

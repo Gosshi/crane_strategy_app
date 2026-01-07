@@ -9,14 +9,19 @@ import '../../data/models/product.dart';
 import '../../data/models/collection_item.dart';
 import '../../data/providers/collection_repository_provider.dart';
 import '../../data/providers/auth_provider.dart';
+import '../../data/providers/audio_service_provider.dart';
+import '../../data/providers/premium_provider.dart';
 import '../../data/models/strategy.dart';
 import '../../data/repositories/post_repository.dart';
 import 'package:url_launcher/url_launcher.dart'; // Attribution link
 import '../../data/repositories/yahoo_shopping_repository.dart';
+import '../../services/ad_manager.dart';
 import '../widgets/strategy_card.dart';
 import 'post_composer_screen.dart'; // 新規作成
 import 'package:confetti/confetti.dart';
 import '../widgets/confetti_overlay.dart';
+import '../../utils/share_utils.dart';
+import '../../l10n/app_localizations.dart';
 
 final productSearchProvider = FutureProvider.family<Product?, String>((
   ref,
@@ -88,7 +93,7 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
       controller: _confettiController,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('スキャン結果'),
+          title: Text(AppLocalizations.of(context)!.scanResult),
           leading: IconButton(
             icon: const Icon(Icons.close),
             onPressed: () {
@@ -104,19 +109,38 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
             if (product == null) {
               return _buildNotFound(context, ref);
             }
+            // 商品が見つかった時に効果音を再生（初回のみ）
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              ref.read(audioServiceProvider).playScanSuccess();
+              // プレミアムユーザーはインタースティシャル広告をスキップ
+              final isPremiumAsync = ref.read(isPremiumProvider);
+              isPremiumAsync.when(
+                data: (isPremium) {
+                  if (!isPremium) {
+                    AdManager().showInterstitialAdIfReady(type: 'scan');
+                  }
+                },
+                loading: () =>
+                    AdManager().showInterstitialAdIfReady(type: 'scan'),
+                error: (_, _) =>
+                    AdManager().showInterstitialAdIfReady(type: 'scan'),
+              );
+            });
             return _buildProductDetail(context, ref, product);
           },
-          loading: () => const Center(
+          loading: () => Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 CircularProgressIndicator(),
                 SizedBox(height: 16),
-                Text('商品を検索中...'),
+                Text(AppLocalizations.of(context)!.searching),
               ],
             ),
           ),
-          error: (err, stack) => Center(child: Text('エラーが発生しました: $err')),
+          error: (err, stack) => Center(
+            child: Text(AppLocalizations.of(context)!.error(err.toString())),
+          ),
         ),
         floatingActionButton: productAsync.when(
           data: (product) {
@@ -131,7 +155,7 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
                 );
               },
               icon: const Icon(Icons.edit),
-              label: const Text('攻略を投稿'),
+              label: Text(AppLocalizations.of(context)!.postStrategy),
             );
           },
           loading: () => null,
@@ -160,9 +184,9 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
 
     if (user == null) {
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('ログインが必要です (認証に失敗しました)')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.loginRequired)),
+        );
       }
       return;
     }
@@ -178,19 +202,24 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
       );
       await collectionRepo.addCollectionItem(user.uid, newItem);
 
-      // 紙吹雪を再生
+      // 紙吹雪と効果音を再生
       _confettiController.play();
+      ref.read(audioServiceProvider).playAcquisitionSuccess();
 
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('${product.name} をGETしました！')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.gotIt(product.name)),
+          ),
+        );
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('エラー: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.error(e.toString())),
+          ),
+        );
       }
     }
   }
@@ -252,6 +281,16 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
                       color: Colors.grey,
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  // 共有ボタン
+                  TextButton.icon(
+                    onPressed: () => ShareUtils.shareProduct(product),
+                    icon: const Icon(Icons.share, size: 16),
+                    label: Text(AppLocalizations.of(context)!.shareProduct),
+                    style: TextButton.styleFrom(
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ),
                   // 作成者のみ編集ボタンを表示
                   if (ref.read(currentUserProvider)?.uid ==
                       product.creatorId) ...[
@@ -261,7 +300,7 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
                         context.push('/product_edit', extra: product);
                       },
                       icon: const Icon(Icons.edit, size: 16),
-                      label: const Text('編集する'),
+                      label: Text(AppLocalizations.of(context)!.editProduct),
                       style: TextButton.styleFrom(
                         foregroundColor: Colors.grey,
                         visualDensity: VisualDensity.compact,
@@ -279,7 +318,7 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
             child: ElevatedButton.icon(
               onPressed: () => _addToCollection(context, ref, product),
               icon: const Icon(Icons.emoji_events),
-              label: const Text('この商品をGETした！'),
+              label: Text(AppLocalizations.of(context)!.gotThisProduct),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
                 foregroundColor: Colors.white,
@@ -301,10 +340,12 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
           relatedStrategiesAsync.when(
             data: (strategies) {
               if (strategies.isEmpty) {
-                return const Card(
+                return Card(
                   child: Padding(
                     padding: EdgeInsets.all(16),
-                    child: Text('関連する攻略法はまだありません'),
+                    child: Text(
+                      AppLocalizations.of(context)!.noRelatedStrategies,
+                    ),
                   ),
                 );
               }
@@ -328,7 +369,9 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
                 child: CircularProgressIndicator(),
               ),
             ),
-            error: (e, s) => Text('攻略法の読み込みエラー: $e'),
+            error: (e, s) => Text(
+              AppLocalizations.of(context)!.loadStrategyError(e.toString()),
+            ),
           ),
 
           const SizedBox(height: 24),
@@ -348,10 +391,10 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
               return postsAsync.when(
                 data: (posts) {
                   if (posts.isEmpty) {
-                    return const Center(
+                    return Center(
                       child: Padding(
                         padding: EdgeInsets.all(16.0),
-                        child: Text('まだ投稿はありません。\n最初の攻略情報を投稿しよう！'),
+                        child: Text(AppLocalizations.of(context)!.noPostsYet),
                       ),
                     );
                   }
@@ -403,15 +446,23 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
                                           ScaffoldMessenger.of(
                                             context,
                                           ).showSnackBar(
-                                            const SnackBar(
-                                              content: Text('動画を開けませんでした'),
+                                            SnackBar(
+                                              content: Text(
+                                                AppLocalizations.of(
+                                                  context,
+                                                )!.cannotOpenVideo,
+                                              ),
                                             ),
                                           );
                                         }
                                       }
                                     },
                                     icon: const Icon(Icons.play_circle_fill),
-                                    label: const Text('動画を見る (YouTube)'),
+                                    label: Text(
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.watchVideoYouTube,
+                                    ),
                                     style: FilledButton.styleFrom(
                                       backgroundColor: Colors.red,
                                       foregroundColor: Colors.white,
@@ -430,108 +481,133 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
                                       fontSize: 12,
                                     ),
                                   ),
-                                  // 自分の投稿のみ編集・削除ボタンを表示
-                                  if (isOwner)
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        IconButton(
-                                          onPressed: () {
-                                            context.push(
-                                              '/post_edit',
-                                              extra: post,
-                                            );
-                                          },
-                                          icon: const Icon(
-                                            Icons.edit,
-                                            size: 18,
-                                          ),
-                                          tooltip: '編集',
-                                          visualDensity: VisualDensity.compact,
-                                          color: Colors.grey[600],
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      // 共有ボタン
+                                      IconButton(
+                                        icon: const Icon(Icons.share, size: 18),
+                                        onPressed: () => ShareUtils.sharePost(
+                                          post,
+                                          productName: product.name,
                                         ),
-                                        IconButton(
-                                          onPressed: () async {
-                                            final shouldDelete =
-                                                await showDialog<bool>(
-                                                  context: context,
-                                                  builder: (context) => AlertDialog(
-                                                    title: const Text('投稿を削除'),
-                                                    content: const Text(
-                                                      'この投稿を削除してもよろしいですか？',
-                                                    ),
-                                                    actions: [
-                                                      TextButton(
-                                                        onPressed: () =>
-                                                            Navigator.pop(
-                                                              context,
-                                                              false,
-                                                            ),
-                                                        child: const Text(
-                                                          'キャンセル',
+                                        tooltip: '共有',
+                                        visualDensity: VisualDensity.compact,
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      // 自分の投稿のみ編集・削除ボタンを表示
+                                      if (isOwner)
+                                        Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            IconButton(
+                                              onPressed: () {
+                                                context.push(
+                                                  '/post_edit',
+                                                  extra: post,
+                                                );
+                                              },
+                                              icon: const Icon(
+                                                Icons.edit,
+                                                size: 18,
+                                              ),
+                                              tooltip: '編集',
+                                              visualDensity:
+                                                  VisualDensity.compact,
+                                              color: Colors.grey[600],
+                                            ),
+                                            IconButton(
+                                              onPressed: () async {
+                                                final shouldDelete =
+                                                    await showDialog<bool>(
+                                                      context: context,
+                                                      builder: (context) => AlertDialog(
+                                                        title: const Text(
+                                                          '投稿を削除',
                                                         ),
-                                                      ),
-                                                      FilledButton(
-                                                        onPressed: () =>
-                                                            Navigator.pop(
-                                                              context,
-                                                              true,
+                                                        content: const Text(
+                                                          'この投稿を削除してもよろしいですか？',
+                                                        ),
+                                                        actions: [
+                                                          TextButton(
+                                                            onPressed: () =>
+                                                                Navigator.pop(
+                                                                  context,
+                                                                  false,
+                                                                ),
+                                                            child: const Text(
+                                                              'キャンセル',
                                                             ),
-                                                        style:
-                                                            FilledButton.styleFrom(
-                                                              backgroundColor:
-                                                                  Colors.red,
+                                                          ),
+                                                          FilledButton(
+                                                            onPressed: () =>
+                                                                Navigator.pop(
+                                                                  context,
+                                                                  true,
+                                                                ),
+                                                            style:
+                                                                FilledButton.styleFrom(
+                                                                  backgroundColor:
+                                                                      Colors
+                                                                          .red,
+                                                                ),
+                                                            child: const Text(
+                                                              '削除',
                                                             ),
-                                                        child: const Text('削除'),
+                                                          ),
+                                                        ],
                                                       ),
-                                                    ],
-                                                  ),
-                                                );
+                                                    );
 
-                                            if (shouldDelete == true) {
-                                              try {
-                                                final postRepository = ref.read(
-                                                  postRepositoryProvider,
-                                                );
-                                                await postRepository.deletePost(
-                                                  post.id,
-                                                );
-                                                if (context.mounted) {
-                                                  ScaffoldMessenger.of(
-                                                    context,
-                                                  ).showSnackBar(
-                                                    const SnackBar(
-                                                      content: Text(
-                                                        '投稿を削除しました',
-                                                      ),
-                                                    ),
-                                                  );
+                                                if (shouldDelete == true) {
+                                                  try {
+                                                    final postRepository = ref
+                                                        .read(
+                                                          postRepositoryProvider,
+                                                        );
+                                                    await postRepository
+                                                        .deletePost(post.id);
+                                                    if (context.mounted) {
+                                                      ScaffoldMessenger.of(
+                                                        context,
+                                                      ).showSnackBar(
+                                                        const SnackBar(
+                                                          content: Text(
+                                                            '投稿を削除しました',
+                                                          ),
+                                                        ),
+                                                      );
+                                                    }
+                                                  } catch (e) {
+                                                    if (context.mounted) {
+                                                      ScaffoldMessenger.of(
+                                                        context,
+                                                      ).showSnackBar(
+                                                        SnackBar(
+                                                          content: Text(
+                                                            '削除エラー: $e',
+                                                          ),
+                                                        ),
+                                                      );
+                                                    }
+                                                  }
                                                 }
-                                              } catch (e) {
-                                                if (context.mounted) {
-                                                  ScaffoldMessenger.of(
-                                                    context,
-                                                  ).showSnackBar(
-                                                    SnackBar(
-                                                      content: Text(
-                                                        '削除エラー: $e',
-                                                      ),
-                                                    ),
-                                                  );
-                                                }
-                                              }
-                                            }
-                                          },
-                                          icon: const Icon(
-                                            Icons.delete,
-                                            size: 18,
-                                          ),
-                                          tooltip: '削除',
-                                          visualDensity: VisualDensity.compact,
-                                          color: Colors.red[400],
+                                              },
+                                              icon: const Icon(
+                                                Icons.delete,
+                                                size: 18,
+                                              ),
+                                              tooltip: '削除',
+                                              visualDensity:
+                                                  VisualDensity.compact,
+                                              color: Colors.red[400],
+                                            ),
+                                          ],
                                         ),
-                                      ],
-                                    ),
+                                    ],
+                                  ),
                                 ],
                               ),
                             ],
@@ -542,7 +618,11 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
                   );
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (err, stack) => Center(child: Text('エラーが発生しました: $err')),
+                error: (err, stack) => Center(
+                  child: Text(
+                    AppLocalizations.of(context)!.error(err.toString()),
+                  ),
+                ),
               );
             },
           ),
@@ -602,13 +682,13 @@ class __YahooApiSearchSectionState
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             CircularProgressIndicator(),
             SizedBox(height: 16),
-            Text('Yahoo!ショッピングから情報を検索中...'),
+            Text(AppLocalizations.of(context)!.yahooSearching),
           ],
         ),
       );
@@ -664,7 +744,7 @@ class __YahooApiSearchSectionState
                   );
                 },
                 icon: const Icon(Icons.edit),
-                label: const Text('この情報を使って登録'),
+                label: Text(AppLocalizations.of(context)!.registerWithThis),
               ),
               const SizedBox(height: 16),
               // Yahoo! Shopping Attribution
@@ -711,7 +791,7 @@ class __YahooApiSearchSectionState
             const SizedBox(height: 32),
             FilledButton(
               onPressed: () => context.go('/'),
-              child: const Text('ホームに戻る'),
+              child: Text(AppLocalizations.of(context)!.returnHome),
             ),
             const SizedBox(height: 16),
             TextButton.icon(
@@ -719,7 +799,7 @@ class __YahooApiSearchSectionState
                 context.push('/product_register', extra: widget.barcode);
               },
               icon: const Icon(Icons.add_circle_outline),
-              label: const Text('手動で登録する'),
+              label: Text(AppLocalizations.of(context)!.manualRegister),
             ),
           ],
         ),

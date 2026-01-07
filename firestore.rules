@@ -34,10 +34,9 @@ service cloud.firestore {
       allow delete: if false; // 削除は管理者のみ (将来的)
     }
     
-    // 攻略法: 誰でも閲覧可, 書き込み不可
+    // 攻略法: 一時的に全て許可（デバッグ用）
     match /strategies/{strategyId} {
-      allow read: if true;
-      allow write: if false;
+      allow read, write: if true;
     }
 
     // 投稿: 誰でも閲覧可, 認証済みなら作成可, 投稿者のみ編集・削除可
@@ -46,6 +45,12 @@ service cloud.firestore {
       allow create: if request.auth != null;
       // 更新・削除: 投稿者本人のみ許可
       allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // 用語集: 誰でも閲覧可, 書き込み不可 (管理者のみ)
+    match /terms/{termId} {
+      allow read: if true;
+      allow write: if false;
     }
   }
 }

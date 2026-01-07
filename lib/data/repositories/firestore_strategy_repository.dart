@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../utils/logger.dart';
 import '../models/product.dart';
 import '../models/strategy.dart';
 import 'strategy_repository.dart';
@@ -12,10 +13,59 @@ class FirestoreStrategyRepository implements StrategyRepository {
 
   @override
   Future<List<Strategy>> fetchStrategies() async {
-    final snapshot = await _firestore.collection('strategies').get();
-    return snapshot.docs
-        .map((doc) => Strategy.fromMap(doc.id, doc.data()))
-        .toList();
+    try {
+      logger.d('[FirestoreStrategyRepository] Fetching strategies...');
+      logger.i(
+        '[FirestoreStrategyRepository] Firestore instance: ${_firestore.app.name}',
+      );
+      logger.i(
+        '[FirestoreStrategyRepository] Project: ${_firestore.app.options.projectId}',
+      );
+
+      // キャッシュを使わずにサーバーから直接取得
+      final snapshot = await _firestore
+          .collection('strategies')
+          .get(const GetOptions(source: Source.server));
+      logger.i(
+        '[FirestoreStrategyRepository] Retrieved ${snapshot.docs.length} documents from SERVER',
+      );
+
+      final strategies = <Strategy>[];
+      for (final doc in snapshot.docs) {
+        try {
+          logger.d('[FirestoreStrategyRepository] Processing doc: ${doc.id}');
+          final strategy = Strategy.fromMap(doc.id, doc.data());
+          strategies.add(strategy);
+        } catch (e) {
+          logger.e(
+            '[FirestoreStrategyRepository] Error parsing doc ${doc.id}: $e',
+          );
+          logger.e('[FirestoreStrategyRepository] Doc data: ${doc.data()}');
+        }
+      }
+
+      logger.i(
+        '[FirestoreStrategyRepository] Successfully parsed ${strategies.length} strategies',
+      );
+      return strategies;
+    } on FirebaseException catch (e) {
+      logger.e('[FirestoreStrategyRepository] FirebaseException: ${e.code}');
+      logger.e('[FirestoreStrategyRepository] Message: ${e.message}');
+      logger.e('[FirestoreStrategyRepository] Plugin: ${e.plugin}');
+      if (e.code == 'permission-denied') {
+        logger.e(
+          '[FirestoreStrategyRepository] PERMISSION DENIED - Check Firestore Rules!',
+        );
+      }
+      rethrow;
+    } catch (e, stackTrace) {
+      logger.e(
+        '[FirestoreStrategyRepository] Error fetching strategies: $e',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
   }
 
   @override

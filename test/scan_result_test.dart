@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:crane_strategy_app/l10n/app_localizations.dart';
 import 'package:crane_strategy_app/data/repositories/mock_strategy_repository.dart';
 import 'package:crane_strategy_app/data/providers/strategy_repository_provider.dart';
 import 'package:crane_strategy_app/data/models/strategy.dart';
@@ -25,13 +27,14 @@ class MockTestRepository extends MockStrategyRepository {
   @override
   Future<List<Strategy>> fetchStrategiesByIds(List<String> ids) async {
     return [
-      const Strategy(
+      Strategy(
         id: '1',
         title: {'ja': 'Test Strategy'},
         description: {'ja': 'Desc'},
         settingType: 'Type',
         thumbnailUrl: 'http://example.com/thumb.png',
         videoId: 'vid',
+        updatedAt: DateTime.now(),
       ),
     ];
   }
@@ -54,7 +57,17 @@ void main() {
         overrides: [
           strategyRepositoryProvider.overrideWithValue(MockTestRepository()),
         ],
-        child: const MaterialApp(home: ScanResultScreen(barcode: 'found')),
+        child: MaterialApp(
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('ja')],
+          locale: const Locale('ja'),
+          home: const ScanResultScreen(barcode: 'found'),
+        ),
       ),
     );
 
@@ -80,7 +93,17 @@ void main() {
         overrides: [
           strategyRepositoryProvider.overrideWithValue(MockTestRepository()),
         ],
-        child: const MaterialApp(home: ScanResultScreen(barcode: 'not_found')),
+        child: MaterialApp(
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('ja')],
+          locale: const Locale('ja'),
+          home: const ScanResultScreen(barcode: 'not_found'),
+        ),
       ),
     );
 

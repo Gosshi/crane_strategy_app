@@ -2,14 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:io';
 import '../../data/providers/auth_provider.dart';
+import '../../data/providers/audio_service_provider.dart';
+import '../../data/providers/premium_provider.dart';
 import '../../data/services/user_level_service.dart';
+import '../widgets/reward_ad_button.dart';
 import 'collection_screen.dart'; // collectionWithProductListProvider
+import '../../l10n/app_localizations.dart';
 
-class AccountScreen extends ConsumerWidget {
+class AccountScreen extends ConsumerStatefulWidget {
   const AccountScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AccountScreen> createState() => _AccountScreenState();
+}
+
+class _AccountScreenState extends ConsumerState<AccountScreen> {
+  @override
+  Widget build(BuildContext context) {
     final user = ref.watch(currentUserProvider);
     final theme = Theme.of(context);
 
@@ -20,7 +29,9 @@ class AccountScreen extends ConsumerWidget {
     final isAnonymous = user.isAnonymous;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('アカウント設定')),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.accountSettings),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -37,7 +48,9 @@ class AccountScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    isAnonymous ? 'ゲストユーザー' : (user.displayName ?? 'ユーザー'),
+                    isAnonymous
+                        ? AppLocalizations.of(context)!.guestUser
+                        : (user.displayName ?? 'ユーザー'),
                     style: theme.textTheme.titleLarge,
                   ),
                   const SizedBox(height: 8),
@@ -78,7 +91,7 @@ class AccountScreen extends ConsumerWidget {
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
-                    const Text('データを永続化するために、\nGoogleアカウントと連携しましょう。'),
+                    Text(AppLocalizations.of(context)!.linkGoogleAccount),
                     const SizedBox(height: 16),
                     FilledButton.icon(
                       onPressed: () async {
@@ -88,19 +101,29 @@ class AccountScreen extends ConsumerWidget {
                               .linkWithGoogle();
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('連携に成功しました！')),
+                              SnackBar(
+                                content: Text(
+                                  AppLocalizations.of(context)!.linkSuccess,
+                                ),
+                              ),
                             );
                           }
                         } catch (e) {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('連携エラー: $e')),
+                              SnackBar(
+                                content: Text(
+                                  AppLocalizations.of(
+                                    context,
+                                  )!.linkError(e.toString()),
+                                ),
+                              ),
                             );
                           }
                         }
                       },
                       icon: const Icon(Icons.link),
-                      label: const Text('Googleアカウントと連携'),
+                      label: Text(AppLocalizations.of(context)!.linkWithGoogle),
                     ),
                     if (Platform.isIOS) ...[
                       const SizedBox(height: 12),
@@ -112,13 +135,23 @@ class AccountScreen extends ConsumerWidget {
                                 .linkWithApple();
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('連携に成功しました！')),
+                                SnackBar(
+                                  content: Text(
+                                    AppLocalizations.of(context)!.linkSuccess,
+                                  ),
+                                ),
                               );
                             }
                           } catch (e) {
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('連携エラー: $e')),
+                                SnackBar(
+                                  content: Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    )!.linkError(e.toString()),
+                                  ),
+                                ),
                               );
                             }
                           }
@@ -128,7 +161,9 @@ class AccountScreen extends ConsumerWidget {
                           foregroundColor: Colors.white,
                         ),
                         icon: const Icon(Icons.apple),
-                        label: const Text('Appleでサインイン'),
+                        label: Text(
+                          AppLocalizations.of(context)!.signInWithApple,
+                        ),
                       ),
                     ],
                   ],
@@ -136,14 +171,23 @@ class AccountScreen extends ConsumerWidget {
               ),
             ),
           ] else ...[
-            const Card(
+            Card(
               child: ListTile(
                 leading: Icon(Icons.check_circle, color: Colors.green),
-                title: Text('アカウント連携済み'),
-                subtitle: Text('データは安全に保存されています。'),
+                title: Text(AppLocalizations.of(context)!.accountLinked),
+                subtitle: Text(AppLocalizations.of(context)!.dataIsSafe),
               ),
             ),
           ],
+          const SizedBox(height: 24),
+
+          // プレミアムステータスセクション
+          _buildPremiumSection(theme),
+
+          const SizedBox(height: 24),
+
+          // 効果音設定
+          _buildSoundSettingsSection(theme),
         ],
       ),
     );
@@ -221,6 +265,203 @@ class AccountScreen extends ConsumerWidget {
       },
       loading: () => const CircularProgressIndicator(),
       error: (e, s) => const SizedBox.shrink(),
+    );
+  }
+
+  Widget _buildSoundSettingsSection(ThemeData theme) {
+    final audioService = ref.watch(audioServiceProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '設定',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.primary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Card(
+          child: SwitchListTile(
+            title: Text(AppLocalizations.of(context)!.soundEffects),
+            subtitle: Text(AppLocalizations.of(context)!.playSoundOnScan),
+            value: audioService.isSoundEnabled,
+            onChanged: (value) {
+              audioService.setSoundEnabled(value);
+              setState(() {}); // UIを更新
+            },
+            secondary: Icon(
+              audioService.isSoundEnabled ? Icons.volume_up : Icons.volume_off,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPremiumSection(ThemeData theme) {
+    final isPremiumAsync = ref.watch(isPremiumProvider);
+    final remainingTimeAsync = ref.watch(remainingPremiumTimeProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          AppLocalizations.of(context)!.premiumFeatures,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.primary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        isPremiumAsync.when(
+          data: (isPremium) {
+            if (isPremium) {
+              return Column(
+                children: [
+                  Card(
+                    color: Colors.amber.withValues(alpha: 0.2),
+                    child: ListTile(
+                      leading: const Icon(
+                        Icons.stars,
+                        color: Colors.amber,
+                        size: 32,
+                      ),
+                      title: const Text(
+                        'プレミアム会員',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: remainingTimeAsync.when(
+                        data: (remaining) {
+                          if (remaining != null) {
+                            final hours = remaining.inHours;
+                            final minutes = remaining.inMinutes.remainder(60);
+                            return Text(
+                              AppLocalizations.of(
+                                context,
+                              )!.remainingTime(hours, minutes),
+                            );
+                          }
+                          return Text(
+                            AppLocalizations.of(context)!.subscriptionActive,
+                          );
+                        },
+                        loading: () =>
+                            Text(AppLocalizations.of(context)!.loading),
+                        error: (_, _) =>
+                            Text(AppLocalizations.of(context)!.limited24Hours),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Card(
+                    child: Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.check_circle,
+                                color: Colors.green,
+                                size: 20,
+                              ),
+                              SizedBox(width: 8),
+                              Text(AppLocalizations.of(context)!.noAds),
+                            ],
+                          ),
+                          SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.check_circle,
+                                color: Colors.green,
+                                size: 20,
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                AppLocalizations.of(context)!.exclusiveBadge,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }
+            return Column(
+              children: [
+                Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        Text(
+                          '広告を見て24時間プレミアム機能を体験！',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          AppLocalizations.of(context)!.premiumBenefits,
+                          style: TextStyle(fontSize: 12),
+                        ),
+                        SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Icon(Icons.check, size: 16, color: Colors.green),
+                            SizedBox(width: 4),
+                            Text(
+                              AppLocalizations.of(context)!.allAdsHidden,
+                              style: TextStyle(fontSize: 12),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Icon(Icons.check, size: 16, color: Colors.green),
+                            SizedBox(width: 4),
+                            Text(
+                              '限定バッジ（Phase 2）',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                RewardAdButton(
+                  title: '広告を見て24時間プレミアム体験',
+                  onRewarded: () async {
+                    await ref
+                        .read(premiumServiceProvider)
+                        .unlockPremiumFor24Hours();
+                    ref.invalidate(isPremiumProvider);
+                    ref.invalidate(remainingPremiumTimeProvider);
+                  },
+                ),
+              ],
+            );
+          },
+          loading: () => Card(
+            child: ListTile(
+              leading: CircularProgressIndicator(),
+              title: Text(AppLocalizations.of(context)!.loading),
+            ),
+          ),
+          error: (_, _) => Card(
+            child: ListTile(
+              leading: Icon(Icons.error, color: Colors.red),
+              title: Text(AppLocalizations.of(context)!.errorOccurred),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

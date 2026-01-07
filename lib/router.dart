@@ -12,6 +12,8 @@ import 'presentation/screens/product_edit_screen.dart'; // Import
 import 'presentation/screens/post_edit_screen.dart'; // Import
 import 'presentation/screens/collection_screen.dart';
 import 'presentation/screens/account_screen.dart';
+import 'presentation/screens/glossary_screen.dart';
+import 'presentation/screens/term_detail_screen.dart';
 
 /// GoRouter の設定
 final router = GoRouter(
@@ -94,6 +96,19 @@ final router = GoRouter(
       builder: (context, state) {
         final post = state.extra as Post;
         return PostEditScreen(post: post);
+      },
+    ),
+    GoRoute(
+      path: '/glossary',
+      name: 'glossary',
+      builder: (context, state) => const GlossaryScreen(),
+    ),
+    GoRoute(
+      path: '/term/:id',
+      name: 'term_detail',
+      builder: (context, state) {
+        final termId = state.pathParameters['id']!;
+        return TermDetailScreen(termId: termId);
       },
     ),
   ],

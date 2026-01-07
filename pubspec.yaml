@@ -1,5 +1,5 @@
 name: crane_strategy_app
-description: "A new Flutter project."
+description: "クレナビ - UFOキャッチャー攻略＆コレクションアプリ"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -30,6 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -53,6 +55,12 @@ dependencies:
   http: ^1.6.0
   share_plus: ^12.0.1
   confetti: ^0.8.0
+  connectivity_plus: ^6.1.4
+  audioplayers: ^6.1.0
+  intl: ^0.20.2
+  logger: ^2.5.0
+  google_mobile_ads: ^5.0.0
+  shared_preferences: ^2.3.3
 
 dev_dependencies:
   flutter_test:
@@ -74,6 +82,7 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  generate: true  # Enable ARB files generation
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
@@ -81,9 +90,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  assets:
+    - assets/sounds/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
