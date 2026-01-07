@@ -55,13 +55,24 @@ void main() {
             MockHomeTestRepository(),
           ),
         ],
-        child: MaterialApp(home: const HomeScreen()),
+        child: MaterialApp(
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('ja')],
+          locale: const Locale('ja'),
+          home: const HomeScreen(),
+        ),
       ),
     );
 
     // Initial load might need pump
     await tester.pumpAndSettle();
 
+    // Updated expectations to match AppLocalizations
     expect(find.text('クレナビ'), findsOneWidget);
     expect(find.text('Home Strategy'), findsOneWidget);
     expect(find.byType(TextField), findsOneWidget);
@@ -75,7 +86,17 @@ void main() {
             MockHomeTestRepository(),
           ),
         ],
-        child: MaterialApp(home: const HomeScreen()),
+        child: MaterialApp(
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('ja')],
+          locale: const Locale('ja'),
+          home: const HomeScreen(),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -102,7 +123,17 @@ void main() {
             MockHomeTestRepository(),
           ),
         ],
-        child: MaterialApp(home: const HomeScreen()),
+        child: MaterialApp(
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('ja')],
+          locale: const Locale('ja'),
+          home: const HomeScreen(),
+        ),
       ),
     );
     await tester.pumpAndSettle();
