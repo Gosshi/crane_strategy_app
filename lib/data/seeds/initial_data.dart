@@ -8,7 +8,10 @@ import '../models/term.dart';
 final List<Strategy> initialStrategies = [
   Strategy(
     id: '1',
-    title: {'ja': '橋渡し・基本の縦ハメ', 'en': 'Bridge - Vertical Stuck Method'},
+    title: {
+      'ja': '橋渡し・基本の縦ハメ',
+      'en': 'Bridge - Basic Vertical Positioning Technique',
+    },
     description: {
       'ja': '橋渡しの基本となる縦ハメの手順です。アームのパワーが強い場合に有効です。',
       'en':
@@ -21,7 +24,7 @@ final List<Strategy> initialStrategies = [
   ),
   Strategy(
     id: '2',
-    title: {'ja': '橋渡し・横ハメのコツ', 'en': 'Bridge - Horizontal Stuck Tips'},
+    title: {'ja': '橋渡し・横ハメのコツ', 'en': 'Bridge - Horizontal Positioning Tips'},
     description: {
       'ja': '横にはまってしまった場合のリカバリー方法と、そこからの寄せについて解説します。',
       'en':
