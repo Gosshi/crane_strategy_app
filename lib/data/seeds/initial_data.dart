@@ -516,4 +516,306 @@ final List<Term> initialTerms = [
     createdAt: DateTime.now(),
     updatedAt: DateTime.now(),
   ),
+
+  // 追加用語 (32-51)
+  Term(
+    id: 'term_jackpot',
+    name: {'ja': 'ジャックポット', 'en': 'Jackpot'},
+    reading: 'じゃっくぽっと',
+    description: {
+      'ja': '複数の景品をまとめて獲得できる状態や設定。一度に大量の景品が落ちることを指します。',
+      'en':
+          'A state or setting where multiple prizes can be won at once. Refers to dropping many prizes simultaneously.',
+    },
+    category: 'machine',
+    imageUrl: null,
+    relatedTermIds: const [],
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
+  ),
+  Term(
+    id: 'term_probability',
+    name: {'ja': '確率変動', 'en': 'Probability Shift'},
+    reading: 'かくりつへんどう',
+    description: {
+      'ja': '一定回数プレイ後にアームの力が強くなる仕組み。機械側で設定された確率に基づいて変化します。',
+      'en':
+          'Mechanism where arm power increases after a certain number of plays. Changes based on probability settings in the machine.',
+    },
+    category: 'machine',
+    imageUrl: null,
+    relatedTermIds: const ['term_setting_check'],
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
+  ),
+  Term(
+    id: 'term_setting_check',
+    name: {'ja': '設定判別', 'en': 'Setting Check'},
+    reading: 'せっていはんべつ',
+    description: {
+      'ja': 'クレーンゲーム機の設定を確認すること。アームの力や確率設定を推測します。',
+      'en':
+          'Checking the settings of a crane game machine. Estimating arm power and probability settings.',
+    },
+    category: 'technique',
+    imageUrl: null,
+    relatedTermIds: const ['term_probability'],
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
+  ),
+  Term(
+    id: 'term_assist',
+    name: {'ja': '店員アシスト', 'en': 'Staff Assist'},
+    reading: 'てんいんあしすと',
+    description: {
+      'ja': '店員に景品の位置を調整してもらうこと。通常は1回のプレイで取れる位置に移動してもらえます。',
+      'en':
+          'Having staff adjust prize position. Usually moved to a position where it can be won in one play.',
+    },
+    category: 'basic',
+    imageUrl: null,
+    relatedTermIds: const [],
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
+  ),
+  Term(
+    id: 'term_pull_back',
+    name: {'ja': '引き戻し', 'en': 'Pull Back'},
+    reading: 'ひきもどし',
+    description: {
+      'ja': 'アームで景品を手前に引き戻す技術。バー設定などで有効な手法です。',
+      'en':
+          'Technique of pulling the prize toward you with the arm. Effective for bar setups.',
+    },
+    category: 'technique',
+    imageUrl: null,
+    relatedTermIds: const ['term_bar'],
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
+  ),
+  Term(
+    id: 'term_dig',
+    name: {'ja': '掘り', 'en': 'Dig'},
+    reading: 'ほり',
+    description: {
+      'ja': '景品の下や隙間にアームを差し込んで持ち上げる技術。箱モノ景品で多用されます。',
+      'en':
+          'Technique of inserting the arm under or between prizes to lift them. Commonly used for boxed prizes.',
+    },
+    category: 'technique',
+    imageUrl: null,
+    relatedTermIds: const ['term_box'],
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
+  ),
+  Term(
+    id: 'term_shake',
+    name: {'ja': '揺らし', 'en': 'Shake'},
+    reading: 'ゆらし',
+    description: {
+      'ja': 'アームで景品を揺らして落とす技術。吊り橋設定などで使用されます。',
+      'en':
+          'Technique of shaking the prize with the arm to drop it. Used in suspension bridge setups.',
+    },
+    category: 'technique',
+    imageUrl: null,
+    relatedTermIds: const ['term_bridge'],
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
+  ),
+  Term(
+    id: 'term_rotation',
+    name: {'ja': '回転', 'en': 'Rotation'},
+    reading: 'かいてん',
+    description: {
+      'ja': 'アームの上で景品を回転させる技術。特定の向きに調整するために使います。',
+      'en':
+          'Technique of rotating the prize on the arm. Used to adjust to specific orientation.',
+    },
+    category: 'technique',
+    imageUrl: null,
+    relatedTermIds: const [],
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
+  ),
+  Term(
+    id: 'term_tilt',
+    name: {'ja': '傾け', 'en': 'Tilt'},
+    reading: 'かたむけ',
+    description: {
+      'ja': '景品を斜めに傾けて落としやすくする技術。バランスを崩して獲得します。',
+      'en':
+          'Technique of tilting the prize diagonally to make it easier to drop. Win by breaking balance.',
+    },
+    category: 'technique',
+    imageUrl: null,
+    relatedTermIds: const [],
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
+  ),
+  Term(
+    id: 'term_sandwich',
+    name: {'ja': 'サンドイッチ', 'en': 'Sandwich'},
+    reading: 'さんどいっち',
+    description: {
+      'ja': '2つのアームの爪で景品を挟んで持ち上げる基本技術。最も一般的な獲得方法です。',
+      'en':
+          'Basic technique of sandwiching and lifting prize between two arm claws. Most common winning method.',
+    },
+    category: 'technique',
+    imageUrl: null,
+    relatedTermIds: const [],
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
+  ),
+  Term(
+    id: 'term_hook',
+    name: {'ja': 'フック', 'en': 'Hook'},
+    reading: 'ふっく',
+    description: {
+      'ja': 'アームの爪を景品のタグや穴に引っ掛けて取る技術。ぬいぐるみで特に有効です。',
+      'en':
+          'Technique of hooking arm claw on prize tag or hole to win. Especially effective for plush toys.',
+    },
+    category: 'technique',
+    imageUrl: null,
+    relatedTermIds: const ['term_plush'],
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
+  ),
+  Term(
+    id: 'term_slide',
+    name: {'ja': 'スライド', 'en': 'Slide'},
+    reading: 'すらいど',
+    description: {
+      'ja': '景品を横にずらして移動させる技術。少しずつ取り口に近づけていきます。',
+      'en':
+          'Technique of sliding the prize sideways to move it. Gradually bringing it closer to the chute.',
+    },
+    category: 'technique',
+    imageUrl: null,
+    relatedTermIds: const ['term_send'],
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
+  ),
+  Term(
+    id: 'term_pinch',
+    name: {'ja': 'ピンチ', 'en': 'Pinch'},
+    reading: 'ぴんち',
+    description: {
+      'ja': 'アームで景品を強く挟み込んで持ち上げる技術。アームパワーが強い機械で有効です。',
+      'en':
+          'Technique of firmly pinching and lifting prize with arm. Effective on machines with strong arm power.',
+    },
+    category: 'technique',
+    imageUrl: null,
+    relatedTermIds: const ['term_power'],
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
+  ),
+  Term(
+    id: 'term_balance_break',
+    name: {'ja': 'バランスブレイク', 'en': 'Balance Break'},
+    reading: 'ばらんすぶれいく',
+    description: {
+      'ja': '景品のバランスを崩して落とす技術。重心を利用した高度なテクニックです。',
+      'en':
+          'Technique of breaking prize balance to drop it. Advanced technique utilizing center of gravity.',
+    },
+    category: 'technique',
+    imageUrl: null,
+    relatedTermIds: const ['term_center_of_gravity'],
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
+  ),
+  Term(
+    id: 'term_edge_drop',
+    name: {'ja': '角落とし', 'en': 'Edge Drop'},
+    reading: 'かどおとし',
+    description: {
+      'ja': '景品の角を狙って落とす技術。箱モノ景品に特に有効です。',
+      'en':
+          'Technique of targeting prize corners to drop it. Especially effective for boxed prizes.',
+    },
+    category: 'technique',
+    imageUrl: null,
+    relatedTermIds: const ['term_box'],
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
+  ),
+  Term(
+    id: 'term_continuous',
+    name: {'ja': '連続プレイ', 'en': 'Continuous Play'},
+    reading: 'れんぞくぷれい',
+    description: {
+      'ja': '複数回連続でプレイすること。効率的に景品を獲得するための基本戦略です。',
+      'en':
+          'Playing multiple times in succession. Basic strategy for efficiently winning prizes.',
+    },
+    category: 'basic',
+    imageUrl: null,
+    relatedTermIds: const [],
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
+  ),
+  Term(
+    id: 'term_practice',
+    name: {'ja': '練習台', 'en': 'Practice Machine'},
+    reading: 'れんしゅうだい',
+    description: {
+      'ja': '無料または低価格で練習できる機械。初心者におすすめです。',
+      'en':
+          'Machine available for free or low-cost practice. Recommended for beginners.',
+    },
+    category: 'basic',
+    imageUrl: null,
+    relatedTermIds: const [],
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
+  ),
+  Term(
+    id: 'term_limited',
+    name: {'ja': '限定景品', 'en': 'Limited Prize'},
+    reading: 'げんていけいひん',
+    description: {
+      'ja': '期間限定や数量限定で提供される景品。レアな景品は人気が高いです。',
+      'en':
+          'Prizes offered for limited time or quantity. Rare prizes are very popular.',
+    },
+    category: 'prize',
+    imageUrl: null,
+    relatedTermIds: const [],
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
+  ),
+  Term(
+    id: 'term_collaboration',
+    name: {'ja': 'コラボ景品', 'en': 'Collaboration Prize'},
+    reading: 'こらぼけいひん',
+    description: {
+      'ja': 'アニメや漫画、ゲームとのコラボレーション景品。ファンに人気があります。',
+      'en':
+          'Prizes in collaboration with anime, manga, or games. Popular among fans.',
+    },
+    category: 'prize',
+    imageUrl: null,
+    relatedTermIds: const ['term_limited'],
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
+  ),
+  Term(
+    id: 'term_timing',
+    name: {'ja': 'タイミング', 'en': 'Timing'},
+    reading: 'たいみんぐ',
+    description: {
+      'ja': 'アームの開閉やボタン押下のタイミング。正確なタイミングが重要です。',
+      'en':
+          'Timing of arm opening/closing and button press. Accurate timing is crucial.',
+    },
+    category: 'technique',
+    imageUrl: null,
+    relatedTermIds: const [],
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
+  ),
 ];
