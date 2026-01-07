@@ -10,6 +10,7 @@ import '../../data/providers/premium_provider.dart';
 import '../../utils/seed_firestore.dart';
 import '../../services/ad_manager.dart';
 import '../widgets/strategy_card.dart';
+import '../../l10n/app_localizations.dart';
 
 /// 攻略法一覧画面
 class HomeScreen extends ConsumerStatefulWidget {
@@ -60,21 +61,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('クレナビ'),
+        title: Text(AppLocalizations.of(context)!.homeTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.book_outlined),
-            tooltip: '用語集',
+            tooltip: AppLocalizations.of(context)!.glossaryTitle,
             onPressed: () => context.push('/glossary'),
           ),
           IconButton(
             icon: const Icon(Icons.emoji_events_outlined),
-            tooltip: '獲得履歴',
+            tooltip: AppLocalizations.of(context)!.collectionTitle,
             onPressed: () => context.push('/collection'),
           ),
           IconButton(
             icon: const Icon(Icons.account_circle_outlined),
-            tooltip: 'アカウント',
+            tooltip: AppLocalizations.of(context)!.accountTitle,
             onPressed: () => context.push('/account'),
           ),
           // デバッグモード時のみデータ投入ボタンを表示
@@ -132,7 +133,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: '商品名やタグで検索 (例: フィギュア)',
+                hintText: AppLocalizations.of(context)!.searchPlaceholder,
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: isSearching
                     ? IconButton(
@@ -201,7 +202,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/scan'),
         icon: const Icon(Icons.camera_alt),
-        label: const Text('スキャン'),
+        label: Text(AppLocalizations.of(context)!.scanButton),
       ),
     );
   }

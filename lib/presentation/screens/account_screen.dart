@@ -7,6 +7,7 @@ import '../../data/providers/premium_provider.dart';
 import '../../data/services/user_level_service.dart';
 import '../widgets/reward_ad_button.dart';
 import 'collection_screen.dart'; // collectionWithProductListProvider
+import '../../l10n/app_localizations.dart';
 
 class AccountScreen extends ConsumerStatefulWidget {
   const AccountScreen({super.key});
@@ -28,7 +29,9 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     final isAnonymous = user.isAnonymous;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('アカウント設定')),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.accountSettings),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -45,7 +48,9 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    isAnonymous ? 'ゲストユーザー' : (user.displayName ?? 'ユーザー'),
+                    isAnonymous
+                        ? AppLocalizations.of(context)!.guestUser
+                        : (user.displayName ?? 'ユーザー'),
                     style: theme.textTheme.titleLarge,
                   ),
                   const SizedBox(height: 8),

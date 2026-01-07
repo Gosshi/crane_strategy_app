@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'l10n/app_localizations.dart';
 import 'firebase_options.dart';
 import 'router.dart';
 import 'theme/app_theme.dart';
-import 'data/providers/auth_provider.dart';
 import 'services/ad_manager.dart';
+import 'data/providers/auth_provider.dart';
 
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -63,8 +65,22 @@ class _CraneStrategyAppState extends ConsumerState<CraneStrategyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'クレナビ',
+      title: 'Crenavi',
       debugShowCheckedModeBanner: false,
+      // 多言語設定
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('ja'), // 日本語
+        Locale('en'), // 英語
+        Locale('zh'), // 簡体中文
+        Locale('zh', 'TW'), // 繁体中文
+        Locale('ko'), // 韓国語
+      ],
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: ThemeMode.dark,
