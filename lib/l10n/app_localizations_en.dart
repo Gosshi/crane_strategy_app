@@ -75,7 +75,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get premiumMember => 'Premium Member';
 
   @override
-  String remainingTime(int hours, int minutes) {
+  String remainingTime(Object hours, Object minutes) {
     return 'Remaining time: $hours hours $minutes minutes';
   }
 
@@ -117,7 +117,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noPrizes => 'No prizes collected yet';
 
   @override
-  String error(String error) {
+  String error(Object error) {
     return 'Error: $error';
   }
 
@@ -141,4 +141,112 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noTermsFound => 'No matching terms found';
+
+  @override
+  String get scanResult => 'Scan Result';
+
+  @override
+  String get searching => 'Searching...';
+
+  @override
+  String get postStrategy => 'Post Strategy';
+
+  @override
+  String get loginRequired => 'Login required (authentication failed)';
+
+  @override
+  String gotIt(Object name) {
+    return 'Got $name!';
+  }
+
+  @override
+  String get shareProduct => 'Share this product';
+
+  @override
+  String get editProduct => 'Edit';
+
+  @override
+  String get gotThisProduct => 'Got this product!';
+
+  @override
+  String get noRelatedStrategies => 'No related strategies yet';
+
+  @override
+  String loadStrategyError(Object error) {
+    return 'Error loading strategies: $error';
+  }
+
+  @override
+  String get noPostsYet => 'No posts yet.\\nBe the first to share tips!';
+
+  @override
+  String get cannotOpenVideo => 'Could not open video';
+
+  @override
+  String get watchVideoYouTube => 'Watch on YouTube';
+
+  @override
+  String get yahooSearching => 'Searching Yahoo! Shopping...';
+
+  @override
+  String get registerWithThis => 'Register with this info';
+
+  @override
+  String get returnHome => 'Return Home';
+
+  @override
+  String get manualRegister => 'Register Manually';
+
+  @override
+  String get notFound => 'Not found';
+
+  @override
+  String get noStrategiesYet => 'No strategies yet';
+
+  @override
+  String get linkGoogleAccount =>
+      'Link your data permanently\\nwith your Google account.';
+
+  @override
+  String get linkSuccess => 'Successfully linked!';
+
+  @override
+  String linkError(Object error) {
+    return 'Link error: $error';
+  }
+
+  @override
+  String get dataSeeding => 'Data Seeding';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get seed => 'Seed';
+
+  @override
+  String get seedSuccess => 'Data seeding completed';
+
+  @override
+  String get productNameRequired => 'Please enter product name';
+
+  @override
+  String get categoryRequired => 'Please select at least one category';
+
+  @override
+  String registerError(Object error) {
+    return 'Registration error: $error';
+  }
+
+  @override
+  String get productRegistration => 'Product Registration';
+
+  @override
+  String barcode(Object barcode) {
+    return 'Barcode: $barcode';
+  }
+
+  @override
+  String get addToCollection =>
+      'Also add to \"My Collection\" upon registration';
 }

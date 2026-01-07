@@ -75,7 +75,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get premiumMember => 'プレミアム会員';
 
   @override
-  String remainingTime(int hours, int minutes) {
+  String remainingTime(Object hours, Object minutes) {
     return '残り時間: $hours時間$minutes分';
   }
 
@@ -116,7 +116,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get noPrizes => 'まだ獲得した景品はありません';
 
   @override
-  String error(String error) {
+  String error(Object error) {
     return 'エラー: $error';
   }
 
@@ -140,4 +140,110 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get noTermsFound => '該当する用語が見つかりません';
+
+  @override
+  String get scanResult => 'スキャン結果';
+
+  @override
+  String get searching => '商品を検索中...';
+
+  @override
+  String get postStrategy => '攻略を投稿';
+
+  @override
+  String get loginRequired => 'ログインが必要です (認証に失敗しました)';
+
+  @override
+  String gotIt(Object name) {
+    return '$name をGETしました！';
+  }
+
+  @override
+  String get shareProduct => 'この商品を共有';
+
+  @override
+  String get editProduct => '編集する';
+
+  @override
+  String get gotThisProduct => 'この商品をGETした！';
+
+  @override
+  String get noRelatedStrategies => '関連する攻略法はまだありません';
+
+  @override
+  String loadStrategyError(Object error) {
+    return '攻略法の読み込みエラー: $error';
+  }
+
+  @override
+  String get noPostsYet => 'No posts yet.\\nBe the first to share tips!';
+
+  @override
+  String get cannotOpenVideo => '動画を開けませんでした';
+
+  @override
+  String get watchVideoYouTube => '動画を見る (YouTube)';
+
+  @override
+  String get yahooSearching => 'Yahoo!ショッピングから情報を検索中...';
+
+  @override
+  String get registerWithThis => 'この情報を使って登録';
+
+  @override
+  String get returnHome => 'ホームに戻る';
+
+  @override
+  String get manualRegister => '手動で登録する';
+
+  @override
+  String get notFound => '見つかりませんでした';
+
+  @override
+  String get noStrategiesYet => '攻略法がまだありません';
+
+  @override
+  String get linkGoogleAccount => 'データを永続化するために、\\nGoogleアカウントと連携しましょう。';
+
+  @override
+  String get linkSuccess => '連携に成功しました！';
+
+  @override
+  String linkError(Object error) {
+    return '連携エラー: $error';
+  }
+
+  @override
+  String get dataSeeding => 'データ投入';
+
+  @override
+  String get cancel => 'キャンセル';
+
+  @override
+  String get seed => '投入する';
+
+  @override
+  String get seedSuccess => 'データ投入が完了しました';
+
+  @override
+  String get productNameRequired => '商品名を入力してください';
+
+  @override
+  String get categoryRequired => 'カテゴリを少なくとも1つ選択してください';
+
+  @override
+  String registerError(Object error) {
+    return '登録エラー: $error';
+  }
+
+  @override
+  String get productRegistration => '商品登録';
+
+  @override
+  String barcode(Object barcode) {
+    return 'バーコード: $barcode';
+  }
+
+  @override
+  String get addToCollection => '登録と同時に「獲得コレクション」にも追加されます';
 }
