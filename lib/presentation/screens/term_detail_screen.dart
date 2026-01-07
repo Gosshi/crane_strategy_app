@@ -48,20 +48,26 @@ class TermDetailScreen extends ConsumerWidget {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(
-                      _getLocalizedText(term.name, context),
-                      style: theme.textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+                    Flexible(
+                      child: Text(
+                        _getLocalizedText(term.name, context),
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     if (term.reading != null) ...[
                       const SizedBox(width: 12),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: Text(
-                          '（${term.reading}）',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            color: Colors.grey,
+                      Flexible(
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Text(
+                            '（${term.reading}）',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: Colors.grey,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ),
