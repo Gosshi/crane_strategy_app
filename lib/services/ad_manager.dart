@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../config/ad_config.dart';
 import '../utils/logger.dart';
@@ -19,6 +20,10 @@ class AdManager {
   // リワード広告のインスタンス
   RewardedAd? _rewardedAd;
   bool _isRewardedAdReady = false;
+
+  // リワード広告の報酬とCompleter
+  RewardItem? _earnedReward;
+  Completer<RewardItem?>? _rewardCompleter;
 
   // 広告表示カウンター
   int _scanCount = 0;
@@ -197,7 +202,15 @@ class AdManager {
             // 広告が閉じられたときの処理
             _rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
               onAdDismissedFullScreenContent: (ad) {
-                logger.d('[AdManager] Rewarded ad dismissed');
+                logger.d(
+                  '[AdManager] Rewarded ad dismissed, earned reward: $_earnedReward',
+                );
+                // Completerに報酬を渡して完了
+                if (_rewardCompleter != null &&
+                    !_rewardCompleter!.isCompleted) {
+                  _rewardCompleter!.complete(_earnedReward);
+                }
+                _earnedReward = null;
                 ad.dispose();
                 _rewardedAd = null;
                 _isRewardedAdReady = false;
@@ -210,6 +223,12 @@ class AdManager {
                   '[AdManager] Rewarded ad failed to show: ${error.message}',
                   error: error,
                 );
+                // エラー時はnullを返す
+                if (_rewardCompleter != null &&
+                    !_rewardCompleter!.isCompleted) {
+                  _rewardCompleter!.complete(null);
+                }
+                _earnedReward = null;
                 ad.dispose();
                 _rewardedAd = null;
                 _isRewardedAdReady = false;
@@ -247,16 +266,31 @@ class AdManager {
 
     logger.i('[AdManager] Showing rewarded ad');
 
-    RewardItem? reward;
+    // Completerを作成
+    _rewardCompleter = Completer<RewardItem?>();
+    _earnedReward = null;
 
+    // 広告を表示
     await _rewardedAd!.show(
       onUserEarnedReward: (ad, rewardItem) {
         logger.i(
           '[AdManager] User earned reward: ${rewardItem.amount} ${rewardItem.type}',
         );
-        reward = rewardItem;
+        _earnedReward = rewardItem;
       },
     );
+
+    logger.d(
+      '[AdManager] Rewarded ad show() completed, waiting for dismiss...',
+    );
+
+    // 広告が閉じられるまで待つ（onAdDismissedFullScreenContentで完了）
+    final reward = await _rewardCompleter!.future;
+    logger.d('[AdManager] Reward received: $reward');
+
+    // 次の広告を読み込む
+    _isRewardedAdReady = false;
+    loadRewardedAd();
 
     return reward;
   }
