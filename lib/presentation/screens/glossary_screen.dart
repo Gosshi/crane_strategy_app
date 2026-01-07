@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../data/models/term.dart';
 import '../../data/providers/term_repository_provider.dart';
+import '../../l10n/app_localizations.dart';
 
 /// 全用語を取得するプロバイダー
 final allTermsProvider = FutureProvider<List<Term>>((ref) async {
@@ -28,7 +29,7 @@ class _GlossaryScreenState extends ConsumerState<GlossaryScreen> {
     final termsAsync = ref.watch(allTermsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('用語集')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.glossaryTitle)),
       body: Column(
         children: [
           // 検索バー
@@ -36,7 +37,7 @@ class _GlossaryScreenState extends ConsumerState<GlossaryScreen> {
             padding: const EdgeInsets.all(16),
             child: TextField(
               decoration: InputDecoration(
-                hintText: '用語を検索...',
+                hintText: AppLocalizations.of(context)!.searchTerms,
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -58,7 +59,11 @@ class _GlossaryScreenState extends ConsumerState<GlossaryScreen> {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
-                _buildCategoryChip(label: 'すべて', value: null, theme: theme),
+                _buildCategoryChip(
+                  label: AppLocalizations.of(context)!.allCategory,
+                  value: null,
+                  theme: theme,
+                ),
                 const SizedBox(width: 8),
                 ...TermCategory.labels.entries.map((entry) {
                   return Padding(
@@ -99,7 +104,9 @@ class _GlossaryScreenState extends ConsumerState<GlossaryScreen> {
                 }
 
                 if (filteredTerms.isEmpty) {
-                  return const Center(child: Text('該当する用語が見つかりません'));
+                  return Center(
+                    child: Text(AppLocalizations.of(context)!.noTermsFound),
+                  );
                 }
 
                 return ListView.builder(
@@ -112,7 +119,11 @@ class _GlossaryScreenState extends ConsumerState<GlossaryScreen> {
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => Center(child: Text('エラー: $error')),
+              error: (error, stack) => Center(
+                child: Text(
+                  AppLocalizations.of(context)!.error(error.toString()),
+                ),
+              ),
             ),
           ),
         ],

@@ -103,4 +103,42 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorOccurred => 'An error occurred';
+
+  @override
+  String get collectionScreenTitle => 'My Collection';
+
+  @override
+  String get gridView => 'Grid View';
+
+  @override
+  String get listView => 'List View';
+
+  @override
+  String get noPrizes => 'No prizes collected yet';
+
+  @override
+  String error(String error) {
+    return 'Error: $error';
+  }
+
+  @override
+  String get acquiredDate => 'Acquired';
+
+  @override
+  String get note => 'Note';
+
+  @override
+  String get shopName => 'Shop';
+
+  @override
+  String get shareAction => 'Share (Brag)';
+
+  @override
+  String get searchTerms => 'Search terms...';
+
+  @override
+  String get allCategory => 'All';
+
+  @override
+  String get noTermsFound => 'No matching terms found';
 }

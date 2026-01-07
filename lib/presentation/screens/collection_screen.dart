@@ -8,6 +8,7 @@ import '../../data/providers/strategy_repository_provider.dart';
 import '../../data/providers/auth_provider.dart';
 import '../../utils/share_utils.dart';
 import '../widgets/collection_grid_item.dart';
+import '../../l10n/app_localizations.dart';
 
 /// コレクションアイテムと商品情報をまとめたクラス
 class CollectionWithProduct {
@@ -43,12 +44,14 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('獲得コレクション'),
+        title: Text(AppLocalizations.of(context)!.collectionScreenTitle),
         actions: [
           // 表示切り替えボタン
           IconButton(
             icon: Icon(_isGridView ? Icons.view_list : Icons.grid_view),
-            tooltip: _isGridView ? 'リスト表示' : 'グリッド表示',
+            tooltip: _isGridView
+                ? AppLocalizations.of(context)!.listView
+                : AppLocalizations.of(context)!.gridView,
             onPressed: () {
               setState(() {
                 _isGridView = !_isGridView;
@@ -82,7 +85,7 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'まだ獲得した景品はありません',
+                          AppLocalizations.of(context)!.noPrizes,
                           style: theme.textTheme.titleMedium,
                         ),
                       ],
@@ -99,7 +102,9 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
             }
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => Center(child: Text('エラー: $error')),
+          error: (error, stack) => Center(
+            child: Text(AppLocalizations.of(context)!.error(error.toString())),
+          ),
         ),
       ),
     );
@@ -206,14 +211,20 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
                       const Divider(),
                       const SizedBox(height: 8),
                       _buildDetailRow(
-                        '獲得日',
+                        AppLocalizations.of(context)!.acquiredDate,
                         collection.acquiredAt.toString().split(' ')[0],
                       ),
                       if (collection.shopName != null)
-                        _buildDetailRow('店舗', collection.shopName!),
+                        _buildDetailRow(
+                          AppLocalizations.of(context)!.shopName,
+                          collection.shopName!,
+                        ),
                       if (collection.note != null &&
                           collection.note!.isNotEmpty)
-                        _buildDetailRow('メモ', collection.note!),
+                        _buildDetailRow(
+                          AppLocalizations.of(context)!.note,
+                          collection.note!,
+                        ),
                       const SizedBox(height: 24),
                       SizedBox(
                         width: double.infinity,
@@ -223,7 +234,9 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
                             _shareItem(item);
                           },
                           icon: const Icon(Icons.share),
-                          label: const Text('自慢する (シェア)'),
+                          label: Text(
+                            AppLocalizations.of(context)!.shareAction,
+                          ),
                         ),
                       ),
                     ],

@@ -288,6 +288,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'An error occurred'**
   String get errorOccurred;
+
+  /// Collection screen title in app bar
+  ///
+  /// In en, this message translates to:
+  /// **'My Collection'**
+  String get collectionScreenTitle;
+
+  /// Grid view tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Grid View'**
+  String get gridView;
+
+  /// List view tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'List View'**
+  String get listView;
+
+  /// Empty collection message
+  ///
+  /// In en, this message translates to:
+  /// **'No prizes collected yet'**
+  String get noPrizes;
+
+  /// Error message with placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {error}'**
+  String error(String error);
+
+  /// Acquired date label
+  ///
+  /// In en, this message translates to:
+  /// **'Acquired'**
+  String get acquiredDate;
+
+  /// Note label
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get note;
+
+  /// Shop name label
+  ///
+  /// In en, this message translates to:
+  /// **'Shop'**
+  String get shopName;
+
+  /// Share button text
+  ///
+  /// In en, this message translates to:
+  /// **'Share (Brag)'**
+  String get shareAction;
+
+  /// Search terms placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Search terms...'**
+  String get searchTerms;
+
+  /// All category filter
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get allCategory;
+
+  /// No terms found message
+  ///
+  /// In en, this message translates to:
+  /// **'No matching terms found'**
+  String get noTermsFound;
 }
 
 class _AppLocalizationsDelegate

@@ -1,135 +1,92 @@
 {
   "@@locale": "en",
   "appTitle": "Crenavi",
-  "@appTitle": {
-    "description": "Application title"
-  },
+  "@appTitle": {"description": "Application title"},
   "homeTitle": "Crenavi",
-  "@homeTitle": {
-    "description": "Home screen title"
-  },
+  "@homeTitle": {"description": "Home screen title"},
   "scanButton": "Scan Prize",
-  "@scanButton": {
-    "description": "Scan button label"
-  },
+  "@scanButton": {"description": "Scan button label"},
   "collectionTitle": "My Collection",
-  "@collectionTitle": {
-    "description": "Collection screen title"
-  },
+  "@collectionTitle": {"description": "Collection screen title"},
   "accountTitle": "Account",
-  "@accountTitle": {
-    "description": "Account screen title"
-  },
+  "@accountTitle": {"description": "Account screen title"},
   "glossaryTitle": "UFO Catcher Guide",
-  "@glossaryTitle": {
-    "description": "Glossary screen title"
-  },
+  "@glossaryTitle": {"description": "Glossary screen title"},
   "premiumFeatures": "Premium Features",
-  "@premiumFeatures": {
-    "description": "Premium features section title"
-  },
+  "@premiumFeatures": {"description": "Premium features section title"},
   "watchAdFor24h": "Watch ad for 24h premium",
-  "@watchAdFor24h": {
-    "description": "Reward ad button text"
-  },
+  "@watchAdFor24h": {"description": "Reward ad button text"},
   "premiumUnlocked": "✨ Premium unlocked for 24 hours!",
-  "@premiumUnlocked": {
-    "description": "Premium unlock success message"
-  },
+  "@premiumUnlocked": {"description": "Premium unlock success message"},
   "noAds": "No Ads",
-  "@noAds": {
-    "description": "Premium benefit: no ads"
-  },
+  "@noAds": {"description": "Premium benefit: no ads"},
   "searchPlaceholder": "Search by name or tag (e.g., figure)",
-  "@searchPlaceholder": {
-    "description": "Search field placeholder text"
-  },
+  "@searchPlaceholder": {"description": "Search field placeholder text"},
   "guestUser": "Guest User",
-  "@guestUser": {
-    "description": "Guest user label"
-  },
+  "@guestUser": {"description": "Guest user label"},
   "accountSettings": "Account Settings",
-  "@accountSettings": {
-    "description": "Account settings title"
-  },
+  "@accountSettings": {"description": "Account settings title"},
   "linkAccount": "Link Account",
-  "@linkAccount": {
-    "description": "Account linking section title"
-  },
+  "@linkAccount": {"description": "Account linking section title"},
   "linkWithGoogle": "Link with Google",
-  "@linkWithGoogle": {
-    "description": "Link with Google button"
-  },
+  "@linkWithGoogle": {"description": "Link with Google button"},
   "signInWithApple": "Sign in with Apple",
-  "@signInWithApple": {
-    "description": "Sign in with Apple button"
-  },
+  "@signInWithApple": {"description": "Sign in with Apple button"},
   "accountLinked": "Account Linked",
-  "@accountLinked": {
-    "description": "Account linked status"
-  },
+  "@accountLinked": {"description": "Account linked status"},
   "dataIsSafe": "Your data is safely stored.",
-  "@dataIsSafe": {
-    "description": "Data safety message"
-  },
+  "@dataIsSafe": {"description": "Data safety message"},
   "settings": "Settings",
-  "@settings": {
-    "description": "Settings section title"
-  },
+  "@settings": {"description": "Settings section title"},
   "soundEffects": "Sound Effects",
-  "@soundEffects": {
-    "description": "Sound effects setting label"
-  },
+  "@soundEffects": {"description": "Sound effects setting label"},
   "playSoundOnScan": "Play sound on scan and prize catch",
-  "@playSoundOnScan": {
-    "description": "Sound effects description"
-  },
+  "@playSoundOnScan": {"description": "Sound effects description"},
   "premiumMember": "Premium Member",
-  "@premiumMember": {
-    "description": "Premium member status"
-  },
+  "@premiumMember": {"description": "Premium member status"},
   "remainingTime": "Remaining time: {hours} hours {minutes} minutes",
   "@remainingTime": {
     "description": "Remaining premium time",
-    "placeholders": {
-      "hours": {
-        "type": "int"
-      },
-      "minutes": {
-        "type": "int"
-      }
-    }
+    "placeholders": {"hours": {"type": "int"}, "minutes": {"type": "int"}}
   },
   "subscriptionActive": "Subscription Active",
-  "@subscriptionActive": {
-    "description": "Active subscription status"
-  },
+  "@subscriptionActive": {"description": "Active subscription status"},
   "limited24Hours": "24-hour unlock active",
-  "@limited24Hours": {
-    "description": "24-hour unlock status"
-  },
+  "@limited24Hours": {"description": "24-hour unlock status"},
   "premiumBenefits": "Premium Benefits:",
-  "@premiumBenefits": {
-    "description": "Premium benefits label"
-  },
+  "@premiumBenefits": {"description": "Premium benefits label"},
   "exclusiveBadge": "Exclusive Badge (Phase 2)",
-  "@exclusiveBadge": {
-    "description": "Exclusive badge benefit"
-  },
+  "@exclusiveBadge": {"description": "Exclusive badge benefit"},
   "experiencePremiumFor24h": "Watch ad to experience premium for 24 hours!",
-  "@experiencePremiumFor24h": {
-    "description": "Premium experience promotion"
-  },
+  "@experiencePremiumFor24h": {"description": "Premium experience promotion"},
   "allAdsHidden": "All ads hidden",
-  "@allAdsHidden": {
-    "description": "All ads hidden benefit"
-  },
+  "@allAdsHidden": {"description": "All ads hidden benefit"},
   "loading": "Loading...",
-  "@loading": {
-    "description": "Loading status"
-  },
+  "@loading": {"description": "Loading status"},
   "errorOccurred": "An error occurred",
-  "@errorOccurred": {
-    "description": "Error message"
-  }
+  "@errorOccurred": {"description": "Error message"},
+  "collectionScreenTitle": "My Collection",
+  "@collectionScreenTitle": {"description": "Collection screen title in app bar"},
+  "gridView": "Grid View",
+  "@gridView": {"description": "Grid view tooltip"},
+  "listView": "List View",
+  "@listView": {"description": "List view tooltip"},
+  "noPrizes": "No prizes collected yet",
+  "@noPrizes": {"description": "Empty collection message"},
+  "error": "Error: {error}",
+  "@error": {"description": "Error message with placeholder", "placeholders": {"error": {"type": "String"}}},
+  "acquiredDate": "Acquired",
+  "@acquiredDate": {"description": "Acquired date label"},
+  "note": "Note",
+  "@note": {"description": "Note label"},
+  "shopName": "Shop",
+  "@shopName": {"description": "Shop name label"},
+  "shareAction": "Share (Brag)",
+  "@shareAction": {"description": "Share button text"},
+  "searchTerms": "Search terms...",
+  "@searchTerms": {"description": "Search terms placeholder"},
+  "allCategory": "All",
+  "@allCategory": {"description": "All category filter"},
+  "noTermsFound": "No matching terms found",
+  "@noTermsFound": {"description": "No terms found message"}
 }

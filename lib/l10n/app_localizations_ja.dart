@@ -102,4 +102,42 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get errorOccurred => 'エラーが発生しました';
+
+  @override
+  String get collectionScreenTitle => '獲得コレクション';
+
+  @override
+  String get gridView => 'グリッド表示';
+
+  @override
+  String get listView => 'リスト表示';
+
+  @override
+  String get noPrizes => 'まだ獲得した景品はありません';
+
+  @override
+  String error(String error) {
+    return 'エラー: $error';
+  }
+
+  @override
+  String get acquiredDate => '獲得日';
+
+  @override
+  String get note => 'メモ';
+
+  @override
+  String get shopName => '店舗';
+
+  @override
+  String get shareAction => '自慢する (シェア)';
+
+  @override
+  String get searchTerms => '用語を検索...';
+
+  @override
+  String get allCategory => 'すべて';
+
+  @override
+  String get noTermsFound => '該当する用語が見つかりません';
 }
