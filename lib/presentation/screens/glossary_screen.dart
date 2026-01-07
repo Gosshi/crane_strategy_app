@@ -74,16 +74,29 @@ class _GlossaryScreenState extends ConsumerState<GlossaryScreen> {
                   theme: theme,
                 ),
                 const SizedBox(width: 8),
-                ...TermCategory.labels.entries.map((entry) {
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: _buildCategoryChip(
-                      label: entry.value,
-                      value: entry.key,
-                      theme: theme,
-                    ),
-                  );
-                }),
+                _buildCategoryChip(
+                  label: AppLocalizations.of(context)!.categoryBasic,
+                  value: TermCategory.basic,
+                  theme: theme,
+                ),
+                const SizedBox(width: 8),
+                _buildCategoryChip(
+                  label: AppLocalizations.of(context)!.categoryTechnique,
+                  value: TermCategory.technique,
+                  theme: theme,
+                ),
+                const SizedBox(width: 8),
+                _buildCategoryChip(
+                  label: AppLocalizations.of(context)!.categoryPrize,
+                  value: TermCategory.prize,
+                  theme: theme,
+                ),
+                const SizedBox(width: 8),
+                _buildCategoryChip(
+                  label: AppLocalizations.of(context)!.categoryMachine,
+                  value: TermCategory.machine,
+                  theme: theme,
+                ),
               ],
             ),
           ),
@@ -195,7 +208,7 @@ class _GlossaryScreenState extends ConsumerState<GlossaryScreen> {
         ),
         trailing: Chip(
           label: Text(
-            TermCategory.labels[term.category] ?? term.category,
+            _getCategoryName(term.category),
             style: const TextStyle(fontSize: 12),
           ),
           visualDensity: VisualDensity.compact,
@@ -205,5 +218,21 @@ class _GlossaryScreenState extends ConsumerState<GlossaryScreen> {
         },
       ),
     );
+  }
+
+  String _getCategoryName(String category) {
+    final loc = AppLocalizations.of(context)!;
+    switch (category) {
+      case TermCategory.basic:
+        return loc.categoryBasic;
+      case TermCategory.technique:
+        return loc.categoryTechnique;
+      case TermCategory.prize:
+        return loc.categoryPrize;
+      case TermCategory.machine:
+        return loc.categoryMachine;
+      default:
+        return category;
+    }
   }
 }

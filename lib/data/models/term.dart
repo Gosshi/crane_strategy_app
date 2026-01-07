@@ -73,11 +73,4 @@ class TermCategory {
   static const String technique = 'technique';
   static const String prize = 'prize';
   static const String machine = 'machine';
-
-  static const Map<String, String> labels = {
-    basic: '基本用語',
-    technique: '技術・攻略',
-    prize: '景品関連',
-    machine: '機械・設定',
-  };
 }

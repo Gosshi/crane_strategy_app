@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../data/models/term.dart';
 import '../../data/providers/term_repository_provider.dart';
+import '../../l10n/app_localizations.dart';
 
 /// 特定の用語を取得するプロバイダー
 final termProvider = FutureProvider.family<Term?, String>((ref, termId) async {
@@ -72,9 +73,21 @@ class TermDetailScreen extends ConsumerWidget {
 
                 // カテゴリ
                 Chip(
-                  label: Text(
-                    TermCategory.labels[term.category] ?? term.category,
-                  ),
+                  label: Text(() {
+                    final loc = AppLocalizations.of(context)!;
+                    switch (term.category) {
+                      case TermCategory.basic:
+                        return loc.categoryBasic;
+                      case TermCategory.technique:
+                        return loc.categoryTechnique;
+                      case TermCategory.prize:
+                        return loc.categoryPrize;
+                      case TermCategory.machine:
+                        return loc.categoryMachine;
+                      default:
+                        return term.category;
+                    }
+                  }()),
                   backgroundColor: theme.colorScheme.primaryContainer,
                 ),
 
