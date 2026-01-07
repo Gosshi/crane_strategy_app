@@ -26,6 +26,7 @@ class _GlossaryScreenState extends ConsumerState<GlossaryScreen> {
   /// Get localized text from multilingual map
   String _getLocalizedText(Map<String, String> textMap) {
     final locale = Localizations.localeOf(context).languageCode;
+    debugPrint('🌍 Current locale: $locale, textMap keys: ${textMap.keys}');
     return textMap[locale] ??
         textMap['ja'] ??
         textMap['en'] ??
