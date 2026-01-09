@@ -27,11 +27,7 @@ class Strategy {
       title: Map<String, String>.from(map['title'] ?? {}),
       description: Map<String, String>.from(map['description'] ?? {}),
       settingType: map['settingType'] ?? '',
-      thumbnailUrl:
-          map['thumbnailUrl'] != null &&
-              (map['thumbnailUrl'] as String).isNotEmpty
-          ? map['thumbnailUrl'] as String
-          : 'https://via.placeholder.com/640x360.png?text=No+Thumbnail',
+      thumbnailUrl: map['thumbnailUrl'] ?? '',
       videoId: map['videoId'] ?? '',
       updatedAt: map['updatedAt'] != null
           ? (map['updatedAt'] as Timestamp).toDate()
