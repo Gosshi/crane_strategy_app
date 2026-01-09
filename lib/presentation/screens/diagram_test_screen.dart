@@ -27,7 +27,10 @@ class DiagramTestScreen extends StatelessWidget {
         children: [
           _buildTestSection(
             title: '基本: 水平な景品、中央重心',
-            diagram: const StrategyDiagram(strategyType: 'bridge'),
+            diagram: const StrategyDiagram(
+              strategyType: 'bridge',
+              animate: false,
+            ),
             params: 'angle: 0.0°, center: (0.5, 0.5)',
           ),
           const Divider(height: 32),
@@ -36,6 +39,7 @@ class DiagramTestScreen extends StatelessWidget {
             diagram: StrategyDiagram(
               strategyType: 'bridge',
               prizeAngle: 15 * pi / 180,
+              animate: false,
             ),
             params: 'angle: 15.0°, center: (0.5, 0.5)',
           ),
@@ -45,6 +49,7 @@ class DiagramTestScreen extends StatelessWidget {
             diagram: StrategyDiagram(
               strategyType: 'bridge',
               prizeAngle: -10 * pi / 180,
+              animate: false,
             ),
             params: 'angle: -10.0°, center: (0.5, 0.5)',
           ),
@@ -54,6 +59,7 @@ class DiagramTestScreen extends StatelessWidget {
             diagram: const StrategyDiagram(
               strategyType: 'bridge',
               centerOfGravity: Offset(0.65, 0.5),
+              animate: false,
             ),
             params: 'angle: 0.0°, center: (0.65, 0.5)',
           ),
@@ -63,6 +69,7 @@ class DiagramTestScreen extends StatelessWidget {
             diagram: const StrategyDiagram(
               strategyType: 'bridge',
               centerOfGravity: Offset(0.35, 0.5),
+              animate: false,
             ),
             params: 'angle: 0.0°, center: (0.35, 0.5)',
           ),
@@ -73,13 +80,17 @@ class DiagramTestScreen extends StatelessWidget {
               strategyType: 'bridge',
               prizeAngle: 20 * pi / 180,
               centerOfGravity: const Offset(0.6, 0.5),
+              animate: false,
             ),
             params: 'angle: 20.0°, center: (0.6, 0.5)',
           ),
           const Divider(height: 32),
           _buildTestSection(
             title: '未実装: 剣山設定（プレースホルダー表示）',
-            diagram: const StrategyDiagram(strategyType: 'kenzan'),
+            diagram: const StrategyDiagram(
+              strategyType: 'kenzan',
+              animate: false,
+            ),
             params: 'type: kenzan (未実装タイプ)',
           ),
         ],
