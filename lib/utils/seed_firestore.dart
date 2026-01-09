@@ -64,24 +64,24 @@ Future<void> addExtendedStrategies() async {
   final strategies = [
     // テスト用: アニメーション図解を表示する橋渡し攻略データ
     {
-      'title': {'ja': '橋渡し攻略 - 図解で学ぶ', 'en': 'Bridge Strategy - Visual Guide'},
+      'title': {'ja': '橋渡し攻略 - 横ハメ図解', 'en': 'Bridge Strategy - Sideways Drop'},
       'description': {
-        'ja': '''橋渡し攻略の基本手順をアニメーション図解で学べます。
+        'ja': '''橋渡し攻略の代表的な手法「横ハメ」をアニメーション図解で学べます。
 
-【攻略手順】
-1. アームを景品の重心の少し右側に合わせる
-2. アームを下げて景品を押す
-3. 景品が傾いて片側のバーから外れる
-4. さらに傾けて落下させる
+【横ハメの手順】
+1. 景品が2本のバーの上に水平に乗っている
+2. アームを景品の端に合わせて下げる
+3. アームで押して景品を90度回転させる
+4. 景品が縦向きになり、バーの間を通り抜けて落下
 
 図解のアニメーションで実際の動きを確認できます。''',
-        'en': '''Learn bridge strategy with animated diagrams.
+        'en': '''Learn the "sideways drop" technique with animated diagrams.
 
 【Steps】
-1. Position claw slightly right of center
-2. Lower and push the prize
-3. Prize tilts off one bar
-4. Continue tilting to drop
+1. Prize rests horizontally on two bars
+2. Position claw at prize edge
+3. Push to rotate prize 90 degrees
+4. Prize becomes vertical and drops through bars
 
 Watch the animated diagram to understand the motion.''',
       },

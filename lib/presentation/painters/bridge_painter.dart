@@ -50,13 +50,13 @@ class BridgePainter extends CustomPainter {
     final barHeight = size.height * 0.02; // バーの高さ
 
     // 景品（箱）の配置
-    final prizeWidth = barRightX - barLeftX; // 景品の幅
-    final prizeHeight = size.height * 0.15; // 景品の高さ
+    final barGap = barRightX - barLeftX; // バー間の距離
+    final prizeWidth = barGap * 0.8; // 景品の幅（バー間より少し小さい横長）
+    final prizeHeight = size.height * 0.12; // 景品の高さ（薄い箱）
     final prizeCenterX = size.width * 0.5; // 景品の中心X
+    final prizeBaseY = barY - prizeHeight / 2; // 景品の基本Y座標（バーの上）
     final prizeCenterY =
-        barY -
-        prizeHeight / 2 +
-        (prizeVerticalOffset * size.height); // 景品の中心Y（垂直オフセット適用）
+        prizeBaseY + (prizeVerticalOffset * size.height); // 景品の中心Y（落下時は下に移動）
 
     // ========================================
     // 2. 平行棒の描画
@@ -108,12 +108,14 @@ class BridgePainter extends CustomPainter {
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2.0;
 
-      // アームのX座標（景品の少し右側）
-      final armX = prizeCenterX + prizeWidth * 0.3;
+      // アームのX座標（景品の端を押す位置）
+      final armX = prizeCenterX + prizeWidth * 0.4;
 
       // アームの垂直位置（0.0 = 上端、1.0 = 景品の上部に接触）
       final armTopY = size.height * 0.05;
-      final armContactY = prizeCenterY - prizeHeight / 2;
+      // 回転を考慮したアーム接触位置の計算
+      final rotatedPrizeTopY = prizeBaseY - prizeHeight / 2 * cos(prizeAngle);
+      final armContactY = rotatedPrizeTopY;
       final armBottomY =
           armTopY + (armContactY - armTopY) * armVerticalPosition;
 

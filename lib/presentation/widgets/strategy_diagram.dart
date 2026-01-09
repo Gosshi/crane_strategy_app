@@ -64,53 +64,42 @@ class _StrategyDiagramState extends State<StrategyDiagram>
       vsync: this,
     );
 
-    // 橋渡し攻略の手順をアニメーションで表現
-    // Phase 1 (0-1秒): 初期状態
+    // 橋渡し攻略の手順をアニメーションで表現（横ハメ）
+    // Phase 1 (0-1秒): 初期状態 - 景品が水平にバーの上に乗っている
     // Phase 2 (1-2秒): アームが下がる
-    // Phase 3 (2-4秒): アームで押して景品を傾ける
-    // Phase 4 (4-5秒): 景品がさらに傾く（片側から落ちかける）
-    // Phase 5 (5-6秒): 景品が落下する
+    // Phase 3 (2-4秒): アームで押して景品を回転させる（0度 → 90度）
+    // Phase 4 (4-5秒): 景品が縦向きになる（90度維持）
+    // Phase 5 (5-6秒): 景品がバーの間を通り抜けて落下する
     // Phase 6 (6-8秒): 初期状態に戻る
 
-    // 角度のアニメーション（0度 → 15度 → 30度 → 45度 → 0度）
+    // 角度のアニメーション（0度 → 90度 → 0度）
     _angleAnimation = TweenSequence<double>([
       // Phase 1: 初期状態（0-1秒）
       TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 12.5),
-      // Phase 2: アーム下降中、まだ傾かない（1-2秒）
+      // Phase 2: アーム下降中、まだ回転しない（1-2秒）
       TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 12.5),
-      // Phase 3: アームで押して15度に傾ける（2-3秒）
+      // Phase 3: アームで押して90度回転させる（2-4秒）
       TweenSequenceItem(
         tween: Tween<double>(
           begin: 0.0,
-          end: 15 * pi / 180,
+          end: 90 * pi / 180,
         ).chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 25.0,
+      ),
+      // Phase 4: 90度維持（縦向き）（4-5秒）
+      TweenSequenceItem(
+        tween: ConstantTween<double>(90 * pi / 180),
         weight: 12.5,
       ),
-      // Phase 3続き: さらに30度に傾ける（3-4秒）
+      // Phase 5: 落下中は90度維持（5-6秒）
       TweenSequenceItem(
-        tween: Tween<double>(
-          begin: 15 * pi / 180,
-          end: 30 * pi / 180,
-        ).chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 12.5,
-      ),
-      // Phase 4: 片側から落ちかける（45度）（4-5秒）
-      TweenSequenceItem(
-        tween: Tween<double>(
-          begin: 30 * pi / 180,
-          end: 45 * pi / 180,
-        ).chain(CurveTween(curve: Curves.easeIn)),
-        weight: 12.5,
-      ),
-      // Phase 5: 落下中は角度維持（5-6秒）
-      TweenSequenceItem(
-        tween: ConstantTween<double>(45 * pi / 180),
+        tween: ConstantTween<double>(90 * pi / 180),
         weight: 12.5,
       ),
       // Phase 6: 初期状態に戻る（6-8秒）
       TweenSequenceItem(
         tween: Tween<double>(
-          begin: 45 * pi / 180,
+          begin: 90 * pi / 180,
           end: 0.0,
         ).chain(CurveTween(curve: Curves.easeInOut)),
         weight: 25.0,
@@ -165,38 +154,12 @@ class _StrategyDiagramState extends State<StrategyDiagram>
       ),
     ]).animate(_controller);
 
-    // 重心のアニメーション（中央 → 右寄り → 中央）
+    // 重心のアニメーション（横ハメでは中央固定）
     _gravityAnimation = TweenSequence<Offset>([
-      // Phase 1-2: 中央（0-2秒）
+      // 常に中央
       TweenSequenceItem(
         tween: ConstantTween<Offset>(const Offset(0.5, 0.5)),
-        weight: 25.0,
-      ),
-      // Phase 3-4: 右寄りに移動（2-4秒）
-      TweenSequenceItem(
-        tween: Tween<Offset>(
-          begin: const Offset(0.5, 0.5),
-          end: const Offset(0.7, 0.5),
-        ).chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 25.0,
-      ),
-      // Phase 4-5: さらに右に（4-5秒）
-      TweenSequenceItem(
-        tween: ConstantTween<Offset>(const Offset(0.7, 0.5)),
-        weight: 12.5,
-      ),
-      // Phase 5-6: 落下中（5-6秒）
-      TweenSequenceItem(
-        tween: ConstantTween<Offset>(const Offset(0.7, 0.5)),
-        weight: 12.5,
-      ),
-      // Phase 6-8: 中央に戻る（6-8秒）
-      TweenSequenceItem(
-        tween: Tween<Offset>(
-          begin: const Offset(0.7, 0.5),
-          end: const Offset(0.5, 0.5),
-        ).chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 25.0,
+        weight: 100.0,
       ),
     ]).animate(_controller);
 
