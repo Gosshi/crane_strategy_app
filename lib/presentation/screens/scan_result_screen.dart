@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../../data/providers/strategy_repository_provider.dart';
 import '../../data/models/product.dart';
@@ -80,6 +81,54 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
   void dispose() {
     _confettiController.dispose();
     super.dispose();
+  }
+
+  /// YouTube動画IDを抽出
+  String? _extractYoutubeVideoId(String url) {
+    return YoutubePlayer.convertUrlToId(url);
+  }
+
+  /// YouTubeプレイヤーをモーダルで表示
+  void _showYoutubePlayer(BuildContext context, String youtubeUrl) {
+    final videoId = _extractYoutubeVideoId(youtubeUrl);
+    if (videoId == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('無効なYouTube URLです')));
+      return;
+    }
+
+    final controller = YoutubePlayerController(
+      initialVideoId: videoId,
+      flags: const YoutubePlayerFlags(autoPlay: true, mute: false),
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: YoutubePlayerBuilder(
+          player: YoutubePlayer(
+            controller: controller,
+            showVideoProgressIndicator: true,
+          ),
+          builder: (context, player) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                player,
+                TextButton(
+                  onPressed: () {
+                    controller.dispose();
+                    Navigator.pop(context);
+                  },
+                  child: const Text('閉じる'),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    ).then((_) => controller.dispose());
   }
 
   @override
@@ -436,33 +485,12 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
                                 Padding(
                                   padding: const EdgeInsets.only(top: 8.0),
                                   child: FilledButton.icon(
-                                    onPressed: () async {
-                                      final uri = Uri.parse(post.youtubeUrl!);
-                                      if (!await launchUrl(
-                                        uri,
-                                        mode: LaunchMode.externalApplication,
-                                      )) {
-                                        if (context.mounted) {
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                AppLocalizations.of(
-                                                  context,
-                                                )!.cannotOpenVideo,
-                                              ),
-                                            ),
-                                          );
-                                        }
-                                      }
-                                    },
-                                    icon: const Icon(Icons.play_circle_fill),
-                                    label: Text(
-                                      AppLocalizations.of(
-                                        context,
-                                      )!.watchVideoYouTube,
+                                    onPressed: () => _showYoutubePlayer(
+                                      context,
+                                      post.youtubeUrl!,
                                     ),
+                                    icon: const Icon(Icons.play_circle_fill),
+                                    label: const Text('動画を再生'),
                                     style: FilledButton.styleFrom(
                                       backgroundColor: Colors.red,
                                       foregroundColor: Colors.white,
