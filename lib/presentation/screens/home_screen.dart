@@ -131,6 +131,55 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 }
               },
             ),
+          // 拡張攻略データ投入ボタン（デバッグモードのみ）
+          if (kDebugMode)
+            IconButton(
+              icon: const Icon(Icons.add_circle),
+              tooltip: '拡張攻略データ追加',
+              onPressed: () async {
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('拡張攻略データ追加'),
+                    content: const Text(
+                      '10件の攻略戦略データをFirestoreに追加しますか？\n（英語版・動画URL付き）',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: Text(AppLocalizations.of(context)!.cancel),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        child: const Text('追加'),
+                      ),
+                    ],
+                  ),
+                );
+
+                if (confirmed == true && context.mounted) {
+                  try {
+                    await addExtendedStrategies();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('拡張攻略データを追加しました！')),
+                      );
+                      ref.invalidate(strategiesProvider);
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            AppLocalizations.of(context)!.error(e.toString()),
+                          ),
+                        ),
+                      );
+                    }
+                  }
+                }
+              },
+            ),
         ],
       ),
       body: Column(
