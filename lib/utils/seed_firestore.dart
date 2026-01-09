@@ -62,6 +62,34 @@ Future<void> addExtendedStrategies() async {
   final now = Timestamp.now();
 
   final strategies = [
+    // テスト用: アニメーション図解を表示する橋渡し攻略データ
+    {
+      'title': {'ja': '橋渡し攻略 - 図解で学ぶ', 'en': 'Bridge Strategy - Visual Guide'},
+      'description': {
+        'ja': '''橋渡し攻略の基本手順をアニメーション図解で学べます。
+
+【攻略手順】
+1. アームを景品の重心の少し右側に合わせる
+2. アームを下げて景品を押す
+3. 景品が傾いて片側のバーから外れる
+4. さらに傾けて落下させる
+
+図解のアニメーションで実際の動きを確認できます。''',
+        'en': '''Learn bridge strategy with animated diagrams.
+
+【Steps】
+1. Position claw slightly right of center
+2. Lower and push the prize
+3. Prize tilts off one bar
+4. Continue tilting to drop
+
+Watch the animated diagram to understand the motion.''',
+      },
+      'thumbnailUrl': '',
+      'videoId': '',
+      'settingType': '橋渡し',
+      'updatedAt': now,
+    },
     {
       'title': {'ja': '重量設定攻略 - 重い景品の取り方', 'en': 'Heavy Prize Strategy'},
       'description': {
