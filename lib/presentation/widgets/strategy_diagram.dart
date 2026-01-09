@@ -51,50 +51,152 @@ class _StrategyDiagramState extends State<StrategyDiagram>
   late AnimationController _controller;
   late Animation<double> _angleAnimation;
   late Animation<Offset> _gravityAnimation;
+  late Animation<double> _armAnimation;
+  late Animation<double> _verticalOffsetAnimation;
 
   @override
   void initState() {
     super.initState();
 
-    // アニメーションコントローラーの初期化（3秒で1サイクル）
+    // アニメーションコントローラーの初期化（8秒で1サイクル）
     _controller = AnimationController(
-      duration: const Duration(seconds: 3),
+      duration: const Duration(seconds: 8),
       vsync: this,
     );
 
-    // 角度のアニメーション（0度 → 15度 → 0度）
+    // 橋渡し攻略の手順をアニメーションで表現
+    // Phase 1 (0-1秒): 初期状態
+    // Phase 2 (1-2秒): アームが下がる
+    // Phase 3 (2-4秒): アームで押して景品を傾ける
+    // Phase 4 (4-5秒): 景品がさらに傾く（片側から落ちかける）
+    // Phase 5 (5-6秒): 景品が落下する
+    // Phase 6 (6-8秒): 初期状態に戻る
+
+    // 角度のアニメーション（0度 → 15度 → 30度 → 45度 → 0度）
     _angleAnimation = TweenSequence<double>([
+      // Phase 1: 初期状態（0-1秒）
+      TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 12.5),
+      // Phase 2: アーム下降中、まだ傾かない（1-2秒）
+      TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 12.5),
+      // Phase 3: アームで押して15度に傾ける（2-3秒）
       TweenSequenceItem(
         tween: Tween<double>(
           begin: 0.0,
           end: 15 * pi / 180,
         ).chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 50,
+        weight: 12.5,
       ),
+      // Phase 3続き: さらに30度に傾ける（3-4秒）
       TweenSequenceItem(
         tween: Tween<double>(
           begin: 15 * pi / 180,
+          end: 30 * pi / 180,
+        ).chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 12.5,
+      ),
+      // Phase 4: 片側から落ちかける（45度）（4-5秒）
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 30 * pi / 180,
+          end: 45 * pi / 180,
+        ).chain(CurveTween(curve: Curves.easeIn)),
+        weight: 12.5,
+      ),
+      // Phase 5: 落下中は角度維持（5-6秒）
+      TweenSequenceItem(
+        tween: ConstantTween<double>(45 * pi / 180),
+        weight: 12.5,
+      ),
+      // Phase 6: 初期状態に戻る（6-8秒）
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 45 * pi / 180,
           end: 0.0,
         ).chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 50,
+        weight: 25.0,
+      ),
+    ]).animate(_controller);
+
+    // アームのアニメーション（0.0=上 → 1.0=接触）
+    _armAnimation = TweenSequence<double>([
+      // Phase 1: アームなし（0-1秒）
+      TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 12.5),
+      // Phase 2: アームが下がる（1-2秒）
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 0.0,
+          end: 1.0,
+        ).chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 12.5,
+      ),
+      // Phase 3-4: アームで押し続ける（2-4秒）
+      TweenSequenceItem(tween: ConstantTween<double>(1.0), weight: 25.0),
+      // Phase 4-5: アームが上がる（4-5秒）
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 1.0,
+          end: 0.0,
+        ).chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 12.5,
+      ),
+      // Phase 5-8: アームなし（5-8秒）
+      TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 37.5),
+    ]).animate(_controller);
+
+    // 垂直位置のアニメーション（0.0=バー上 → 1.0=落下）
+    _verticalOffsetAnimation = TweenSequence<double>([
+      // Phase 1-5: バー上（0-5秒）
+      TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 62.5),
+      // Phase 5: 落下開始（5-6秒）
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 0.0,
+          end: 1.2,
+        ).chain(CurveTween(curve: Curves.easeIn)),
+        weight: 12.5,
+      ),
+      // Phase 6: 初期状態に戻る（6-8秒）
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 1.2,
+          end: 0.0,
+        ).chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 25.0,
       ),
     ]).animate(_controller);
 
     // 重心のアニメーション（中央 → 右寄り → 中央）
     _gravityAnimation = TweenSequence<Offset>([
+      // Phase 1-2: 中央（0-2秒）
+      TweenSequenceItem(
+        tween: ConstantTween<Offset>(const Offset(0.5, 0.5)),
+        weight: 25.0,
+      ),
+      // Phase 3-4: 右寄りに移動（2-4秒）
       TweenSequenceItem(
         tween: Tween<Offset>(
           begin: const Offset(0.5, 0.5),
-          end: const Offset(0.65, 0.5),
+          end: const Offset(0.7, 0.5),
         ).chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 50,
+        weight: 25.0,
       ),
+      // Phase 4-5: さらに右に（4-5秒）
+      TweenSequenceItem(
+        tween: ConstantTween<Offset>(const Offset(0.7, 0.5)),
+        weight: 12.5,
+      ),
+      // Phase 5-6: 落下中（5-6秒）
+      TweenSequenceItem(
+        tween: ConstantTween<Offset>(const Offset(0.7, 0.5)),
+        weight: 12.5,
+      ),
+      // Phase 6-8: 中央に戻る（6-8秒）
       TweenSequenceItem(
         tween: Tween<Offset>(
-          begin: const Offset(0.65, 0.5),
+          begin: const Offset(0.7, 0.5),
           end: const Offset(0.5, 0.5),
         ).chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 50,
+        weight: 25.0,
       ),
     ]).animate(_controller);
 
@@ -158,6 +260,8 @@ class _StrategyDiagramState extends State<StrategyDiagram>
           final painter = _getPainter(
             angle: _angleAnimation.value,
             gravity: _gravityAnimation.value,
+            armPosition: _armAnimation.value,
+            verticalOffset: _verticalOffsetAnimation.value,
           );
 
           if (painter != null) {
@@ -172,6 +276,8 @@ class _StrategyDiagramState extends State<StrategyDiagram>
       final painter = _getPainter(
         angle: widget.prizeAngle ?? 0.0,
         gravity: widget.centerOfGravity ?? const Offset(0.5, 0.5),
+        armPosition: 0.0,
+        verticalOffset: 0.0,
       );
 
       if (painter != null) {
@@ -202,7 +308,12 @@ class _StrategyDiagramState extends State<StrategyDiagram>
   /// strategyTypeに応じた適切なCustomPainterを返す
   ///
   /// 未実装のタイプの場合はnullを返します。
-  CustomPainter? _getPainter({required double angle, required Offset gravity}) {
+  CustomPainter? _getPainter({
+    required double angle,
+    required Offset gravity,
+    required double armPosition,
+    required double verticalOffset,
+  }) {
     // 空文字列チェック
     if (widget.strategyType.isEmpty) {
       return null;
@@ -211,7 +322,12 @@ class _StrategyDiagramState extends State<StrategyDiagram>
     switch (widget.strategyType.toLowerCase()) {
       case 'bridge':
       case '橋渡し':
-        return BridgePainter(prizeAngle: angle, centerOfGravity: gravity);
+        return BridgePainter(
+          prizeAngle: angle,
+          centerOfGravity: gravity,
+          armVerticalPosition: armPosition,
+          prizeVerticalOffset: verticalOffset,
+        );
       // 将来の拡張用
       // case 'kenzan':
       // case '剣山':
