@@ -24,7 +24,7 @@ class CollectionGridItem extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            if (product != null)
+            if (product != null && product!.imageUrl.isNotEmpty)
               Hero(
                 tag: 'collection_image_${item.id}',
                 child: CachedNetworkImage(
@@ -36,8 +36,9 @@ class CollectionGridItem extends StatelessWidget {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     ),
                   ),
-                  errorWidget: (context, url, error) => const Center(
-                    child: Icon(Icons.broken_image, color: Colors.grey),
+                  errorWidget: (context, url, error) => Container(
+                    color: Colors.grey[300],
+                    child: const Icon(Icons.image_not_supported),
                   ),
                 ),
               )

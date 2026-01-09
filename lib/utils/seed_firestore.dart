@@ -82,7 +82,8 @@ Future<void> addExtendedStrategies() async {
 
 Heavy prizes require multiple plays.''',
       },
-      'thumbnailUrl': '',
+      'thumbnailUrl':
+          'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
       'videoId': 'dQw4w9WgXcQ',
       'settingType': '重量設定',
       'updatedAt': now,
@@ -101,7 +102,8 @@ Heavy prizes require multiple plays.''',
 【Medium】Standard bridge
 【Strong】Quick win possible''',
       },
-      'thumbnailUrl': '',
+      'thumbnailUrl':
+          'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
       'videoId': 'dQw4w9WgXcQ',
       'settingType': 'アームパワー',
       'updatedAt': now,
@@ -118,7 +120,8 @@ Heavy prizes require multiple plays.''',
 【Effective】Tag hooking, target ears/limbs
 【Tips】Use hooking if too soft''',
       },
-      'thumbnailUrl': '',
+      'thumbnailUrl':
+          'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
       'videoId': 'dQw4w9WgXcQ',
       'settingType': 'ぬいぐるみ',
       'updatedAt': now,
@@ -133,7 +136,8 @@ Heavy prizes require multiple plays.''',
 
 【Basic】Target corners, bridge gradually''',
       },
-      'thumbnailUrl': '',
+      'thumbnailUrl':
+          'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
       'videoId': 'dQw4w9WgXcQ',
       'settingType': 'フィギュア',
       'updatedAt': now,
@@ -148,7 +152,8 @@ Heavy prizes require multiple plays.''',
 
 【Methods】Push out, hook, multi-grab''',
       },
-      'thumbnailUrl': '',
+      'thumbnailUrl':
+          'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
       'videoId': 'dQw4w9WgXcQ',
       'settingType': 'お菓子',
       'updatedAt': now,
@@ -163,7 +168,8 @@ Heavy prizes require multiple plays.''',
 
 【Basic】Use corners, move gradually''',
       },
-      'thumbnailUrl': '',
+      'thumbnailUrl':
+          'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
       'videoId': 'dQw4w9WgXcQ',
       'settingType': '箱物',
       'updatedAt': now,
@@ -178,7 +184,8 @@ Heavy prizes require multiple plays.''',
 
 【Target】Tags, strings, ears/limbs''',
       },
-      'thumbnailUrl': '',
+      'thumbnailUrl':
+          'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
       'videoId': 'dQw4w9WgXcQ',
       'settingType': '引っかけ',
       'updatedAt': now,
@@ -193,7 +200,8 @@ Heavy prizes require multiple plays.''',
 
 【When】Prize angled, tag not visible''',
       },
-      'thumbnailUrl': '',
+      'thumbnailUrl':
+          'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
       'videoId': 'dQw4w9WgXcQ',
       'settingType': '回転',
       'updatedAt': now,
@@ -208,7 +216,8 @@ Heavy prizes require multiple plays.''',
 
 【Best】Light items, near hole''',
       },
-      'thumbnailUrl': '',
+      'thumbnailUrl':
+          'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
       'videoId': 'dQw4w9WgXcQ',
       'settingType': '押し込み',
       'updatedAt': now,
@@ -223,7 +232,8 @@ Heavy prizes require multiple plays.''',
 
 【Types】Swinging, rotating platforms''',
       },
-      'thumbnailUrl': '',
+      'thumbnailUrl':
+          'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
       'videoId': 'dQw4w9WgXcQ',
       'settingType': 'タイミング',
       'updatedAt': now,

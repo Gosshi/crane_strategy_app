@@ -30,10 +30,28 @@ class StrategyCard extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  CachedNetworkImage(
-                    imageUrl: strategy.thumbnailUrl,
-                    fit: BoxFit.cover,
-                  ),
+                  if (strategy.thumbnailUrl.isNotEmpty)
+                    CachedNetworkImage(
+                      imageUrl: strategy.thumbnailUrl,
+                      fit: BoxFit.cover,
+                      errorWidget: (context, url, error) => Container(
+                        color: Colors.grey[300],
+                        child: const Center(
+                          child: Icon(Icons.image_not_supported, size: 40),
+                        ),
+                      ),
+                    )
+                  else
+                    Container(
+                      color: Colors.grey[300],
+                      child: const Center(
+                        child: Icon(
+                          Icons.video_library,
+                          size: 40,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ),
                   // 再生アイコンオーバーレイ (グラデーション付き)
                   Center(
                     child: Container(
