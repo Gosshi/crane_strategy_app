@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import '../../data/models/strategy.dart';
+import 'strategy_diagram.dart';
 
 /// 攻略法カードのUI部品
 class StrategyCard extends StatelessWidget {
@@ -42,16 +43,7 @@ class StrategyCard extends StatelessWidget {
                       ),
                     )
                   else
-                    Container(
-                      color: Colors.grey[300],
-                      child: const Center(
-                        child: Icon(
-                          Icons.video_library,
-                          size: 40,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ),
+                    StrategyDiagram(strategyType: strategy.settingType),
                   // 再生アイコンオーバーレイ (グラデーション付き)
                   Center(
                     child: Container(
