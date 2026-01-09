@@ -177,6 +177,37 @@ class _PostComposerScreenState extends ConsumerState<PostComposerScreen> {
                 ),
               ],
             ),
+            const SizedBox(height: 12),
+
+            // 法的免責注意事項
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.orange.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange.shade200),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.warning_amber,
+                    color: Colors.orange.shade700,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '投稿する動画リンクは、YouTubeの利用規約および著作権法を遵守したものに限ります。違法なコンテンツは予告なく削除されます。',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.orange.shade900,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             const SizedBox(height: 16),
 
             // 画像投稿機能は一旦無効化（肖像権対策）
