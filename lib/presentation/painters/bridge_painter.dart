@@ -3,31 +3,32 @@ import 'package:flutter/material.dart';
 
 /// 橋渡し設定のクレーンゲーム攻略図解を描画するPainter
 ///
-/// 2本の平行棒の上に景品が乗っている状態を表現し、
-/// 橋渡し攻略の手順をアニメーションで示します。
+/// ## 物理構造
+/// - 2本のバー（手前と奥）が画面を横切る
+/// - 景品は2本のバーの上にまたがって乗っている
+/// - クレーンの爪が景品の角を引っ掛けて動かす
 ///
 /// ## 縦ハメ（Vertical Fitting）
-/// 景品をバーに対して垂直になるよう制御し、左右に振りながら落とす。
-/// - 角を狙って初期回転を作る
-/// - 対角線上の角を交互に狙う
-/// - 最終的に縦向きで落下
+/// 景品をバーに対して垂直（奥行き方向）に回転させて落とす。
+/// - アームが角を押す → 反対側のバーを支点に奥行き回転
+/// - Y軸回転として疑似3D表現
 ///
 /// ## 横ハメ（Horizontal Fitting）
-/// 景品をバーに対して平行に保ち、片側を脱輪させて落とす。
-/// - 片側を深く沈める
-/// - スライドさせてバーから外す
-/// - 水平のまま落下
+/// 景品をバーに平行に保ち、片側を脱輪させて横にスライド。
+/// - 片側を沈める → 水平方向にスライド → 脱輪
 class BridgePainter extends CustomPainter {
-  /// 景品の傾き角度（ラジアン、デフォルト: 0.0 = 水平）
+  /// 景品の回転角度（ラジアン）
+  /// - 縦ハメ: Y軸回転（奥行き方向、-π/2 〜 π/2）
+  /// - 横ハメ: Z軸回転（画面内回転、-π/6 〜 π/6 程度）
   final double prizeAngle;
 
-  /// 重心のオフセット（0.0-1.0の相対座標、デフォルト: Offset(0.5, 0.5) = 中央）
+  /// 重心のオフセット（0.0-1.0の相対座標）
   final Offset centerOfGravity;
 
-  /// 景品の色（デフォルト: lightBlue[200]）
+  /// 景品の色
   final Color prizeColor;
 
-  /// アームの垂直位置（0.0 = 上、1.0 = 景品に接触）
+  /// アームの垂直位置（0.0 = 上、1.0 = 景品に接触、1.15 = 深押し）
   final double armVerticalPosition;
 
   /// 景品の垂直位置オフセット（0.0 = バー上、1.0以上 = 落下）
@@ -36,10 +37,10 @@ class BridgePainter extends CustomPainter {
   /// 景品の水平位置オフセット（-1.0 = 左端、0.0 = 中央、1.0 = 右端）
   final double prizeHorizontalOffset;
 
-  /// アームの水平位置（-1.0 = 左端狙い、0.0 = 中央、1.0 = 右端狙い）
+  /// アームの水平位置（-0.5 = 左角、0.0 = 中央、0.5 = 右角）
   final double armHorizontalPosition;
 
-  /// 回転の支点（-1.0 = 左バー、0.0 = 中央、1.0 = 右バー）
+  /// 回転の支点（-1.0 = 手前バー、1.0 = 奥バー）
   final double pivotPosition;
 
   /// アームを表示するかどうか
@@ -55,7 +56,7 @@ class BridgePainter extends CustomPainter {
     this.armVerticalPosition = 0.0,
     this.prizeVerticalOffset = 0.0,
     this.prizeHorizontalOffset = 0.0,
-    this.armHorizontalPosition = 0.4,
+    this.armHorizontalPosition = 0.0,
     this.pivotPosition = 0.0,
     this.showArm = true,
     this.showTargetArrow = true,
@@ -64,125 +65,358 @@ class BridgePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     // ========================================
-    // 1. レイアウト計算
+    // 1. 座標設計: 手前と奥の2本バー
     // ========================================
 
-    // 平行棒（バー）の配置
-    final barY = size.height * 0.6;
-    final barLeftX = size.width * 0.2;
-    final barRightX = size.width * 0.8;
-    final barWidth = size.width * 0.05;
+    // 手前のバー（画面下側、Y座標が小さい）
+    final frontBarY = size.height * 0.45;
+    // 奥のバー（画面上側、Y座標が大きい）
+    final backBarY = size.height * 0.55;
+    final barGap = backBarY - frontBarY;
+
+    // バーの幅と高さ
+    final barWidth = size.width * 0.8; // 画面を横切る
     final barHeight = size.height * 0.02;
+    final barLeftX = size.width * 0.1;
 
-    // 景品（箱）の配置
-    final barGap = barRightX - barLeftX;
-    final prizeWidth = barGap * 0.8;
-    final prizeHeight = size.height * 0.12;
+    // 景品の基本サイズ
+    final prizeWidth = size.width * 0.3;
+    final prizeDepth = barGap * 0.8; // 2本のバー間の距離に基づく
 
-    // 景品の中心位置（水平オフセット適用）
+    // 景品の中心位置（水平・垂直オフセット適用）
+    final basePrizeCenterX = size.width * 0.5;
+    final basePrizeCenterY = (frontBarY + backBarY) / 2;
+
     final prizeCenterX =
-        size.width * 0.5 + (prizeHorizontalOffset * barGap * 0.3);
-    final prizeBaseY = barY - prizeHeight / 2;
-    final prizeCenterY = prizeBaseY + (prizeVerticalOffset * size.height);
-
-    // 回転の支点を計算（縦ハメ時はバーを支点に）
-    final pivotX = _calculatePivotX(
-      prizeCenterX,
-      prizeWidth,
-      barLeftX,
-      barRightX,
-    );
-    final pivotY = barY;
+        basePrizeCenterX + (prizeHorizontalOffset * size.width * 0.2);
+    final prizeCenterY = basePrizeCenterY + (prizeVerticalOffset * size.height);
 
     // ========================================
-    // 2. 平行棒の描画
+    // 2. Zオーダー: 奥から順に描画
     // ========================================
 
-    final barPaint = Paint()
-      ..color = Colors.grey[700]!
-      ..style = PaintingStyle.fill;
-
-    // 左バー
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(
-          barLeftX - barWidth / 2,
-          barY - barHeight / 2,
-          barWidth,
-          barHeight,
-        ),
-        const Radius.circular(4),
-      ),
-      barPaint,
+    // 2-1. 奥のバー
+    _drawBar(
+      canvas,
+      x: barLeftX,
+      y: backBarY,
+      width: barWidth,
+      height: barHeight,
+      isDarker: true, // 奥なので少し暗く
     );
 
-    // 右バー
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(
-          barRightX - barWidth / 2,
-          barY - barHeight / 2,
-          barWidth,
-          barHeight,
-        ),
-        const Radius.circular(4),
-      ),
-      barPaint,
-    );
-
-    // ========================================
-    // 3. アームの描画
-    // ========================================
-
-    if (showArm && armVerticalPosition > 0.0) {
-      _drawArm(canvas, size, prizeCenterX, prizeWidth, prizeBaseY, prizeHeight);
+    // 2-2. 景品（バーの間）
+    if (prizeVerticalOffset < 0.5) {
+      // バー上または落下中（バーより上）
+      _drawPrize(
+        canvas,
+        size,
+        prizeCenterX: prizeCenterX,
+        prizeCenterY: prizeCenterY,
+        prizeWidth: prizeWidth,
+        prizeDepth: prizeDepth,
+        frontBarY: frontBarY,
+        backBarY: backBarY,
+      );
     }
 
-    // ========================================
-    // 4. 景品の描画（支点を中心に回転）
-    // ========================================
+    // 2-3. 手前のバー
+    _drawBar(
+      canvas,
+      x: barLeftX,
+      y: frontBarY,
+      width: barWidth,
+      height: barHeight,
+      isDarker: false, // 手前なので明るく
+    );
 
+    // 2-4. アーム（最前面）
+    if (showArm && armVerticalPosition > 0.0) {
+      _drawCraneArm(
+        canvas,
+        size,
+        prizeCenterX: prizeCenterX,
+        prizeCenterY: basePrizeCenterY,
+        prizeWidth: prizeWidth,
+        frontBarY: frontBarY,
+        backBarY: backBarY,
+      );
+    }
+
+    // 2-5. 景品（落下後、バーより下）
+    if (prizeVerticalOffset >= 0.5) {
+      _drawPrize(
+        canvas,
+        size,
+        prizeCenterX: prizeCenterX,
+        prizeCenterY: prizeCenterY,
+        prizeWidth: prizeWidth,
+        prizeDepth: prizeDepth,
+        frontBarY: frontBarY,
+        backBarY: backBarY,
+      );
+    }
+
+    // 2-6. 狙い目矢印と重心マーカー
+    if (showTargetArrow) {
+      _drawTargetIndicators(
+        canvas,
+        size,
+        prizeCenterX: prizeCenterX,
+        prizeCenterY: prizeCenterY,
+        prizeWidth: prizeWidth,
+        prizeDepth: prizeDepth,
+      );
+    }
+  }
+
+  /// バー（橋）を描画
+  void _drawBar(
+    Canvas canvas, {
+    required double x,
+    required double y,
+    required double width,
+    required double height,
+    required bool isDarker,
+  }) {
+    final barPaint = Paint()
+      ..color = isDarker ? Colors.grey[800]! : Colors.grey[700]!
+      ..style = PaintingStyle.fill;
+
+    final barStrokePaint = Paint()
+      ..color = Colors.grey[900]!
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+
+    final barRect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(x, y - height / 2, width, height),
+      const Radius.circular(4),
+    );
+
+    canvas.drawRRect(barRect, barPaint);
+    canvas.drawRRect(barRect, barStrokePaint);
+
+    // ハイライトで立体感
+    final highlightPaint = Paint()
+      ..color = Colors.white.withValues(alpha: isDarker ? 0.1 : 0.2)
+      ..style = PaintingStyle.fill;
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(x, y - height / 2, width, height * 0.3),
+        const Radius.circular(4),
+      ),
+      highlightPaint,
+    );
+  }
+
+  /// 景品を疑似3Dで描画
+  void _drawPrize(
+    Canvas canvas,
+    Size size, {
+    required double prizeCenterX,
+    required double prizeCenterY,
+    required double prizeWidth,
+    required double prizeDepth,
+    required double frontBarY,
+    required double backBarY,
+  }) {
+    // Y軸回転を表現: 角度に応じて見かけの幅が変わる
+    final rotationFactor = cos(prizeAngle); // -1.0 〜 1.0
+    final visibleWidth = prizeWidth * rotationFactor.abs();
+    final skewX = prizeWidth * sin(prizeAngle) * 0.3;
+
+    // 景品を平行四辺形として描画（疑似3D）
+    final path = Path();
+
+    // 4つの頂点を計算
+    final topLeft = Offset(
+      prizeCenterX - visibleWidth / 2 - skewX,
+      prizeCenterY - prizeDepth / 2,
+    );
+    final topRight = Offset(
+      prizeCenterX + visibleWidth / 2 - skewX,
+      prizeCenterY - prizeDepth / 2,
+    );
+    final bottomRight = Offset(
+      prizeCenterX + visibleWidth / 2 + skewX,
+      prizeCenterY + prizeDepth / 2,
+    );
+    final bottomLeft = Offset(
+      prizeCenterX - visibleWidth / 2 + skewX,
+      prizeCenterY + prizeDepth / 2,
+    );
+
+    path.moveTo(topLeft.dx, topLeft.dy);
+    path.lineTo(topRight.dx, topRight.dy);
+    path.lineTo(bottomRight.dx, bottomRight.dy);
+    path.lineTo(bottomLeft.dx, bottomLeft.dy);
+    path.close();
+
+    // 景品本体
     final prizePaint = Paint()
       ..color = prizeColor
       ..style = PaintingStyle.fill;
 
+    canvas.drawPath(path, prizePaint);
+
+    // 景品の枠線
     final prizeStrokePaint = Paint()
       ..color = Colors.black
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
 
-    // 回転を適用（支点を中心に）
-    canvas.save();
-    canvas.translate(pivotX, pivotY);
-    canvas.rotate(prizeAngle);
-    canvas.translate(-pivotX, -pivotY);
+    canvas.drawPath(path, prizeStrokePaint);
 
-    // 景品の矩形を定義（回転後の位置）
-    final prizeRect = Rect.fromCenter(
-      center: Offset(prizeCenterX, prizeCenterY),
-      width: prizeWidth,
-      height: prizeHeight,
+    // 立体感のための影
+    final shadowPaint = Paint()
+      ..color = Colors.black.withValues(alpha: 0.2)
+      ..style = PaintingStyle.fill;
+
+    final shadowPath = Path();
+    shadowPath.moveTo(bottomLeft.dx, bottomLeft.dy);
+    shadowPath.lineTo(bottomRight.dx, bottomRight.dy);
+    shadowPath.lineTo(
+      bottomRight.dx + skewX,
+      bottomRight.dy + prizeDepth * 0.1,
+    );
+    shadowPath.lineTo(bottomLeft.dx + skewX, bottomLeft.dy + prizeDepth * 0.1);
+    shadowPath.close();
+
+    canvas.drawPath(shadowPath, shadowPaint);
+  }
+
+  /// クレーンのアーム（爪）を描画
+  void _drawCraneArm(
+    Canvas canvas,
+    Size size, {
+    required double prizeCenterX,
+    required double prizeCenterY,
+    required double prizeWidth,
+    required double frontBarY,
+    required double backBarY,
+  }) {
+    // アームの水平位置
+    final armX = prizeCenterX + prizeWidth * armHorizontalPosition;
+
+    // アームの垂直位置
+    final armTopY = size.height * 0.05;
+    final armContactY = prizeCenterY - (backBarY - frontBarY) / 2;
+    final armBottomY =
+        armTopY + (armContactY - armTopY) * armVerticalPosition.clamp(0.0, 1.0);
+
+    // 深押しの場合、さらに下に
+    final deepPushOffset =
+        (armVerticalPosition - 1.0).clamp(0.0, 0.15) * size.height * 0.3;
+    final finalArmBottomY = armBottomY + deepPushOffset;
+
+    // アームの本体（垂直の支柱）
+    final armBodyPaint = Paint()
+      ..color = Colors.grey[600]!
+      ..strokeWidth = 6.0
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawLine(
+      Offset(armX, armTopY),
+      Offset(armX, finalArmBottomY),
+      armBodyPaint,
     );
 
-    // 景品本体
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(prizeRect, const Radius.circular(8)),
-      prizePaint,
+    // アームの爪（開閉する2本の爪）
+    _drawClaw(
+      canvas,
+      centerX: armX,
+      centerY: finalArmBottomY,
+      openAmount: armVerticalPosition < 0.9 ? 0.5 : 0.2, // 接触時に閉じる
     );
+  }
 
-    // 景品の枠線
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(prizeRect, const Radius.circular(8)),
-      prizeStrokePaint,
+  /// クレーンの爪を描画
+  void _drawClaw(
+    Canvas canvas, {
+    required double centerX,
+    required double centerY,
+    required double openAmount,
+  }) {
+    final clawPaint = Paint()
+      ..color = Colors.grey[700]!
+      ..style = PaintingStyle.fill;
+
+    final clawStrokePaint = Paint()
+      ..color = Colors.grey[900]!
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+
+    final clawWidth = 15.0;
+    final clawHeight = 20.0;
+    final clawGap = 20.0 * openAmount;
+
+    // 左の爪
+    final leftClawPath = Path();
+    leftClawPath.moveTo(centerX - clawGap, centerY);
+    leftClawPath.lineTo(centerX - clawGap - clawWidth, centerY);
+    leftClawPath.lineTo(
+      centerX - clawGap - clawWidth * 0.5,
+      centerY + clawHeight,
     );
+    leftClawPath.lineTo(centerX - clawGap, centerY + clawHeight * 0.8);
+    leftClawPath.close();
 
-    // ========================================
-    // 5. 重心マーカーの描画
-    // ========================================
+    canvas.drawPath(leftClawPath, clawPaint);
+    canvas.drawPath(leftClawPath, clawStrokePaint);
 
-    final gravityX = prizeRect.left + prizeRect.width * centerOfGravity.dx;
-    final gravityY = prizeRect.top + prizeRect.height * centerOfGravity.dy;
+    // 右の爪
+    final rightClawPath = Path();
+    rightClawPath.moveTo(centerX + clawGap, centerY);
+    rightClawPath.lineTo(centerX + clawGap + clawWidth, centerY);
+    rightClawPath.lineTo(
+      centerX + clawGap + clawWidth * 0.5,
+      centerY + clawHeight,
+    );
+    rightClawPath.lineTo(centerX + clawGap, centerY + clawHeight * 0.8);
+    rightClawPath.close();
 
+    canvas.drawPath(rightClawPath, clawPaint);
+    canvas.drawPath(rightClawPath, clawStrokePaint);
+
+    // 爪の接続部（ヒンジ）
+    final hingePaint = Paint()
+      ..color = Colors.grey[800]!
+      ..style = PaintingStyle.fill;
+
+    canvas.drawCircle(Offset(centerX, centerY), 8, hingePaint);
+    canvas.drawCircle(
+      Offset(centerX, centerY),
+      8,
+      Paint()
+        ..color = Colors.grey[900]!
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.0,
+    );
+  }
+
+  /// 狙い目矢印と重心マーカーを描画
+  void _drawTargetIndicators(
+    Canvas canvas,
+    Size size, {
+    required double prizeCenterX,
+    required double prizeCenterY,
+    required double prizeWidth,
+    required double prizeDepth,
+  }) {
+    // 回転を考慮した重心位置
+    final rotationFactor = cos(prizeAngle);
+    final skewX = prizeWidth * sin(prizeAngle) * 0.3;
+    final visibleWidth = prizeWidth * rotationFactor.abs();
+
+    final gravityOffsetX = (centerOfGravity.dx - 0.5) * visibleWidth;
+    final gravityOffsetY = (centerOfGravity.dy - 0.5) * prizeDepth;
+
+    final gravityX =
+        prizeCenterX + gravityOffsetX + skewX * (centerOfGravity.dy - 0.5) * 2;
+    final gravityY = prizeCenterY + gravityOffsetY;
+
+    // 重心マーカー
     final centerPaint = Paint()
       ..color = Colors.red
       ..style = PaintingStyle.fill;
@@ -196,126 +430,9 @@ class BridgePainter extends CustomPainter {
 
     canvas.drawCircle(Offset(gravityX, gravityY), 8, centerStrokePaint);
 
-    canvas.restore();
-
-    // ========================================
-    // 6. 狙い目矢印の描画
-    // ========================================
-
-    if (showTargetArrow) {
-      _drawTargetArrow(
-        canvas,
-        size,
-        prizeCenterX,
-        prizeCenterY,
-        gravityX,
-        gravityY,
-        pivotX,
-        pivotY,
-      );
-    }
-  }
-
-  /// 回転の支点X座標を計算
-  double _calculatePivotX(
-    double prizeCenterX,
-    double prizeWidth,
-    double barLeftX,
-    double barRightX,
-  ) {
-    if (pivotPosition < 0) {
-      // 左バーを支点
-      return barLeftX;
-    } else if (pivotPosition > 0) {
-      // 右バーを支点
-      return barRightX;
-    } else {
-      // 中央（デフォルト）
-      return prizeCenterX;
-    }
-  }
-
-  /// アームを描画
-  void _drawArm(
-    Canvas canvas,
-    Size size,
-    double prizeCenterX,
-    double prizeWidth,
-    double prizeBaseY,
-    double prizeHeight,
-  ) {
-    final armPaint = Paint()
-      ..color = Colors.grey[600]!
-      ..style = PaintingStyle.fill;
-
-    final armStrokePaint = Paint()
-      ..color = Colors.grey[800]!
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
-
-    // アームのX座標（armHorizontalPositionに基づく）
-    final armX = prizeCenterX + prizeWidth * armHorizontalPosition;
-
-    // アームの垂直位置
-    final armTopY = size.height * 0.05;
-    final rotatedPrizeTopY = prizeBaseY - prizeHeight / 2 * cos(prizeAngle);
-    final armContactY = rotatedPrizeTopY;
-    final armBottomY = armTopY + (armContactY - armTopY) * armVerticalPosition;
-
-    // アームの垂直部分（棒）
-    canvas.drawLine(
-      Offset(armX, armTopY),
-      Offset(armX, armBottomY),
-      Paint()
-        ..color = Colors.grey[700]!
-        ..strokeWidth = 8.0
-        ..strokeCap = StrokeCap.round,
-    );
-
-    // アームの先端（爪部分）
-    final clawWidth = size.width * 0.08;
-    final clawHeight = size.height * 0.03;
-    final clawRect = RRect.fromRectAndRadius(
-      Rect.fromCenter(
-        center: Offset(armX, armBottomY),
-        width: clawWidth,
-        height: clawHeight,
-      ),
-      const Radius.circular(4),
-    );
-
-    canvas.drawRRect(clawRect, armPaint);
-    canvas.drawRRect(clawRect, armStrokePaint);
-  }
-
-  /// 狙い目矢印を描画
-  void _drawTargetArrow(
-    Canvas canvas,
-    Size size,
-    double prizeCenterX,
-    double prizeCenterY,
-    double gravityX,
-    double gravityY,
-    double pivotX,
-    double pivotY,
-  ) {
-    // 回転後の重心位置を計算
-    final gravityOffset = Offset(gravityX - pivotX, gravityY - pivotY);
-    final rotatedGravityX =
-        pivotX +
-        gravityOffset.dx * cos(prizeAngle) -
-        gravityOffset.dy * sin(prizeAngle);
-    final rotatedGravityY =
-        pivotY +
-        gravityOffset.dx * sin(prizeAngle) +
-        gravityOffset.dy * cos(prizeAngle);
-
-    final arrowPaint = Paint()
-      ..color = Colors.orange
-      ..style = PaintingStyle.fill;
-
+    // 狙い目矢印
     final arrowStartY = size.height * 0.15;
-    final arrowEndY = rotatedGravityY - 20;
+    final arrowEndY = gravityY - 20;
 
     final arrowLinePaint = Paint()
       ..color = Colors.orange
@@ -323,17 +440,21 @@ class BridgePainter extends CustomPainter {
       ..strokeWidth = 3.0;
 
     canvas.drawLine(
-      Offset(rotatedGravityX, arrowStartY),
-      Offset(rotatedGravityX, arrowEndY),
+      Offset(gravityX, arrowStartY),
+      Offset(gravityX, arrowEndY),
       arrowLinePaint,
     );
 
     // 矢印の先端
     final arrowPath = Path();
-    arrowPath.moveTo(rotatedGravityX, arrowEndY);
-    arrowPath.lineTo(rotatedGravityX - 8, arrowEndY - 12);
-    arrowPath.lineTo(rotatedGravityX + 8, arrowEndY - 12);
+    arrowPath.moveTo(gravityX, arrowEndY);
+    arrowPath.lineTo(gravityX - 8, arrowEndY - 12);
+    arrowPath.lineTo(gravityX + 8, arrowEndY - 12);
     arrowPath.close();
+
+    final arrowPaint = Paint()
+      ..color = Colors.orange
+      ..style = PaintingStyle.fill;
 
     canvas.drawPath(arrowPath, arrowPaint);
 
@@ -353,7 +474,7 @@ class BridgePainter extends CustomPainter {
     targetTextPainter.paint(
       canvas,
       Offset(
-        rotatedGravityX - targetTextPainter.width / 2,
+        gravityX - targetTextPainter.width / 2,
         arrowStartY - targetTextPainter.height - 4,
       ),
     );
@@ -374,10 +495,7 @@ class BridgePainter extends CustomPainter {
     centerTextPainter.layout();
     centerTextPainter.paint(
       canvas,
-      Offset(
-        rotatedGravityX - centerTextPainter.width / 2,
-        rotatedGravityY + 12,
-      ),
+      Offset(gravityX - centerTextPainter.width / 2, gravityY + 12),
     );
   }
 

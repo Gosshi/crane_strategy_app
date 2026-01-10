@@ -92,6 +92,10 @@ class _StrategyDiagramState extends State<StrategyDiagram>
   /// - 右奥角を押す → 左バー支点 → 右下がり（正の角度）
   /// - 左奥角を押す → 右バー支点 → 左下がり（負の角度）
   ///
+  /// 質感改善:
+  /// - 接触時に「ググッ」と重みを感じる easeOutCubic
+  /// - フィニッシュ前に深押し（1.0→1.15）で落下のきっかけを明示
+  ///
   /// タイムライン（10秒サイクル）:
   /// [0.0-1.0] Phase 1: 初期状態（水平）
   /// [1.0-1.5] Phase 2: アーム下降（右奥角へ）
@@ -101,7 +105,8 @@ class _StrategyDiagramState extends State<StrategyDiagram>
   /// [3.5-4.5] Phase 6: 接触→回転（左下がり -30度）
   /// [4.5-5.0] Phase 7: アーム上昇
   /// [5.0-5.5] Phase 8: アーム下降（右奥角へ）
-  /// [5.5-6.5] Phase 9: 接触→回転（右下がり +45度）
+  /// [5.5-6.3] Phase 9: 接触→回転（右下がり +50度）
+  /// [6.3-6.5] Phase 9.5: 深押し（フィニッシュ準備）← NEW
   /// [6.5-7.0] Phase 10: アーム上昇
   /// [7.0-8.0] Phase 11: 対角線で落下
   /// [8.0-10.0] Phase 12: リセット
@@ -114,6 +119,7 @@ class _StrategyDiagramState extends State<StrategyDiagram>
     // ========================================
     // 角度アニメーション
     // アームが接触した瞬間から回転開始
+    // 「ググッ」と重みを感じる easeOutCubic を使用
     // ========================================
     _angleAnimation = TweenSequence<double>([
       // [0.0-1.0] Phase 1: 初期状態（水平）
@@ -125,11 +131,12 @@ class _StrategyDiagramState extends State<StrategyDiagram>
       // [1.5-2.5] Phase 3: アーム接触→景品が右下がりに傾く
       // 狙い: 右奥角、ベクトル: 下向き押し込み
       // 支点: 左バー、結果: 右下がり（正の角度）
+      // 質感: 接触直後は抵抗があり、徐々に動く（easeOutCubic）
       TweenSequenceItem(
         tween: Tween<double>(
           begin: 0.0,
           end: 25 * pi / 180,
-        ).chain(CurveTween(curve: Curves.easeOut)),
+        ).chain(CurveTween(curve: Curves.easeOutCubic)),
         weight: 10.0,
       ),
       // [2.5-3.0] Phase 4: アーム上昇（角度維持）
@@ -145,11 +152,12 @@ class _StrategyDiagramState extends State<StrategyDiagram>
       // [3.5-4.5] Phase 6: アーム接触→景品が左下がりに傾く
       // 狙い: 左奥角（対角線上）、ベクトル: 下向き押し込み
       // 支点: 右バー、結果: 左下がり（負の角度）
+      // 質感: 重みで「ググッ」と動く
       TweenSequenceItem(
         tween: Tween<double>(
           begin: 25 * pi / 180,
           end: -30 * pi / 180,
-        ).chain(CurveTween(curve: Curves.easeInOut)),
+        ).chain(CurveTween(curve: Curves.easeOutCubic)),
         weight: 10.0,
       ),
       // [4.5-5.0] Phase 7: アーム上昇（角度維持）
@@ -162,30 +170,39 @@ class _StrategyDiagramState extends State<StrategyDiagram>
         tween: ConstantTween<double>(-30 * pi / 180),
         weight: 5.0,
       ),
-      // [5.5-6.5] Phase 9: アーム接触→景品がさらに右下がりに
+      // [5.5-6.3] Phase 9: アーム接触→景品がさらに右下がりに
       // 狙い: 右奥角（対角線上）、ベクトル: 下向き押し込み
-      // 支点: 左バー、結果: 大きく右下がり（+45度）→落下準備
+      // 支点: 左バー、結果: 大きく右下がり（+50度）→落下準備
       TweenSequenceItem(
         tween: Tween<double>(
           begin: -30 * pi / 180,
           end: 50 * pi / 180,
-        ).chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 10.0,
+        ).chain(CurveTween(curve: Curves.easeOutCubic)),
+        weight: 8.0,
+      ),
+      // [6.3-6.5] Phase 9.5: 深押しによる最後の一押し
+      // フィニッシュ前の「押し込み」で角度がさらに増加
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 50 * pi / 180,
+          end: 55 * pi / 180,
+        ).chain(CurveTween(curve: Curves.easeOut)),
+        weight: 2.0,
       ),
       // [6.5-7.0] Phase 10: アーム上昇（角度維持）
       TweenSequenceItem(
-        tween: ConstantTween<double>(50 * pi / 180),
+        tween: ConstantTween<double>(55 * pi / 180),
         weight: 5.0,
       ),
       // [7.0-8.0] Phase 11: 落下（角度維持）
       TweenSequenceItem(
-        tween: ConstantTween<double>(50 * pi / 180),
+        tween: ConstantTween<double>(55 * pi / 180),
         weight: 10.0,
       ),
       // [8.0-10.0] Phase 12: リセット
       TweenSequenceItem(
         tween: Tween<double>(
-          begin: 50 * pi / 180,
+          begin: 55 * pi / 180,
           end: 0.0,
         ).chain(CurveTween(curve: Curves.easeInOut)),
         weight: 20.0,
@@ -194,12 +211,13 @@ class _StrategyDiagramState extends State<StrategyDiagram>
 
     // ========================================
     // アーム垂直位置アニメーション
-    // 0.0=上端、1.0=景品に接触
+    // 0.0=上端、1.0=景品に接触、1.15=深押し
     // ========================================
     _armVerticalAnimation = TweenSequence<double>([
       // [0.0-1.0] Phase 1: アームなし
       TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 10.0),
       // [1.0-1.5] Phase 2: アーム下降（右奥角へ）
+      // 加速しながら下降、接触直前で最速
       TweenSequenceItem(
         tween: Tween<double>(
           begin: 0.0,
@@ -243,12 +261,21 @@ class _StrategyDiagramState extends State<StrategyDiagram>
         ).chain(CurveTween(curve: Curves.easeIn)),
         weight: 5.0,
       ),
-      // [5.5-6.5] Phase 9: 接触維持（押し込み中）
-      TweenSequenceItem(tween: ConstantTween<double>(1.0), weight: 10.0),
-      // [6.5-7.0] Phase 10: アーム上昇
+      // [5.5-6.3] Phase 9: 接触維持（押し込み中）
+      TweenSequenceItem(tween: ConstantTween<double>(1.0), weight: 8.0),
+      // [6.3-6.5] Phase 9.5: 深押し（フィニッシュ準備）
+      // アームがさらに深く沈み込み、落下のきっかけを作る
       TweenSequenceItem(
         tween: Tween<double>(
           begin: 1.0,
+          end: 1.15,
+        ).chain(CurveTween(curve: Curves.easeOut)),
+        weight: 2.0,
+      ),
+      // [6.5-7.0] Phase 10: アーム上昇
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 1.15,
           end: 0.0,
         ).chain(CurveTween(curve: Curves.easeOut)),
         weight: 5.0,
@@ -323,13 +350,18 @@ class _StrategyDiagramState extends State<StrategyDiagram>
   /// - アームで横方向に押し出す（スライド/横引き）
   /// - バーとの掛かりが外れて落下
   ///
+  /// 質感改善:
+  /// - 接触時に「ググッ」と重みを感じる easeOutCubic
+  /// - スライド中に摩擦を逃がす微小な垂直揺れ（持ち上げ）
+  /// - スライド速度を非線形に（最初ゆっくり、後半加速）
+  ///
   /// タイムライン（10秒サイクル）:
   /// [0.0-1.0] Phase 1: 初期状態（水平）
   /// [1.0-1.5] Phase 2: アーム下降（右側へ）
   /// [1.5-2.5] Phase 3: 接触→片側沈め（傾斜 +25度）
   /// [2.5-3.0] Phase 4: アーム上昇
   /// [3.0-3.5] Phase 5: アーム下降（左側バー際へ）
-  /// [3.5-5.5] Phase 6: アームで右方向にスライド（脱輪）
+  /// [3.5-5.5] Phase 6: アームで右方向にスライド（脱輪）+ 垂直揺れ
   /// [5.5-6.5] Phase 7: 落下
   /// [6.5-10.0] Phase 8: リセット
   void _setupHorizontalFittingAnimation() {
@@ -341,6 +373,7 @@ class _StrategyDiagramState extends State<StrategyDiagram>
     // ========================================
     // 角度アニメーション
     // 片側を沈めて傾斜をつける
+    // 「ググッ」と重みを感じる easeOutCubic
     // ========================================
     _angleAnimation = TweenSequence<double>([
       // [0.0-1.0] Phase 1: 初期状態（水平）
@@ -350,11 +383,12 @@ class _StrategyDiagramState extends State<StrategyDiagram>
       // [1.5-2.5] Phase 3: アーム接触→片側を沈める
       // 狙い: 右側、ベクトル: 下向き押し込み
       // 支点: 左バー、結果: 右下がり（正の角度）
+      // 質感: 接触直後は抵抗があり、徐々に動く
       TweenSequenceItem(
         tween: Tween<double>(
           begin: 0.0,
           end: 25 * pi / 180,
-        ).chain(CurveTween(curve: Curves.easeOut)),
+        ).chain(CurveTween(curve: Curves.easeOutCubic)),
         weight: 10.0,
       ),
       // [2.5-3.0] Phase 4: アーム上昇（角度維持）
@@ -453,18 +487,28 @@ class _StrategyDiagramState extends State<StrategyDiagram>
     // ========================================
     // 水平位置アニメーション（スライド）
     // アームで押されて右に移動→脱輪
+    // 非線形: 最初ゆっくり（摩擦抵抗）、後半加速（脱輪）
     // ========================================
     _horizontalOffsetAnimation = TweenSequence<double>([
       // [0.0-3.5] Phase 1-5: 中央位置
       TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 35.0),
-      // [3.5-5.5] Phase 6: アームに押されて右にスライド
-      // 物理: アームの横方向ベクトルで景品が移動
+      // [3.5-4.5] Phase 6前半: アームに押されて動き始める
+      // 物理: 静止摩擦を超えるまで抵抗、その後動く
       TweenSequenceItem(
         tween: Tween<double>(
           begin: 0.0,
+          end: 0.3,
+        ).chain(CurveTween(curve: Curves.easeIn)),
+        weight: 10.0,
+      ),
+      // [4.5-5.5] Phase 6後半: 摩擦が減り加速→脱輪
+      // 物理: 動摩擦は静止摩擦より小さい→加速
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 0.3,
           end: 1.0,
-        ).chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 20.0,
+        ).chain(CurveTween(curve: Curves.easeOut)),
+        weight: 10.0,
       ),
       // [5.5-6.5] Phase 7: 落下中（位置維持）
       TweenSequenceItem(tween: ConstantTween<double>(1.0), weight: 10.0),
@@ -479,11 +523,46 @@ class _StrategyDiagramState extends State<StrategyDiagram>
     ]).animate(_controller!);
 
     // ========================================
-    // 垂直位置アニメーション（落下）
+    // 垂直位置アニメーション（落下 + スライド中の摩擦揺れ）
+    // スライド中に微小な持ち上げ（摩擦を逃がす動き）
     // ========================================
     _verticalOffsetAnimation = TweenSequence<double>([
-      // [0.0-5.5] Phase 1-6: バー上
-      TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 55.0),
+      // [0.0-3.5] Phase 1-5: バー上（静止）
+      TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 35.0),
+      // [3.5-4.0] Phase 6-1: スライド開始時に微小持ち上げ
+      // 物理: 摩擦を逃がすため景品がわずかに浮く
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 0.0,
+          end: -0.03,
+        ).chain(CurveTween(curve: Curves.easeOut)),
+        weight: 5.0,
+      ),
+      // [4.0-4.5] Phase 6-2: 元の位置に戻りながらスライド
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: -0.03,
+          end: 0.0,
+        ).chain(CurveTween(curve: Curves.easeIn)),
+        weight: 5.0,
+      ),
+      // [4.5-5.0] Phase 6-3: 脱輪直前の微小持ち上げ
+      // 物理: バーから外れる瞬間に再度浮く
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 0.0,
+          end: -0.02,
+        ).chain(CurveTween(curve: Curves.easeOut)),
+        weight: 5.0,
+      ),
+      // [5.0-5.5] Phase 6-4: 脱輪→落下開始
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: -0.02,
+          end: 0.0,
+        ).chain(CurveTween(curve: Curves.easeIn)),
+        weight: 5.0,
+      ),
       // [5.5-6.5] Phase 7: 落下
       TweenSequenceItem(
         tween: Tween<double>(
