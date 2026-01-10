@@ -13,36 +13,28 @@ enum BridgeAnimationType {
 
 /// 攻略法の図解を表示するウィジェット
 ///
-/// クレーンゲームの攻略タイプに応じて、CustomPainterを使用した
-/// 図解を16:9のアスペクト比で表示します。
-///
 /// ## 橋渡し攻略のアニメーション
 ///
 /// ### 縦ハメ（Vertical Fitting）
-/// 景品をバーに対して垂直になるよう制御し、左右に振りながら落とす王道戦略。
-/// 1. 初期回転: 角を狙って斜めにする
-/// 2. 対角線攻撃: 左右交互に振ってシーソーのように動かす
-/// 3. フィニッシュ: 縦向きになったら押して落下
+/// 景品の角を左右交互に狙い、シーソーのように振りながら対角線で落とす。
+///
+/// 物理ロジック:
+/// - アームが右奥角を押す → 左バーを支点に右下がりに傾く
+/// - アームが左奥角を押す → 右バーを支点に左下がりに傾く
+/// - 交互に繰り返し、角度を増幅させて落下
 ///
 /// ### 横ハメ（Horizontal Fitting）
-/// 景品をバーに対して平行に保ち、片側を脱輪させて落とす戦略。
-/// 1. 片側沈め: 片方を深く沈める
-/// 2. スライド: 横にずらしてバーから外す
-/// 3. 落下
+/// 景品をバーに平行に保ち、片側を脱輪させてスライドで引き抜く。
+///
+/// 物理ロジック:
+/// - 片側を沈めて傾斜をつける
+/// - アームで横方向に押し出し（スライド）
+/// - バーとの掛かりが外れて落下
 class StrategyDiagram extends StatefulWidget {
-  /// 攻略タイプ（例: 'bridge', 'kenzan', '3-claw'）
   final String strategyType;
-
-  /// 景品の傾き角度（ラジアン、オプション）
   final double? prizeAngle;
-
-  /// 重心の位置（0.0-1.0の相対座標、オプション）
   final Offset? centerOfGravity;
-
-  /// アニメーションを有効にするかどうか（デフォルト: true）
   final bool animate;
-
-  /// 橋渡し攻略のアニメーションタイプ（デフォルト: vertical）
   final BridgeAnimationType bridgeAnimationType;
 
   const StrategyDiagram({
@@ -62,12 +54,9 @@ class _StrategyDiagramState extends State<StrategyDiagram>
     with SingleTickerProviderStateMixin {
   AnimationController? _controller;
 
-  // 共通アニメーション
   Animation<double>? _angleAnimation;
   Animation<double>? _armVerticalAnimation;
   Animation<double>? _verticalOffsetAnimation;
-
-  // 拡張アニメーション
   Animation<double>? _horizontalOffsetAnimation;
   Animation<double>? _armHorizontalAnimation;
   Animation<double>? _pivotAnimation;
@@ -82,7 +71,6 @@ class _StrategyDiagramState extends State<StrategyDiagram>
   }
 
   void _setupAnimations() {
-    // アニメーションタイプに応じてセットアップ
     if (widget.bridgeAnimationType == BridgeAnimationType.vertical) {
       _setupVerticalFittingAnimation();
     } else {
@@ -94,343 +82,423 @@ class _StrategyDiagramState extends State<StrategyDiagram>
     }
   }
 
-  /// 縦ハメアニメーションのセットアップ
+  /// ============================================================
+  /// 縦ハメアニメーション（Vertical Fitting）
+  /// ============================================================
   ///
-  /// 景品の角を左右交互に狙い、シーソーのように振りながら
-  /// 徐々に縦向きにして落とす。
+  /// 物理モデル:
+  /// - アームが景品の角に接触した瞬間から回転が始まる
+  /// - 接触していない角の下にあるバーが回転の支点となる
+  /// - 右奥角を押す → 左バー支点 → 右下がり（正の角度）
+  /// - 左奥角を押す → 右バー支点 → 左下がり（負の角度）
+  ///
+  /// タイムライン（10秒サイクル）:
+  /// [0.0-1.0] Phase 1: 初期状態（水平）
+  /// [1.0-1.5] Phase 2: アーム下降（右奥角へ）
+  /// [1.5-2.5] Phase 3: 接触→回転（右下がり +25度）
+  /// [2.5-3.0] Phase 4: アーム上昇
+  /// [3.0-3.5] Phase 5: アーム下降（左奥角へ）
+  /// [3.5-4.5] Phase 6: 接触→回転（左下がり -30度）
+  /// [4.5-5.0] Phase 7: アーム上昇
+  /// [5.0-5.5] Phase 8: アーム下降（右奥角へ）
+  /// [5.5-6.5] Phase 9: 接触→回転（右下がり +45度）
+  /// [6.5-7.0] Phase 10: アーム上昇
+  /// [7.0-8.0] Phase 11: 対角線で落下
+  /// [8.0-10.0] Phase 12: リセット
   void _setupVerticalFittingAnimation() {
-    // 12秒サイクル
-    _controller = AnimationController(
-      duration: const Duration(seconds: 12),
-      vsync: this,
-    );
-
-    // 縦ハメの角度アニメーション
-    // 右下がり → 左下がり → さらに右下がり → 縦向き → 落下
-    _angleAnimation = TweenSequence<double>([
-      // Phase 1: 初期状態（0-1秒）
-      TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 8.33),
-      // Phase 2: アーム下降中（1-2秒）
-      TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 8.33),
-      // Phase 3: 右を押して左下がりに（2-3秒）- 右バーを支点
-      TweenSequenceItem(
-        tween: Tween<double>(
-          begin: 0.0,
-          end: -25 * pi / 180,
-        ).chain(CurveTween(curve: Curves.easeOut)),
-        weight: 8.33,
-      ),
-      // Phase 4: アーム上昇（3-4秒）
-      TweenSequenceItem(
-        tween: ConstantTween<double>(-25 * pi / 180),
-        weight: 8.33,
-      ),
-      // Phase 5-6: 左アームで右下がりに（4-6秒）- 左バーを支点
-      TweenSequenceItem(
-        tween: Tween<double>(
-          begin: -25 * pi / 180,
-          end: 30 * pi / 180,
-        ).chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 16.66,
-      ),
-      // Phase 7: アーム上昇（6-7秒）
-      TweenSequenceItem(
-        tween: ConstantTween<double>(30 * pi / 180),
-        weight: 8.33,
-      ),
-      // Phase 8-9: 再度右を押してさらに傾ける（7-9秒）
-      TweenSequenceItem(
-        tween: Tween<double>(
-          begin: 30 * pi / 180,
-          end: -45 * pi / 180,
-        ).chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 16.66,
-      ),
-      // Phase 10: 縦向きで維持（9-10秒）
-      TweenSequenceItem(
-        tween: ConstantTween<double>(-45 * pi / 180),
-        weight: 8.33,
-      ),
-      // Phase 11: 落下（10-11秒）
-      TweenSequenceItem(
-        tween: ConstantTween<double>(-45 * pi / 180),
-        weight: 8.33,
-      ),
-      // Phase 12: 初期状態に戻る（11-12秒）
-      TweenSequenceItem(
-        tween: Tween<double>(
-          begin: -45 * pi / 180,
-          end: 0.0,
-        ).chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 8.33,
-      ),
-    ]).animate(_controller!);
-
-    // アーム垂直位置アニメーション
-    _armVerticalAnimation = TweenSequence<double>([
-      // Phase 1: アームなし（0-1秒）
-      TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 8.33),
-      // Phase 2: 右アーム下降（1-2秒）
-      TweenSequenceItem(
-        tween: Tween<double>(
-          begin: 0.0,
-          end: 1.0,
-        ).chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 8.33,
-      ),
-      // Phase 3: 押し中（2-3秒）
-      TweenSequenceItem(tween: ConstantTween<double>(1.0), weight: 8.33),
-      // Phase 4: 右アーム上昇（3-4秒）
-      TweenSequenceItem(
-        tween: Tween<double>(
-          begin: 1.0,
-          end: 0.0,
-        ).chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 8.33,
-      ),
-      // Phase 5: 左アーム下降（4-5秒）
-      TweenSequenceItem(
-        tween: Tween<double>(
-          begin: 0.0,
-          end: 1.0,
-        ).chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 8.33,
-      ),
-      // Phase 6: 押し中（5-6秒）
-      TweenSequenceItem(tween: ConstantTween<double>(1.0), weight: 8.33),
-      // Phase 7: 左アーム上昇（6-7秒）
-      TweenSequenceItem(
-        tween: Tween<double>(
-          begin: 1.0,
-          end: 0.0,
-        ).chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 8.33,
-      ),
-      // Phase 8: 右アーム下降（7-8秒）
-      TweenSequenceItem(
-        tween: Tween<double>(
-          begin: 0.0,
-          end: 1.0,
-        ).chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 8.33,
-      ),
-      // Phase 9: 押し中（8-9秒）
-      TweenSequenceItem(tween: ConstantTween<double>(1.0), weight: 8.33),
-      // Phase 10-12: アームなし（9-12秒）
-      TweenSequenceItem(
-        tween: Tween<double>(
-          begin: 1.0,
-          end: 0.0,
-        ).chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 8.33,
-      ),
-      TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 16.66),
-    ]).animate(_controller!);
-
-    // アーム水平位置アニメーション（右→左→右）
-    _armHorizontalAnimation = TweenSequence<double>([
-      // Phase 1-4: 右側を狙う（0-4秒）
-      TweenSequenceItem(tween: ConstantTween<double>(0.4), weight: 33.32),
-      // Phase 5-7: 左側を狙う（4-7秒）
-      TweenSequenceItem(tween: ConstantTween<double>(-0.4), weight: 25.0),
-      // Phase 8-12: 右側を狙う（7-12秒）
-      TweenSequenceItem(tween: ConstantTween<double>(0.4), weight: 41.68),
-    ]).animate(_controller!);
-
-    // 支点アニメーション（右バー→左バー→右バー）
-    _pivotAnimation = TweenSequence<double>([
-      // Phase 1-4: 右バーを支点（左下がりに）
-      TweenSequenceItem(tween: ConstantTween<double>(1.0), weight: 33.32),
-      // Phase 5-7: 左バーを支点（右下がりに）
-      TweenSequenceItem(tween: ConstantTween<double>(-1.0), weight: 25.0),
-      // Phase 8-12: 右バーを支点（左下がりに）
-      TweenSequenceItem(tween: ConstantTween<double>(1.0), weight: 41.68),
-    ]).animate(_controller!);
-
-    // 垂直位置アニメーション（落下）
-    _verticalOffsetAnimation = TweenSequence<double>([
-      // Phase 1-10: バー上（0-10秒）
-      TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 83.33),
-      // Phase 11: 落下（10-11秒）
-      TweenSequenceItem(
-        tween: Tween<double>(
-          begin: 0.0,
-          end: 1.2,
-        ).chain(CurveTween(curve: Curves.easeIn)),
-        weight: 8.33,
-      ),
-      // Phase 12: 初期状態に戻る（11-12秒）
-      TweenSequenceItem(
-        tween: Tween<double>(
-          begin: 1.2,
-          end: 0.0,
-        ).chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 8.33,
-      ),
-    ]).animate(_controller!);
-
-    // 水平位置は固定
-    _horizontalOffsetAnimation = ConstantTween<double>(
-      0.0,
-    ).animate(_controller!);
-  }
-
-  /// 横ハメアニメーションのセットアップ
-  ///
-  /// 片側を深く沈めてから、横にスライドさせてバーから外す。
-  void _setupHorizontalFittingAnimation() {
-    // 10秒サイクル
     _controller = AnimationController(
       duration: const Duration(seconds: 10),
       vsync: this,
     );
 
-    // 横ハメの角度アニメーション（小さな傾斜のみ）
+    // ========================================
+    // 角度アニメーション
+    // アームが接触した瞬間から回転開始
+    // ========================================
     _angleAnimation = TweenSequence<double>([
-      // Phase 1: 初期状態（0-1秒）
+      // [0.0-1.0] Phase 1: 初期状態（水平）
+      // 狙い: なし、景品は水平にバーの上
       TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 10.0),
-      // Phase 2: アーム下降中（1-2秒）
-      TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 10.0),
-      // Phase 3: 片側を沈める（2-3秒）
+      // [1.0-1.5] Phase 2: アーム下降中（まだ接触していない）
+      // 狙い: 右奥角に向けてアームが下降中
+      TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 5.0),
+      // [1.5-2.5] Phase 3: アーム接触→景品が右下がりに傾く
+      // 狙い: 右奥角、ベクトル: 下向き押し込み
+      // 支点: 左バー、結果: 右下がり（正の角度）
       TweenSequenceItem(
         tween: Tween<double>(
           begin: 0.0,
-          end: 20 * pi / 180,
+          end: 25 * pi / 180,
         ).chain(CurveTween(curve: Curves.easeOut)),
         weight: 10.0,
       ),
-      // Phase 4: 角度維持（3-4秒）
+      // [2.5-3.0] Phase 4: アーム上昇（角度維持）
       TweenSequenceItem(
-        tween: ConstantTween<double>(20 * pi / 180),
-        weight: 10.0,
+        tween: ConstantTween<double>(25 * pi / 180),
+        weight: 5.0,
       ),
-      // Phase 5: 角度維持しながらスライド準備（4-5秒）
+      // [3.0-3.5] Phase 5: アーム下降中（左奥角へ）
       TweenSequenceItem(
-        tween: ConstantTween<double>(20 * pi / 180),
-        weight: 10.0,
+        tween: ConstantTween<double>(25 * pi / 180),
+        weight: 5.0,
       ),
-      // Phase 6-7: スライド中（5-7秒）
-      TweenSequenceItem(
-        tween: ConstantTween<double>(20 * pi / 180),
-        weight: 20.0,
-      ),
-      // Phase 8: 落下開始（7-8秒）
-      TweenSequenceItem(
-        tween: ConstantTween<double>(20 * pi / 180),
-        weight: 10.0,
-      ),
-      // Phase 9: 落下中（8-9秒）
-      TweenSequenceItem(
-        tween: ConstantTween<double>(20 * pi / 180),
-        weight: 10.0,
-      ),
-      // Phase 10: 初期状態に戻る（9-10秒）
+      // [3.5-4.5] Phase 6: アーム接触→景品が左下がりに傾く
+      // 狙い: 左奥角（対角線上）、ベクトル: 下向き押し込み
+      // 支点: 右バー、結果: 左下がり（負の角度）
       TweenSequenceItem(
         tween: Tween<double>(
-          begin: 20 * pi / 180,
-          end: 0.0,
+          begin: 25 * pi / 180,
+          end: -30 * pi / 180,
         ).chain(CurveTween(curve: Curves.easeInOut)),
         weight: 10.0,
       ),
+      // [4.5-5.0] Phase 7: アーム上昇（角度維持）
+      TweenSequenceItem(
+        tween: ConstantTween<double>(-30 * pi / 180),
+        weight: 5.0,
+      ),
+      // [5.0-5.5] Phase 8: アーム下降中（右奥角へ）
+      TweenSequenceItem(
+        tween: ConstantTween<double>(-30 * pi / 180),
+        weight: 5.0,
+      ),
+      // [5.5-6.5] Phase 9: アーム接触→景品がさらに右下がりに
+      // 狙い: 右奥角（対角線上）、ベクトル: 下向き押し込み
+      // 支点: 左バー、結果: 大きく右下がり（+45度）→落下準備
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: -30 * pi / 180,
+          end: 50 * pi / 180,
+        ).chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 10.0,
+      ),
+      // [6.5-7.0] Phase 10: アーム上昇（角度維持）
+      TweenSequenceItem(
+        tween: ConstantTween<double>(50 * pi / 180),
+        weight: 5.0,
+      ),
+      // [7.0-8.0] Phase 11: 落下（角度維持）
+      TweenSequenceItem(
+        tween: ConstantTween<double>(50 * pi / 180),
+        weight: 10.0,
+      ),
+      // [8.0-10.0] Phase 12: リセット
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 50 * pi / 180,
+          end: 0.0,
+        ).chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 20.0,
+      ),
     ]).animate(_controller!);
 
+    // ========================================
     // アーム垂直位置アニメーション
+    // 0.0=上端、1.0=景品に接触
+    // ========================================
     _armVerticalAnimation = TweenSequence<double>([
-      // Phase 1: アームなし（0-1秒）
+      // [0.0-1.0] Phase 1: アームなし
       TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 10.0),
-      // Phase 2: アーム下降（1-2秒）
+      // [1.0-1.5] Phase 2: アーム下降（右奥角へ）
       TweenSequenceItem(
         tween: Tween<double>(
           begin: 0.0,
           end: 1.0,
-        ).chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 10.0,
+        ).chain(CurveTween(curve: Curves.easeIn)),
+        weight: 5.0,
       ),
-      // Phase 3-4: 押し中（2-4秒）
-      TweenSequenceItem(tween: ConstantTween<double>(1.0), weight: 20.0),
-      // Phase 5: アーム上昇（4-5秒）
-      TweenSequenceItem(
-        tween: Tween<double>(
-          begin: 1.0,
-          end: 0.0,
-        ).chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 10.0,
-      ),
-      // Phase 6: 左アーム下降（5-6秒）
-      TweenSequenceItem(
-        tween: Tween<double>(
-          begin: 0.0,
-          end: 1.0,
-        ).chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 10.0,
-      ),
-      // Phase 7: スライド中（6-7秒）
+      // [1.5-2.5] Phase 3: 接触維持（押し込み中）
       TweenSequenceItem(tween: ConstantTween<double>(1.0), weight: 10.0),
-      // Phase 8-10: アームなし（7-10秒）
+      // [2.5-3.0] Phase 4: アーム上昇
       TweenSequenceItem(
         tween: Tween<double>(
           begin: 1.0,
           end: 0.0,
-        ).chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 10.0,
+        ).chain(CurveTween(curve: Curves.easeOut)),
+        weight: 5.0,
       ),
-      TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 20.0),
-    ]).animate(_controller!);
-
-    // アーム水平位置（右→左）
-    _armHorizontalAnimation = TweenSequence<double>([
-      // Phase 1-5: 右側を狙う（0-5秒）
-      TweenSequenceItem(tween: ConstantTween<double>(0.4), weight: 50.0),
-      // Phase 6-10: 左側を狙う（5-10秒）
-      TweenSequenceItem(tween: ConstantTween<double>(-0.4), weight: 50.0),
-    ]).animate(_controller!);
-
-    // 支点（左バーを支点に右下がり）
-    _pivotAnimation = ConstantTween<double>(-1.0).animate(_controller!);
-
-    // 水平位置アニメーション（スライド）
-    _horizontalOffsetAnimation = TweenSequence<double>([
-      // Phase 1-5: 中央（0-5秒）
-      TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 50.0),
-      // Phase 6-7: 右にスライド（5-7秒）
+      // [3.0-3.5] Phase 5: アーム下降（左奥角へ）
       TweenSequenceItem(
         tween: Tween<double>(
           begin: 0.0,
-          end: 0.8,
-        ).chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 20.0,
+          end: 1.0,
+        ).chain(CurveTween(curve: Curves.easeIn)),
+        weight: 5.0,
       ),
-      // Phase 8-9: スライド位置維持（7-9秒）
-      TweenSequenceItem(tween: ConstantTween<double>(0.8), weight: 20.0),
-      // Phase 10: 初期状態に戻る（9-10秒）
+      // [3.5-4.5] Phase 6: 接触維持（押し込み中）
+      TweenSequenceItem(tween: ConstantTween<double>(1.0), weight: 10.0),
+      // [4.5-5.0] Phase 7: アーム上昇
       TweenSequenceItem(
         tween: Tween<double>(
-          begin: 0.8,
+          begin: 1.0,
           end: 0.0,
-        ).chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 10.0,
+        ).chain(CurveTween(curve: Curves.easeOut)),
+        weight: 5.0,
       ),
-    ]).animate(_controller!);
-
-    // 垂直位置アニメーション（落下）
-    _verticalOffsetAnimation = TweenSequence<double>([
-      // Phase 1-7: バー上（0-7秒）
-      TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 70.0),
-      // Phase 8: 落下（7-8秒）
+      // [5.0-5.5] Phase 8: アーム下降（右奥角へ）
       TweenSequenceItem(
         tween: Tween<double>(
           begin: 0.0,
-          end: 1.2,
+          end: 1.0,
+        ).chain(CurveTween(curve: Curves.easeIn)),
+        weight: 5.0,
+      ),
+      // [5.5-6.5] Phase 9: 接触維持（押し込み中）
+      TweenSequenceItem(tween: ConstantTween<double>(1.0), weight: 10.0),
+      // [6.5-7.0] Phase 10: アーム上昇
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 1.0,
+          end: 0.0,
+        ).chain(CurveTween(curve: Curves.easeOut)),
+        weight: 5.0,
+      ),
+      // [7.0-10.0] Phase 11-12: アームなし
+      TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 30.0),
+    ]).animate(_controller!);
+
+    // ========================================
+    // アーム水平位置アニメーション
+    // 0.4=右奥角、-0.4=左奥角
+    // ========================================
+    _armHorizontalAnimation = TweenSequence<double>([
+      // [0.0-3.0] Phase 1-4: 右奥角を狙う
+      TweenSequenceItem(tween: ConstantTween<double>(0.4), weight: 30.0),
+      // [3.0-5.0] Phase 5-7: 左奥角を狙う（対角線攻撃）
+      TweenSequenceItem(tween: ConstantTween<double>(-0.4), weight: 20.0),
+      // [5.0-10.0] Phase 8-12: 右奥角を狙う
+      TweenSequenceItem(tween: ConstantTween<double>(0.4), weight: 50.0),
+    ]).animate(_controller!);
+
+    // ========================================
+    // 回転支点アニメーション
+    // -1.0=左バー支点、1.0=右バー支点
+    // 押す角の反対側のバーが支点になる
+    // ========================================
+    _pivotAnimation = TweenSequence<double>([
+      // [0.0-3.0] Phase 1-4: 左バー支点（右を押すので）
+      TweenSequenceItem(tween: ConstantTween<double>(-1.0), weight: 30.0),
+      // [3.0-5.0] Phase 5-7: 右バー支点（左を押すので）
+      TweenSequenceItem(tween: ConstantTween<double>(1.0), weight: 20.0),
+      // [5.0-10.0] Phase 8-12: 左バー支点（右を押すので）
+      TweenSequenceItem(tween: ConstantTween<double>(-1.0), weight: 50.0),
+    ]).animate(_controller!);
+
+    // ========================================
+    // 垂直位置アニメーション（落下）
+    // ========================================
+    _verticalOffsetAnimation = TweenSequence<double>([
+      // [0.0-7.0] Phase 1-10: バー上
+      TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 70.0),
+      // [7.0-8.0] Phase 11: 落下
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 0.0,
+          end: 1.5,
         ).chain(CurveTween(curve: Curves.easeIn)),
         weight: 10.0,
       ),
-      // Phase 9-10: 初期状態に戻る（8-10秒）
+      // [8.0-10.0] Phase 12: リセット
       TweenSequenceItem(
         tween: Tween<double>(
-          begin: 1.2,
+          begin: 1.5,
           end: 0.0,
         ).chain(CurveTween(curve: Curves.easeInOut)),
         weight: 20.0,
+      ),
+    ]).animate(_controller!);
+
+    // 水平位置は固定（縦ハメでは横移動しない）
+    _horizontalOffsetAnimation = ConstantTween<double>(
+      0.0,
+    ).animate(_controller!);
+  }
+
+  /// ============================================================
+  /// 横ハメアニメーション（Horizontal Fitting）
+  /// ============================================================
+  ///
+  /// 物理モデル:
+  /// - 片側を沈めて傾斜をつける
+  /// - アームで横方向に押し出す（スライド/横引き）
+  /// - バーとの掛かりが外れて落下
+  ///
+  /// タイムライン（10秒サイクル）:
+  /// [0.0-1.0] Phase 1: 初期状態（水平）
+  /// [1.0-1.5] Phase 2: アーム下降（右側へ）
+  /// [1.5-2.5] Phase 3: 接触→片側沈め（傾斜 +25度）
+  /// [2.5-3.0] Phase 4: アーム上昇
+  /// [3.0-3.5] Phase 5: アーム下降（左側バー際へ）
+  /// [3.5-5.5] Phase 6: アームで右方向にスライド（脱輪）
+  /// [5.5-6.5] Phase 7: 落下
+  /// [6.5-10.0] Phase 8: リセット
+  void _setupHorizontalFittingAnimation() {
+    _controller = AnimationController(
+      duration: const Duration(seconds: 10),
+      vsync: this,
+    );
+
+    // ========================================
+    // 角度アニメーション
+    // 片側を沈めて傾斜をつける
+    // ========================================
+    _angleAnimation = TweenSequence<double>([
+      // [0.0-1.0] Phase 1: 初期状態（水平）
+      TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 10.0),
+      // [1.0-1.5] Phase 2: アーム下降中（まだ接触していない）
+      TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 5.0),
+      // [1.5-2.5] Phase 3: アーム接触→片側を沈める
+      // 狙い: 右側、ベクトル: 下向き押し込み
+      // 支点: 左バー、結果: 右下がり（正の角度）
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 0.0,
+          end: 25 * pi / 180,
+        ).chain(CurveTween(curve: Curves.easeOut)),
+        weight: 10.0,
+      ),
+      // [2.5-3.0] Phase 4: アーム上昇（角度維持）
+      TweenSequenceItem(
+        tween: ConstantTween<double>(25 * pi / 180),
+        weight: 5.0,
+      ),
+      // [3.0-3.5] Phase 5: アーム下降（左側バー際へ）
+      TweenSequenceItem(
+        tween: ConstantTween<double>(25 * pi / 180),
+        weight: 5.0,
+      ),
+      // [3.5-5.5] Phase 6: スライド中（角度維持）
+      TweenSequenceItem(
+        tween: ConstantTween<double>(25 * pi / 180),
+        weight: 20.0,
+      ),
+      // [5.5-6.5] Phase 7: 落下中（角度維持）
+      TweenSequenceItem(
+        tween: ConstantTween<double>(25 * pi / 180),
+        weight: 10.0,
+      ),
+      // [6.5-10.0] Phase 8: リセット
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 25 * pi / 180,
+          end: 0.0,
+        ).chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 35.0,
+      ),
+    ]).animate(_controller!);
+
+    // ========================================
+    // アーム垂直位置アニメーション
+    // ========================================
+    _armVerticalAnimation = TweenSequence<double>([
+      // [0.0-1.0] Phase 1: アームなし
+      TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 10.0),
+      // [1.0-1.5] Phase 2: アーム下降（右側へ）
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 0.0,
+          end: 1.0,
+        ).chain(CurveTween(curve: Curves.easeIn)),
+        weight: 5.0,
+      ),
+      // [1.5-2.5] Phase 3: 接触維持
+      TweenSequenceItem(tween: ConstantTween<double>(1.0), weight: 10.0),
+      // [2.5-3.0] Phase 4: アーム上昇
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 1.0,
+          end: 0.0,
+        ).chain(CurveTween(curve: Curves.easeOut)),
+        weight: 5.0,
+      ),
+      // [3.0-3.5] Phase 5: アーム下降（左側バー際へ）
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 0.0,
+          end: 1.0,
+        ).chain(CurveTween(curve: Curves.easeIn)),
+        weight: 5.0,
+      ),
+      // [3.5-5.5] Phase 6: スライド中（接触維持）
+      TweenSequenceItem(tween: ConstantTween<double>(1.0), weight: 20.0),
+      // [5.5-6.0] Phase 7前半: アーム上昇
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 1.0,
+          end: 0.0,
+        ).chain(CurveTween(curve: Curves.easeOut)),
+        weight: 5.0,
+      ),
+      // [6.0-10.0] Phase 7後半-8: アームなし
+      TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 40.0),
+    ]).animate(_controller!);
+
+    // ========================================
+    // アーム水平位置アニメーション
+    // 最初は右側、スライド時は左側から右へ押す
+    // ========================================
+    _armHorizontalAnimation = TweenSequence<double>([
+      // [0.0-3.0] Phase 1-4: 右側を狙う（沈め用）
+      TweenSequenceItem(tween: ConstantTween<double>(0.4), weight: 30.0),
+      // [3.0-5.5] Phase 5-6: 左側から右へスライド
+      // アームが左バー際から景品を右に押し出す
+      TweenSequenceItem(tween: ConstantTween<double>(-0.3), weight: 25.0),
+      // [5.5-10.0] Phase 7-8: 終了
+      TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 45.0),
+    ]).animate(_controller!);
+
+    // 支点は常に左バー（右下がりを維持）
+    _pivotAnimation = ConstantTween<double>(-1.0).animate(_controller!);
+
+    // ========================================
+    // 水平位置アニメーション（スライド）
+    // アームで押されて右に移動→脱輪
+    // ========================================
+    _horizontalOffsetAnimation = TweenSequence<double>([
+      // [0.0-3.5] Phase 1-5: 中央位置
+      TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 35.0),
+      // [3.5-5.5] Phase 6: アームに押されて右にスライド
+      // 物理: アームの横方向ベクトルで景品が移動
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 0.0,
+          end: 1.0,
+        ).chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 20.0,
+      ),
+      // [5.5-6.5] Phase 7: 落下中（位置維持）
+      TweenSequenceItem(tween: ConstantTween<double>(1.0), weight: 10.0),
+      // [6.5-10.0] Phase 8: リセット
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 1.0,
+          end: 0.0,
+        ).chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 35.0,
+      ),
+    ]).animate(_controller!);
+
+    // ========================================
+    // 垂直位置アニメーション（落下）
+    // ========================================
+    _verticalOffsetAnimation = TweenSequence<double>([
+      // [0.0-5.5] Phase 1-6: バー上
+      TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 55.0),
+      // [5.5-6.5] Phase 7: 落下
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 0.0,
+          end: 1.5,
+        ).chain(CurveTween(curve: Curves.easeIn)),
+        weight: 10.0,
+      ),
+      // [6.5-10.0] Phase 8: リセット
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 1.5,
+          end: 0.0,
+        ).chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 35.0,
       ),
     ]).animate(_controller!);
   }
@@ -445,7 +513,6 @@ class _StrategyDiagramState extends State<StrategyDiagram>
   void didUpdateWidget(StrategyDiagram oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // アニメーションタイプが変更された場合は再セットアップ
     if (oldWidget.bridgeAnimationType != widget.bridgeAnimationType) {
       _controller?.stop();
       _controller?.dispose();
