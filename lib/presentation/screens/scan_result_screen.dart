@@ -307,13 +307,20 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
                 children: [
                   SizedBox(
                     height: 150,
-                    child: CachedNetworkImage(
-                      imageUrl: product.imageUrl,
-                      placeholder: (context, url) =>
-                          const Center(child: CircularProgressIndicator()),
-                      errorWidget: (context, url, error) =>
-                          const Icon(Icons.image_not_supported, size: 50),
-                    ),
+                    child: product.imageUrl.isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: product.imageUrl,
+                            placeholder: (context, url) => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                            errorWidget: (context, url, error) =>
+                                const Icon(Icons.image_not_supported, size: 50),
+                          )
+                        : const Icon(
+                            Icons.image_not_supported,
+                            size: 50,
+                            color: Colors.grey,
+                          ),
                   ),
                   const SizedBox(height: 16),
                   Text(

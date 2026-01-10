@@ -180,6 +180,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 }
               },
             ),
+          // 図解テスト画面ボタン（デバッグモードのみ）
+          if (kDebugMode)
+            IconButton(
+              icon: const Icon(Icons.architecture),
+              tooltip: '図解テスト',
+              onPressed: () => context.push('/diagram_test'),
+            ),
         ],
       ),
       body: Column(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import '../../data/models/strategy.dart';
+import 'strategy_diagram.dart';
 
 /// 攻略法カードのUI部品
 class StrategyCard extends StatelessWidget {
@@ -30,10 +31,19 @@ class StrategyCard extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  CachedNetworkImage(
-                    imageUrl: strategy.thumbnailUrl,
-                    fit: BoxFit.cover,
-                  ),
+                  if (strategy.thumbnailUrl.isNotEmpty)
+                    CachedNetworkImage(
+                      imageUrl: strategy.thumbnailUrl,
+                      fit: BoxFit.cover,
+                      errorWidget: (context, url, error) => Container(
+                        color: Colors.grey[300],
+                        child: const Center(
+                          child: Icon(Icons.image_not_supported, size: 40),
+                        ),
+                      ),
+                    )
+                  else
+                    StrategyDiagram(strategyType: strategy.settingType),
                   // 再生アイコンオーバーレイ (グラデーション付き)
                   Center(
                     child: Container(

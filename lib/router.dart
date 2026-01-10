@@ -14,6 +14,7 @@ import 'presentation/screens/collection_screen.dart';
 import 'presentation/screens/account_screen.dart';
 import 'presentation/screens/glossary_screen.dart';
 import 'presentation/screens/term_detail_screen.dart';
+import 'presentation/screens/diagram_test_screen.dart';
 
 /// GoRouter の設定
 final router = GoRouter(
@@ -110,6 +111,11 @@ final router = GoRouter(
         final termId = state.pathParameters['id']!;
         return TermDetailScreen(termId: termId);
       },
+    ),
+    GoRoute(
+      path: '/diagram_test',
+      name: 'diagram_test',
+      builder: (context, state) => const DiagramTestScreen(),
     ),
   ],
   errorBuilder: (context, state) => Scaffold(

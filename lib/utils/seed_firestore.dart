@@ -62,6 +62,34 @@ Future<void> addExtendedStrategies() async {
   final now = Timestamp.now();
 
   final strategies = [
+    // テスト用: アニメーション図解を表示する橋渡し攻略データ
+    {
+      'title': {'ja': '橋渡し攻略 - 横ハメ図解', 'en': 'Bridge Strategy - Sideways Drop'},
+      'description': {
+        'ja': '''橋渡し攻略の代表的な手法「横ハメ」をアニメーション図解で学べます。
+
+【横ハメの手順】
+1. 景品が2本のバーの上に水平に乗っている
+2. アームを景品の端に合わせて下げる
+3. アームで押して景品を90度回転させる
+4. 景品が縦向きになり、バーの間を通り抜けて落下
+
+図解のアニメーションで実際の動きを確認できます。''',
+        'en': '''Learn the "sideways drop" technique with animated diagrams.
+
+【Steps】
+1. Prize rests horizontally on two bars
+2. Position claw at prize edge
+3. Push to rotate prize 90 degrees
+4. Prize becomes vertical and drops through bars
+
+Watch the animated diagram to understand the motion.''',
+      },
+      'thumbnailUrl': '',
+      'videoId': '',
+      'settingType': '橋渡し',
+      'updatedAt': now,
+    },
     {
       'title': {'ja': '重量設定攻略 - 重い景品の取り方', 'en': 'Heavy Prize Strategy'},
       'description': {
@@ -82,7 +110,8 @@ Future<void> addExtendedStrategies() async {
 
 Heavy prizes require multiple plays.''',
       },
-      'thumbnailUrl': '',
+      'thumbnailUrl':
+          'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
       'videoId': 'dQw4w9WgXcQ',
       'settingType': '重量設定',
       'updatedAt': now,
@@ -101,7 +130,8 @@ Heavy prizes require multiple plays.''',
 【Medium】Standard bridge
 【Strong】Quick win possible''',
       },
-      'thumbnailUrl': '',
+      'thumbnailUrl':
+          'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
       'videoId': 'dQw4w9WgXcQ',
       'settingType': 'アームパワー',
       'updatedAt': now,
@@ -118,7 +148,8 @@ Heavy prizes require multiple plays.''',
 【Effective】Tag hooking, target ears/limbs
 【Tips】Use hooking if too soft''',
       },
-      'thumbnailUrl': '',
+      'thumbnailUrl':
+          'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
       'videoId': 'dQw4w9WgXcQ',
       'settingType': 'ぬいぐるみ',
       'updatedAt': now,
@@ -133,7 +164,8 @@ Heavy prizes require multiple plays.''',
 
 【Basic】Target corners, bridge gradually''',
       },
-      'thumbnailUrl': '',
+      'thumbnailUrl':
+          'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
       'videoId': 'dQw4w9WgXcQ',
       'settingType': 'フィギュア',
       'updatedAt': now,
@@ -148,7 +180,8 @@ Heavy prizes require multiple plays.''',
 
 【Methods】Push out, hook, multi-grab''',
       },
-      'thumbnailUrl': '',
+      'thumbnailUrl':
+          'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
       'videoId': 'dQw4w9WgXcQ',
       'settingType': 'お菓子',
       'updatedAt': now,
@@ -163,7 +196,8 @@ Heavy prizes require multiple plays.''',
 
 【Basic】Use corners, move gradually''',
       },
-      'thumbnailUrl': '',
+      'thumbnailUrl':
+          'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
       'videoId': 'dQw4w9WgXcQ',
       'settingType': '箱物',
       'updatedAt': now,
@@ -178,7 +212,8 @@ Heavy prizes require multiple plays.''',
 
 【Target】Tags, strings, ears/limbs''',
       },
-      'thumbnailUrl': '',
+      'thumbnailUrl':
+          'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
       'videoId': 'dQw4w9WgXcQ',
       'settingType': '引っかけ',
       'updatedAt': now,
@@ -193,7 +228,8 @@ Heavy prizes require multiple plays.''',
 
 【When】Prize angled, tag not visible''',
       },
-      'thumbnailUrl': '',
+      'thumbnailUrl':
+          'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
       'videoId': 'dQw4w9WgXcQ',
       'settingType': '回転',
       'updatedAt': now,
@@ -208,7 +244,8 @@ Heavy prizes require multiple plays.''',
 
 【Best】Light items, near hole''',
       },
-      'thumbnailUrl': '',
+      'thumbnailUrl':
+          'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
       'videoId': 'dQw4w9WgXcQ',
       'settingType': '押し込み',
       'updatedAt': now,
@@ -223,7 +260,8 @@ Heavy prizes require multiple plays.''',
 
 【Types】Swinging, rotating platforms''',
       },
-      'thumbnailUrl': '',
+      'thumbnailUrl':
+          'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
       'videoId': 'dQw4w9WgXcQ',
       'settingType': 'タイミング',
       'updatedAt': now,
