@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 /// ## 縦ハメ（Vertical Fitting）
 /// 景品をバーに対して垂直（奥行き方向）に回転させて落とす。
 /// - アームが角を押す → 反対側のバーを支点に奥行き回転
-/// - Y軸回転として疑似3D表現
+/// - Y軸回転として疑似3D表現、側面陰影で「ハの字」を強調
 ///
 /// ## 横ハメ（Horizontal Fitting）
 /// 景品をバーに平行に保ち、片側を脱輪させて横にスライド。
@@ -81,6 +81,7 @@ class BridgePainter extends CustomPainter {
 
     // 景品の基本サイズ
     final prizeWidth = size.width * 0.3;
+    final prizeHeight = size.height * 0.12; // 箱の高さ
     final prizeDepth = barGap * 0.8; // 2本のバー間の距離に基づく
 
     // 景品の中心位置（水平・垂直オフセット適用）
@@ -91,9 +92,18 @@ class BridgePainter extends CustomPainter {
         basePrizeCenterX + (prizeHorizontalOffset * size.width * 0.2);
     final prizeCenterY = basePrizeCenterY + (prizeVerticalOffset * size.height);
 
+    // 回転の支点を計算
+    final pivotX = prizeCenterX;
+    final pivotY = pivotPosition < 0
+        ? frontBarY
+        : (pivotPosition > 0 ? backBarY : basePrizeCenterY);
+
     // ========================================
-    // 2. Zオーダー: 奥から順に描画
+    // 2. 動的Zオーダー: 奥から順に描画
     // ========================================
+
+    // 落下判定：景品がバーより下にあるか
+    final isFalling = prizeVerticalOffset > 0.2;
 
     // 2-1. 奥のバー
     _drawBar(
@@ -102,19 +112,21 @@ class BridgePainter extends CustomPainter {
       y: backBarY,
       width: barWidth,
       height: barHeight,
-      isDarker: true, // 奥なので少し暗く
+      isDarker: true,
     );
 
-    // 2-2. 景品（バーの間）
-    if (prizeVerticalOffset < 0.5) {
-      // バー上または落下中（バーより上）
-      _drawPrize(
+    // 2-2. 景品（バーより上）
+    if (!isFalling) {
+      _drawPrizeWith3D(
         canvas,
         size,
         prizeCenterX: prizeCenterX,
         prizeCenterY: prizeCenterY,
         prizeWidth: prizeWidth,
+        prizeHeight: prizeHeight,
         prizeDepth: prizeDepth,
+        pivotX: pivotX,
+        pivotY: pivotY,
         frontBarY: frontBarY,
         backBarY: backBarY,
       );
@@ -127,10 +139,27 @@ class BridgePainter extends CustomPainter {
       y: frontBarY,
       width: barWidth,
       height: barHeight,
-      isDarker: false, // 手前なので明るく
+      isDarker: false,
     );
 
-    // 2-4. アーム（最前面）
+    // 2-4. 景品（バーより下、落下中）
+    if (isFalling) {
+      _drawPrizeWith3D(
+        canvas,
+        size,
+        prizeCenterX: prizeCenterX,
+        prizeCenterY: prizeCenterY,
+        prizeWidth: prizeWidth,
+        prizeHeight: prizeHeight,
+        prizeDepth: prizeDepth,
+        pivotX: pivotX,
+        pivotY: pivotY,
+        frontBarY: frontBarY,
+        backBarY: backBarY,
+      );
+    }
+
+    // 2-5. アーム（最前面）
     if (showArm && armVerticalPosition > 0.0) {
       _drawCraneArm(
         canvas,
@@ -138,19 +167,7 @@ class BridgePainter extends CustomPainter {
         prizeCenterX: prizeCenterX,
         prizeCenterY: basePrizeCenterY,
         prizeWidth: prizeWidth,
-        frontBarY: frontBarY,
-        backBarY: backBarY,
-      );
-    }
-
-    // 2-5. 景品（落下後、バーより下）
-    if (prizeVerticalOffset >= 0.5) {
-      _drawPrize(
-        canvas,
-        size,
-        prizeCenterX: prizeCenterX,
-        prizeCenterY: prizeCenterY,
-        prizeWidth: prizeWidth,
+        prizeHeight: prizeHeight,
         prizeDepth: prizeDepth,
         frontBarY: frontBarY,
         backBarY: backBarY,
@@ -166,6 +183,8 @@ class BridgePainter extends CustomPainter {
         prizeCenterY: prizeCenterY,
         prizeWidth: prizeWidth,
         prizeDepth: prizeDepth,
+        pivotX: pivotX,
+        pivotY: pivotY,
       );
     }
   }
@@ -210,98 +229,266 @@ class BridgePainter extends CustomPainter {
     );
   }
 
-  /// 景品を疑似3Dで描画
-  void _drawPrize(
+  /// 景品を3D表現で描画（側面陰影で「ハの字」を強調）
+  void _drawPrizeWith3D(
     Canvas canvas,
     Size size, {
     required double prizeCenterX,
     required double prizeCenterY,
     required double prizeWidth,
+    required double prizeHeight,
     required double prizeDepth,
+    required double pivotX,
+    required double pivotY,
     required double frontBarY,
     required double backBarY,
   }) {
+    canvas.save();
+
+    // 回転の支点を中心に変換
+    canvas.translate(pivotX, pivotY);
+    canvas.rotate(prizeAngle);
+    canvas.translate(-pivotX, -pivotY);
+
     // Y軸回転を表現: 角度に応じて見かけの幅が変わる
     final rotationFactor = cos(prizeAngle); // -1.0 〜 1.0
     final visibleWidth = prizeWidth * rotationFactor.abs();
-    final skewX = prizeWidth * sin(prizeAngle) * 0.3;
+    final skewX = prizeWidth * sin(prizeAngle) * 0.4;
 
-    // 景品を平行四辺形として描画（疑似3D）
-    final path = Path();
+    // 箱の中心（回転後）
+    final centerX = prizeCenterX;
+    final centerY = prizeCenterY - prizeHeight / 2;
 
-    // 4つの頂点を計算
+    // ========================================
+    // 3面を描画: 上面、正面、側面
+    // ========================================
+
+    // 3-1. 側面（暗い面、奥行き感を出す）
+    if (sin(prizeAngle) > 0) {
+      // 右側面が見える場合
+      _drawSideFace(
+        canvas,
+        centerX: centerX,
+        centerY: centerY,
+        visibleWidth: visibleWidth,
+        prizeHeight: prizeHeight,
+        prizeDepth: prizeDepth,
+        skewX: skewX,
+        isRight: true,
+      );
+    } else if (sin(prizeAngle) < 0) {
+      // 左側面が見える場合
+      _drawSideFace(
+        canvas,
+        centerX: centerX,
+        centerY: centerY,
+        visibleWidth: visibleWidth,
+        prizeHeight: prizeHeight,
+        prizeDepth: prizeDepth,
+        skewX: skewX,
+        isRight: false,
+      );
+    }
+
+    // 3-2. 上面（明るい面）
+    _drawTopFace(
+      canvas,
+      centerX: centerX,
+      centerY: centerY,
+      visibleWidth: visibleWidth,
+      prizeDepth: prizeDepth,
+      skewX: skewX,
+    );
+
+    // 3-3. 正面（メイン面）
+    _drawFrontFace(
+      canvas,
+      centerX: centerX,
+      centerY: centerY,
+      visibleWidth: visibleWidth,
+      prizeHeight: prizeHeight,
+      prizeDepth: prizeDepth,
+      skewX: skewX,
+    );
+
+    canvas.restore();
+  }
+
+  /// 側面を描画（暗い面で奥行きを強調）
+  void _drawSideFace(
+    Canvas canvas, {
+    required double centerX,
+    required double centerY,
+    required double visibleWidth,
+    required double prizeHeight,
+    required double prizeDepth,
+    required double skewX,
+    required bool isRight,
+  }) {
+    final sidePath = Path();
+
+    if (isRight) {
+      // 右側面
+      final x = centerX + visibleWidth / 2;
+      sidePath.moveTo(x - skewX, centerY - prizeDepth / 2);
+      sidePath.lineTo(x - skewX, centerY - prizeDepth / 2 + prizeHeight);
+      sidePath.lineTo(x + skewX, centerY + prizeDepth / 2 + prizeHeight);
+      sidePath.lineTo(x + skewX, centerY + prizeDepth / 2);
+      sidePath.close();
+    } else {
+      // 左側面
+      final x = centerX - visibleWidth / 2;
+      sidePath.moveTo(x - skewX, centerY - prizeDepth / 2);
+      sidePath.lineTo(x - skewX, centerY - prizeDepth / 2 + prizeHeight);
+      sidePath.lineTo(x + skewX, centerY + prizeDepth / 2 + prizeHeight);
+      sidePath.lineTo(x + skewX, centerY + prizeDepth / 2);
+      sidePath.close();
+    }
+
+    // 側面は暗い色（陰影）
+    final sidePaint = Paint()
+      ..color = prizeColor.withValues(alpha: 0.5)
+      ..style = PaintingStyle.fill;
+
+    canvas.drawPath(sidePath, sidePaint);
+
+    final sideStrokePaint = Paint()
+      ..color = Colors.black.withValues(alpha: 0.6)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+
+    canvas.drawPath(sidePath, sideStrokePaint);
+  }
+
+  /// 上面を描画（明るい面）
+  void _drawTopFace(
+    Canvas canvas, {
+    required double centerX,
+    required double centerY,
+    required double visibleWidth,
+    required double prizeDepth,
+    required double skewX,
+  }) {
+    final topPath = Path();
+
+    // 上面の4頂点
     final topLeft = Offset(
-      prizeCenterX - visibleWidth / 2 - skewX,
-      prizeCenterY - prizeDepth / 2,
+      centerX - visibleWidth / 2 - skewX,
+      centerY - prizeDepth / 2,
     );
     final topRight = Offset(
-      prizeCenterX + visibleWidth / 2 - skewX,
-      prizeCenterY - prizeDepth / 2,
+      centerX + visibleWidth / 2 - skewX,
+      centerY - prizeDepth / 2,
     );
     final bottomRight = Offset(
-      prizeCenterX + visibleWidth / 2 + skewX,
-      prizeCenterY + prizeDepth / 2,
+      centerX + visibleWidth / 2 + skewX,
+      centerY + prizeDepth / 2,
     );
     final bottomLeft = Offset(
-      prizeCenterX - visibleWidth / 2 + skewX,
-      prizeCenterY + prizeDepth / 2,
+      centerX - visibleWidth / 2 + skewX,
+      centerY + prizeDepth / 2,
     );
 
-    path.moveTo(topLeft.dx, topLeft.dy);
-    path.lineTo(topRight.dx, topRight.dy);
-    path.lineTo(bottomRight.dx, bottomRight.dy);
-    path.lineTo(bottomLeft.dx, bottomLeft.dy);
-    path.close();
+    topPath.moveTo(topLeft.dx, topLeft.dy);
+    topPath.lineTo(topRight.dx, topRight.dy);
+    topPath.lineTo(bottomRight.dx, bottomRight.dy);
+    topPath.lineTo(bottomLeft.dx, bottomLeft.dy);
+    topPath.close();
 
-    // 景品本体
-    final prizePaint = Paint()
+    // 上面は明るい色
+    final topPaint = Paint()
       ..color = prizeColor
       ..style = PaintingStyle.fill;
 
-    canvas.drawPath(path, prizePaint);
+    canvas.drawPath(topPath, topPaint);
 
-    // 景品の枠線
-    final prizeStrokePaint = Paint()
+    final topStrokePaint = Paint()
       ..color = Colors.black
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
 
-    canvas.drawPath(path, prizeStrokePaint);
+    canvas.drawPath(topPath, topStrokePaint);
+  }
 
-    // 立体感のための影
-    final shadowPaint = Paint()
-      ..color = Colors.black.withValues(alpha: 0.2)
+  /// 正面を描画（メイン面）
+  void _drawFrontFace(
+    Canvas canvas, {
+    required double centerX,
+    required double centerY,
+    required double visibleWidth,
+    required double prizeHeight,
+    required double prizeDepth,
+    required double skewX,
+  }) {
+    final frontPath = Path();
+
+    // 正面の4頂点
+    final topLeft = Offset(
+      centerX - visibleWidth / 2 - skewX,
+      centerY - prizeDepth / 2,
+    );
+    final topRight = Offset(
+      centerX + visibleWidth / 2 - skewX,
+      centerY - prizeDepth / 2,
+    );
+    final bottomRight = Offset(
+      centerX + visibleWidth / 2 - skewX,
+      centerY - prizeDepth / 2 + prizeHeight,
+    );
+    final bottomLeft = Offset(
+      centerX - visibleWidth / 2 - skewX,
+      centerY - prizeDepth / 2 + prizeHeight,
+    );
+
+    frontPath.moveTo(topLeft.dx, topLeft.dy);
+    frontPath.lineTo(topRight.dx, topRight.dy);
+    frontPath.lineTo(bottomRight.dx, bottomRight.dy);
+    frontPath.lineTo(bottomLeft.dx, bottomLeft.dy);
+    frontPath.close();
+
+    // 正面は中間の明るさ
+    final frontPaint = Paint()
+      ..color = prizeColor.withValues(alpha: 0.8)
       ..style = PaintingStyle.fill;
 
-    final shadowPath = Path();
-    shadowPath.moveTo(bottomLeft.dx, bottomLeft.dy);
-    shadowPath.lineTo(bottomRight.dx, bottomRight.dy);
-    shadowPath.lineTo(
-      bottomRight.dx + skewX,
-      bottomRight.dy + prizeDepth * 0.1,
-    );
-    shadowPath.lineTo(bottomLeft.dx + skewX, bottomLeft.dy + prizeDepth * 0.1);
-    shadowPath.close();
+    canvas.drawPath(frontPath, frontPaint);
 
-    canvas.drawPath(shadowPath, shadowPaint);
+    final frontStrokePaint = Paint()
+      ..color = Colors.black.withValues(alpha: 0.8)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+
+    canvas.drawPath(frontPath, frontStrokePaint);
   }
 
   /// クレーンのアーム（爪）を描画
+  /// 回転した箱の角を正確に狙う
   void _drawCraneArm(
     Canvas canvas,
     Size size, {
     required double prizeCenterX,
     required double prizeCenterY,
     required double prizeWidth,
+    required double prizeHeight,
+    required double prizeDepth,
     required double frontBarY,
     required double backBarY,
   }) {
-    // アームの水平位置
-    final armX = prizeCenterX + prizeWidth * armHorizontalPosition;
+    // 回転後の箱の角の位置を計算
+    final rotationFactor = cos(prizeAngle);
+    final skewX = prizeWidth * sin(prizeAngle) * 0.4;
+    final visibleWidth = prizeWidth * rotationFactor.abs();
+
+    // armHorizontalPositionに基づいて狙う角を決定
+    // -0.5 = 左奥角、0.0 = 中央、0.5 = 右奥角
+    final targetCornerX =
+        prizeCenterX +
+        (visibleWidth / 2 * armHorizontalPosition * 2) +
+        (skewX * (armHorizontalPosition < 0 ? -1 : 1));
 
     // アームの垂直位置
     final armTopY = size.height * 0.05;
-    final armContactY = prizeCenterY - (backBarY - frontBarY) / 2;
+    final armContactY = prizeCenterY - prizeHeight / 2 - prizeDepth / 2;
     final armBottomY =
         armTopY + (armContactY - armTopY) * armVerticalPosition.clamp(0.0, 1.0);
 
@@ -317,15 +504,15 @@ class BridgePainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     canvas.drawLine(
-      Offset(armX, armTopY),
-      Offset(armX, finalArmBottomY),
+      Offset(targetCornerX, armTopY),
+      Offset(targetCornerX, finalArmBottomY),
       armBodyPaint,
     );
 
     // アームの爪（開閉する2本の爪）
     _drawClaw(
       canvas,
-      centerX: armX,
+      centerX: targetCornerX,
       centerY: finalArmBottomY,
       openAmount: armVerticalPosition < 0.9 ? 0.5 : 0.2, // 接触時に閉じる
     );
@@ -403,18 +590,30 @@ class BridgePainter extends CustomPainter {
     required double prizeCenterY,
     required double prizeWidth,
     required double prizeDepth,
+    required double pivotX,
+    required double pivotY,
   }) {
     // 回転を考慮した重心位置
     final rotationFactor = cos(prizeAngle);
-    final skewX = prizeWidth * sin(prizeAngle) * 0.3;
+    final skewX = prizeWidth * sin(prizeAngle) * 0.4;
     final visibleWidth = prizeWidth * rotationFactor.abs();
 
     final gravityOffsetX = (centerOfGravity.dx - 0.5) * visibleWidth;
     final gravityOffsetY = (centerOfGravity.dy - 0.5) * prizeDepth;
 
-    final gravityX =
-        prizeCenterX + gravityOffsetX + skewX * (centerOfGravity.dy - 0.5) * 2;
-    final gravityY = prizeCenterY + gravityOffsetY;
+    // 回転を適用した重心位置
+    final dx =
+        prizeCenterX -
+        pivotX +
+        gravityOffsetX +
+        skewX * (centerOfGravity.dy - 0.5) * 2;
+    final dy = prizeCenterY - pivotY + gravityOffsetY;
+
+    final rotatedDx = dx * cos(prizeAngle) - dy * sin(prizeAngle);
+    final rotatedDy = dx * sin(prizeAngle) + dy * cos(prizeAngle);
+
+    final gravityX = pivotX + rotatedDx;
+    final gravityY = pivotY + rotatedDy;
 
     // 重心マーカー
     final centerPaint = Paint()
