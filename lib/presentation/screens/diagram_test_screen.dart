@@ -8,13 +8,9 @@ import 'package:crane_strategy_app/presentation/widgets/strategy_diagram.dart';
 /// 描画が正しく動作することを確認するための開発用画面です。
 ///
 /// ## テストパターン
-/// - 基本（水平、中央重心）
-/// - 右傾斜（15度）
-/// - 左傾斜（-10度）
-/// - 右寄り重心
-/// - 左寄り重心
-/// - 複合（傾斜+偏重心）
-/// - 未実装タイプ（プレースホルダー確認）
+/// - 縦ハメアニメーション（Vertical Fitting）
+/// - 横ハメアニメーション（Horizontal Fitting）
+/// - 静的表示（各種角度・重心パターン）
 class DiagramTestScreen extends StatelessWidget {
   const DiagramTestScreen({super.key});
 
@@ -25,6 +21,55 @@ class DiagramTestScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          // ========================================
+          // アニメーションテスト
+          // ========================================
+          const Text(
+            'アニメーションテスト',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.blue,
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          _buildTestSection(
+            title: '縦ハメ（Vertical Fitting）',
+            diagram: const StrategyDiagram(
+              strategyType: 'bridge',
+              animate: true,
+              bridgeAnimationType: BridgeAnimationType.vertical,
+            ),
+            params: '角を左右交互に狙い、シーソーのように振りながら縦向きにして落とす',
+          ),
+          const Divider(height: 32),
+
+          _buildTestSection(
+            title: '横ハメ（Horizontal Fitting）',
+            diagram: const StrategyDiagram(
+              strategyType: 'bridge',
+              animate: true,
+              bridgeAnimationType: BridgeAnimationType.horizontal,
+            ),
+            params: '片側を沈めてから横にスライドさせてバーから外す',
+          ),
+
+          const Divider(height: 48),
+
+          // ========================================
+          // 静的表示テスト
+          // ========================================
+          const Text(
+            '静的表示テスト',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.blue,
+            ),
+          ),
+          const SizedBox(height: 16),
+
           _buildTestSection(
             title: '基本: 水平な景品、中央重心',
             diagram: const StrategyDiagram(
@@ -34,6 +79,7 @@ class DiagramTestScreen extends StatelessWidget {
             params: 'angle: 0.0°, center: (0.5, 0.5)',
           ),
           const Divider(height: 32),
+
           _buildTestSection(
             title: '右傾斜: 15度傾いた景品',
             diagram: StrategyDiagram(
@@ -44,6 +90,7 @@ class DiagramTestScreen extends StatelessWidget {
             params: 'angle: 15.0°, center: (0.5, 0.5)',
           ),
           const Divider(height: 32),
+
           _buildTestSection(
             title: '左傾斜: -10度傾いた景品',
             diagram: StrategyDiagram(
@@ -54,6 +101,7 @@ class DiagramTestScreen extends StatelessWidget {
             params: 'angle: -10.0°, center: (0.5, 0.5)',
           ),
           const Divider(height: 32),
+
           _buildTestSection(
             title: '右寄り重心: 水平だが重心が右寄り',
             diagram: const StrategyDiagram(
@@ -64,6 +112,7 @@ class DiagramTestScreen extends StatelessWidget {
             params: 'angle: 0.0°, center: (0.65, 0.5)',
           ),
           const Divider(height: 32),
+
           _buildTestSection(
             title: '左寄り重心: 水平だが重心が左寄り',
             diagram: const StrategyDiagram(
@@ -74,6 +123,7 @@ class DiagramTestScreen extends StatelessWidget {
             params: 'angle: 0.0°, center: (0.35, 0.5)',
           ),
           const Divider(height: 32),
+
           _buildTestSection(
             title: '複合: 傾斜+右寄り重心',
             diagram: StrategyDiagram(
@@ -85,6 +135,7 @@ class DiagramTestScreen extends StatelessWidget {
             params: 'angle: 20.0°, center: (0.6, 0.5)',
           ),
           const Divider(height: 32),
+
           _buildTestSection(
             title: '未実装: 剣山設定（プレースホルダー表示）',
             diagram: const StrategyDiagram(
@@ -99,10 +150,6 @@ class DiagramTestScreen extends StatelessWidget {
   }
 
   /// テストセクションを構築
-  ///
-  /// [title] セクションのタイトル
-  /// [diagram] 表示するStrategyDiagramウィジェット
-  /// [params] パラメータ情報の説明文
   Widget _buildTestSection({
     required String title,
     required Widget diagram,
