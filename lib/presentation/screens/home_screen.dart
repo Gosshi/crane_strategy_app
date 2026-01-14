@@ -8,6 +8,7 @@ import '../../data/models/product.dart'; // Product class
 import '../../data/providers/strategy_repository_provider.dart';
 import '../../data/providers/premium_provider.dart';
 import '../../utils/seed_firestore.dart';
+import '../../utils/responsive_utils.dart';
 import '../../services/ad_manager.dart';
 import '../widgets/strategy_card.dart';
 import '../../l10n/app_localizations.dart';
@@ -186,7 +187,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         children: [
           // 検索バー
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(
+              ResponsiveUtils.getHorizontalPadding(context),
+            ),
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
@@ -270,30 +273,40 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         if (products.isEmpty) {
           return Center(child: Text(AppLocalizations.of(context)!.notFound));
         }
-        return ListView.builder(
-          itemCount: products.length,
-          itemBuilder: (context, index) {
-            final product = products[index];
-            return ListTile(
-              leading: product.imageUrl.isNotEmpty
-                  ? Image.network(
-                      product.imageUrl,
-                      width: 50,
-                      height: 50,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          const Icon(Icons.image),
-                    )
-                  : const Icon(Icons.image),
-              title: Text(product.name),
-              subtitle: Text(product.tags.join(', ')),
-              onTap: () {
-                // スキャン結果画面へ遷移 (詳細表示)
-                // ScanResultScreenはスキャン結果として商品を表示する役割も兼ねている
-                context.push('/scan_result', extra: product.id);
+
+        final horizontalPadding = ResponsiveUtils.getHorizontalPadding(context);
+        final maxWidth = ResponsiveUtils.getContentMaxWidth(context);
+
+        return Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxWidth),
+            child: ListView.builder(
+              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+              itemCount: products.length,
+              itemBuilder: (context, index) {
+                final product = products[index];
+                return ListTile(
+                  leading: product.imageUrl.isNotEmpty
+                      ? Image.network(
+                          product.imageUrl,
+                          width: 50,
+                          height: 50,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(Icons.image),
+                        )
+                      : const Icon(Icons.image),
+                  title: Text(product.name),
+                  subtitle: Text(product.tags.join(', ')),
+                  onTap: () {
+                    // スキャン結果画面へ遷移 (詳細表示)
+                    // ScanResultScreenはスキャン結果として商品を表示する役割も兼ねている
+                    context.push('/scan_result', extra: product.id);
+                  },
+                );
               },
-            );
-          },
+            ),
+          ),
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -311,8 +324,48 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Text(AppLocalizations.of(context)!.noStrategiesYet),
           );
         }
+
+        final horizontalPadding = ResponsiveUtils.getHorizontalPadding(context);
+        final isTabletOrLarger =
+            ResponsiveUtils.isTablet(context) ||
+            ResponsiveUtils.isDesktop(context);
+
+        // タブレット以上の場合はグリッドレイアウト
+        if (isTabletOrLarger) {
+          final columnCount = ResponsiveUtils.getValue(
+            context,
+            mobile: 1,
+            tablet: 2,
+            desktop: 3,
+          );
+
+          return GridView.builder(
+            padding: EdgeInsets.symmetric(
+              horizontal: horizontalPadding,
+              vertical: 16,
+            ),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: columnCount,
+              childAspectRatio: 1.5,
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+            ),
+            itemCount: strategies.length,
+            itemBuilder: (context, index) {
+              final strategy = strategies[index];
+              return StrategyCard(
+                strategy: strategy,
+                onTap: () {
+                  context.push('/detail', extra: strategy);
+                },
+              );
+            },
+          );
+        }
+
+        // モバイルの場合はリストビュー
         return ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
           itemCount: strategies.length,
           itemBuilder: (context, index) {
             final strategy = strategies[index];
