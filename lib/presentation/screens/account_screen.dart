@@ -5,6 +5,7 @@ import '../../data/providers/auth_provider.dart';
 import '../../data/providers/audio_service_provider.dart';
 import '../../data/providers/premium_provider.dart';
 import '../../data/services/user_level_service.dart';
+import '../../utils/responsive_utils.dart';
 import '../widgets/reward_ad_button.dart';
 import 'collection_screen.dart'; // collectionWithProductListProvider
 import '../../l10n/app_localizations.dart';
@@ -28,167 +29,184 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
 
     final isAnonymous = user.isAnonymous;
 
+    final horizontalPadding = ResponsiveUtils.getHorizontalPadding(context);
+    final maxWidth = ResponsiveUtils.getContentMaxWidth(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.accountSettings),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // ユーザー情報カード
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  const Icon(
-                    Icons.account_circle,
-                    size: 64,
-                    color: Colors.grey,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    isAnonymous
-                        ? AppLocalizations.of(context)!.guestUser
-                        : (user.displayName ?? 'ユーザー'),
-                    style: theme.textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxWidth),
+          child: ListView(
+            padding: EdgeInsets.all(horizontalPadding),
+            children: [
+              // ユーザー情報カード
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      const Icon(
+                        Icons.account_circle,
+                        size: 64,
+                        color: Colors.grey,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        isAnonymous
+                            ? AppLocalizations.of(context)!.guestUser
+                            : (user.displayName ?? 'ユーザー'),
+                        style: theme.textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 8),
 
-                  // ランク表示
-                  _buildRankSection(ref, user.uid, theme),
+                      // ランク表示
+                      _buildRankSection(ref, user.uid, theme),
 
-                  const SizedBox(height: 8),
-                  Text(
-                    'UID: ${user.uid}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: Colors.grey,
-                    ),
-                  ),
-                  if (!isAnonymous) ...[
-                    const SizedBox(height: 4),
-                    Text(user.email ?? '', style: theme.textTheme.bodyMedium),
-                  ],
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-
-          // アカウント連携セクション
-          if (isAnonymous) ...[
-            Text(
-              'アカウント連携',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: theme.colorScheme.primary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Card(
-              color: theme.colorScheme.primaryContainer.withValues(alpha: 0.2),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    Text(AppLocalizations.of(context)!.linkGoogleAccount),
-                    const SizedBox(height: 16),
-                    FilledButton.icon(
-                      onPressed: () async {
-                        try {
-                          await ref
-                              .read(authRepositoryProvider)
-                              .linkWithGoogle();
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  AppLocalizations.of(context)!.linkSuccess,
-                                ),
-                              ),
-                            );
-                          }
-                        } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  AppLocalizations.of(
-                                    context,
-                                  )!.linkError(e.toString()),
-                                ),
-                              ),
-                            );
-                          }
-                        }
-                      },
-                      icon: const Icon(Icons.link),
-                      label: Text(AppLocalizations.of(context)!.linkWithGoogle),
-                    ),
-                    if (Platform.isIOS) ...[
-                      const SizedBox(height: 12),
-                      FilledButton.icon(
-                        onPressed: () async {
-                          try {
-                            await ref
-                                .read(authRepositoryProvider)
-                                .linkWithApple();
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    AppLocalizations.of(context)!.linkSuccess,
-                                  ),
-                                ),
-                              );
-                            }
-                          } catch (e) {
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    AppLocalizations.of(
-                                      context,
-                                    )!.linkError(e.toString()),
-                                  ),
-                                ),
-                              );
-                            }
-                          }
-                        },
-                        style: FilledButton.styleFrom(
-                          backgroundColor: Colors.black,
-                          foregroundColor: Colors.white,
-                        ),
-                        icon: const Icon(Icons.apple),
-                        label: Text(
-                          AppLocalizations.of(context)!.signInWithApple,
+                      const SizedBox(height: 8),
+                      Text(
+                        'UID: ${user.uid}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: Colors.grey,
                         ),
                       ),
+                      if (!isAnonymous) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          user.email ?? '',
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ] else ...[
-            Card(
-              child: ListTile(
-                leading: Icon(Icons.check_circle, color: Colors.green),
-                title: Text(AppLocalizations.of(context)!.accountLinked),
-                subtitle: Text(AppLocalizations.of(context)!.dataIsSafe),
-              ),
-            ),
-          ],
-          const SizedBox(height: 24),
+              const SizedBox(height: 24),
 
-          // プレミアムステータスセクション
-          _buildPremiumSection(theme),
+              // アカウント連携セクション
+              if (isAnonymous) ...[
+                Text(
+                  'アカウント連携',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Card(
+                  color: theme.colorScheme.primaryContainer.withValues(
+                    alpha: 0.2,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        Text(AppLocalizations.of(context)!.linkGoogleAccount),
+                        const SizedBox(height: 16),
+                        FilledButton.icon(
+                          onPressed: () async {
+                            try {
+                              await ref
+                                  .read(authRepositoryProvider)
+                                  .linkWithGoogle();
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      AppLocalizations.of(context)!.linkSuccess,
+                                    ),
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.linkError(e.toString()),
+                                    ),
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                          icon: const Icon(Icons.link),
+                          label: Text(
+                            AppLocalizations.of(context)!.linkWithGoogle,
+                          ),
+                        ),
+                        if (Platform.isIOS) ...[
+                          const SizedBox(height: 12),
+                          FilledButton.icon(
+                            onPressed: () async {
+                              try {
+                                await ref
+                                    .read(authRepositoryProvider)
+                                    .linkWithApple();
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.linkSuccess,
+                                      ),
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.linkError(e.toString()),
+                                      ),
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                            style: FilledButton.styleFrom(
+                              backgroundColor: Colors.black,
+                              foregroundColor: Colors.white,
+                            ),
+                            icon: const Icon(Icons.apple),
+                            label: Text(
+                              AppLocalizations.of(context)!.signInWithApple,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ] else ...[
+                Card(
+                  child: ListTile(
+                    leading: Icon(Icons.check_circle, color: Colors.green),
+                    title: Text(AppLocalizations.of(context)!.accountLinked),
+                    subtitle: Text(AppLocalizations.of(context)!.dataIsSafe),
+                  ),
+                ),
+              ],
+              const SizedBox(height: 24),
 
-          const SizedBox(height: 24),
+              // プレミアムステータスセクション
+              _buildPremiumSection(theme),
 
-          // 効果音設定
-          _buildSoundSettingsSection(theme),
-        ],
+              const SizedBox(height: 24),
+
+              // 効果音設定
+              _buildSoundSettingsSection(theme),
+            ],
+          ),
+        ),
       ),
     );
   }

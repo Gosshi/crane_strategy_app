@@ -7,6 +7,7 @@ import '../../data/models/strategy.dart';
 import '../../data/models/report.dart';
 import '../../data/providers/report_repository_provider.dart';
 import '../../data/providers/auth_provider.dart';
+import '../../utils/responsive_utils.dart';
 
 /// 攻略法詳細画面
 class DetailScreen extends ConsumerStatefulWidget {
@@ -76,144 +77,240 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
         ),
       ),
       builder: (context, player) {
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
-            actions: [
-              PopupMenuButton<String>(
-                onSelected: (value) {
-                  if (value == 'report') {
-                    _showReportDialog(context);
-                  }
-                },
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: 'report',
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.flag_outlined,
-                          color: theme.colorScheme.error,
-                        ),
-                        const SizedBox(width: 8),
-                        const Text('情報の誤りを報告'),
-                      ],
-                    ),
-                  ),
-                ],
+        return _buildScaffold(
+          context,
+          title,
+          description,
+          theme,
+          colorScheme,
+          // YouTube Player
+          kIsWeb ? AspectRatio(aspectRatio: 16 / 9, child: player) : player,
+        );
+      },
+    );
+  }
+
+  /// Scaffoldを構築する共通メソッド
+  Widget _buildScaffold(
+    BuildContext context,
+    String title,
+    String description,
+    ThemeData theme,
+    ColorScheme colorScheme,
+    Widget mediaWidget,
+  ) {
+    final layoutType = ResponsiveUtils.getDetailLayoutType(context);
+    final horizontalPadding = ResponsiveUtils.getHorizontalPadding(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'report') {
+                _showReportDialog(context);
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'report',
+                child: Row(
+                  children: [
+                    Icon(Icons.flag_outlined, color: theme.colorScheme.error),
+                    const SizedBox(width: 8),
+                    const Text('情報の誤りを報告'),
+                  ],
+                ),
               ),
             ],
           ),
+        ],
+      ),
+      body: layoutType == DetailLayoutType.sideBySide
+          ? _buildSideBySideLayout(
+              context,
+              title,
+              description,
+              theme,
+              colorScheme,
+              mediaWidget,
+              horizontalPadding,
+            )
+          : _buildVerticalLayout(
+              context,
+              title,
+              description,
+              theme,
+              colorScheme,
+              mediaWidget,
+            ),
+    );
+  }
 
-          body: SingleChildScrollView(
-            child: Column(
+  /// 縦並びレイアウト（モバイル）
+  Widget _buildVerticalLayout(
+    BuildContext context,
+    String title,
+    String description,
+    ThemeData theme,
+    ColorScheme colorScheme,
+    Widget mediaWidget,
+  ) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Media Widget (YouTube Player)
+          mediaWidget,
+          _buildContentSection(context, title, description, theme, colorScheme),
+        ],
+      ),
+    );
+  }
+
+  /// 横並びレイアウト（タブレット・デスクトップ）
+  Widget _buildSideBySideLayout(
+    BuildContext context,
+    String title,
+    String description,
+    ThemeData theme,
+    ColorScheme colorScheme,
+    Widget mediaWidget,
+    double horizontalPadding,
+  ) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 左側：メディア
+        Expanded(
+          flex: 3,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.all(horizontalPadding),
+              child: mediaWidget,
+            ),
+          ),
+        ),
+        // 右側：コンテンツ
+        Expanded(
+          flex: 2,
+          child: SingleChildScrollView(
+            child: _buildContentSection(
+              context,
+              title,
+              description,
+              theme,
+              colorScheme,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// コンテンツセクション（共通部分）
+  Widget _buildContentSection(
+    BuildContext context,
+    String title,
+    String description,
+    ThemeData theme,
+    ColorScheme colorScheme,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Tags (Chips)
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _buildNeonChip(
+                context,
+                label: widget.strategy.settingType,
+                icon: Icons.settings,
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // Title
+          Text(
+            title,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Section Title
+          _buildSectionTitle(context, '攻略のポイント'),
+          const SizedBox(height: 12),
+
+          // Description Box
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainer,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: colorScheme.outline.withValues(alpha: 0.2),
+              ),
+            ),
+            child: Text(
+              description,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                height: 1.8,
+                color: colorScheme.onSurface,
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Hint Card
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  colorScheme.tertiary.withValues(alpha: 0.2),
+                  colorScheme.tertiary.withValues(alpha: 0.05),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: colorScheme.tertiary.withValues(alpha: 0.3),
+              ),
+            ),
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // YouTube Player
-                kIsWeb
-                    ? AspectRatio(aspectRatio: 16 / 9, child: player)
-                    : player,
-
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Tags (Chips)
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          _buildNeonChip(
-                            context,
-                            label: widget.strategy.settingType,
-                            icon: Icons.settings,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Title
-                      Text(
-                        title,
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Section Title
-                      _buildSectionTitle(context, '攻略のポイント'),
-                      const SizedBox(height: 12),
-
-                      // Description Box
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: colorScheme.surfaceContainer,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: colorScheme.outline.withValues(alpha: 0.2),
-                          ),
-                        ),
-                        child: Text(
-                          description,
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            height: 1.8,
-                            color: colorScheme.onSurface,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Hint Card
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              colorScheme.tertiary.withValues(alpha: 0.2),
-                              colorScheme.tertiary.withValues(alpha: 0.05),
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: colorScheme.tertiary.withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(
-                              Icons.lightbulb_outline,
-                              color: colorScheme.tertiary,
-                              size: 28,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                '動画を見ながら、アームの動きや重心の位置をよく観察してみましょう！タイミングが重要です。',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: colorScheme.onSurface,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 40),
-                    ],
+                Icon(
+                  Icons.lightbulb_outline,
+                  color: colorScheme.tertiary,
+                  size: 28,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    '動画を見ながら、アームの動きや重心の位置をよく観察してみましょう！タイミングが重要です。',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurface,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-        );
-      },
+          const SizedBox(height: 40),
+        ],
+      ),
     );
   }
 

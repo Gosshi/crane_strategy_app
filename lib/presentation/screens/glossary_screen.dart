@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../data/models/term.dart';
 import '../../data/providers/term_repository_provider.dart';
+import '../../utils/responsive_utils.dart';
 import '../../l10n/app_localizations.dart';
 
 /// 全用語を取得するプロバイダー
@@ -36,6 +37,7 @@ class _GlossaryScreenState extends ConsumerState<GlossaryScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final termsAsync = ref.watch(allTermsProvider);
+    final horizontalPadding = ResponsiveUtils.getHorizontalPadding(context);
 
     return Scaffold(
       appBar: AppBar(title: Text(AppLocalizations.of(context)!.glossaryTitle)),
@@ -43,7 +45,7 @@ class _GlossaryScreenState extends ConsumerState<GlossaryScreen> {
         children: [
           // 検索バー
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(horizontalPadding),
             child: TextField(
               decoration: InputDecoration(
                 hintText: AppLocalizations.of(context)!.searchTerms,
@@ -135,13 +137,20 @@ class _GlossaryScreenState extends ConsumerState<GlossaryScreen> {
                   );
                 }
 
-                return ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: filteredTerms.length,
-                  itemBuilder: (context, index) {
-                    final term = filteredTerms[index];
-                    return _buildTermCard(term, theme);
-                  },
+                final maxWidth = ResponsiveUtils.getContentMaxWidth(context);
+
+                return Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: maxWidth),
+                    child: ListView.builder(
+                      padding: EdgeInsets.all(horizontalPadding),
+                      itemCount: filteredTerms.length,
+                      itemBuilder: (context, index) {
+                        final term = filteredTerms[index];
+                        return _buildTermCard(term, theme);
+                      },
+                    ),
+                  ),
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),

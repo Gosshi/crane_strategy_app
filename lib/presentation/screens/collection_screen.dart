@@ -7,6 +7,7 @@ import '../../data/providers/collection_repository_provider.dart';
 import '../../data/providers/strategy_repository_provider.dart';
 import '../../data/providers/auth_provider.dart';
 import '../../utils/share_utils.dart';
+import '../../utils/responsive_utils.dart';
 import '../widgets/collection_grid_item.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -111,48 +112,70 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
   }
 
   Widget _buildListView(List<CollectionWithProduct> items) {
-    return ListView.builder(
-      itemCount: items.length,
-      padding: const EdgeInsets.only(bottom: 24),
-      itemBuilder: (context, index) {
-        final item = items[index];
-        final product = item.product;
-        final collection = item.collectionItem;
+    final horizontalPadding = ResponsiveUtils.getHorizontalPadding(context);
+    final maxWidth = ResponsiveUtils.getContentMaxWidth(context);
 
-        return Card(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: ListTile(
-            leading: product?.imageUrl != null
-                ? CircleAvatar(
-                    backgroundImage: NetworkImage(product!.imageUrl),
-                    backgroundColor: Colors.transparent,
-                  )
-                : const Icon(Icons.check_circle, color: Colors.green),
-            title: Text(product?.name ?? collection.shopName ?? '名称不明'),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('獲得日: ${collection.acquiredAt.toString().split(' ')[0]}'),
-                if (collection.note != null && collection.note!.isNotEmpty)
-                  Text('メモ: ${collection.note!}'),
-              ],
-            ),
-            trailing: IconButton(
-              icon: const Icon(Icons.share),
-              onPressed: () => _shareItem(item),
-            ),
-            onTap: () => _showDetailDialog(item),
+    return Center(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: maxWidth),
+        child: ListView.builder(
+          itemCount: items.length,
+          padding: EdgeInsets.only(
+            bottom: 24,
+            left: horizontalPadding,
+            right: horizontalPadding,
           ),
-        );
-      },
+          itemBuilder: (context, index) {
+            final item = items[index];
+            final product = item.product;
+            final collection = item.collectionItem;
+
+            return Card(
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              child: ListTile(
+                leading: product?.imageUrl != null
+                    ? CircleAvatar(
+                        backgroundImage: NetworkImage(product!.imageUrl),
+                        backgroundColor: Colors.transparent,
+                      )
+                    : const Icon(Icons.check_circle, color: Colors.green),
+                title: Text(product?.name ?? collection.shopName ?? '名称不明'),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '獲得日: ${collection.acquiredAt.toString().split(' ')[0]}',
+                    ),
+                    if (collection.note != null && collection.note!.isNotEmpty)
+                      Text('メモ: ${collection.note!}'),
+                  ],
+                ),
+                trailing: IconButton(
+                  icon: const Icon(Icons.share),
+                  onPressed: () => _shareItem(item),
+                ),
+                onTap: () => _showDetailDialog(item),
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 
   Widget _buildGridView(List<CollectionWithProduct> items) {
+    final columnCount = ResponsiveUtils.getGridColumnCount(
+      context,
+      mobile: 3,
+      tablet: 5,
+      desktop: 7,
+    );
+    final padding = ResponsiveUtils.getHorizontalPadding(context);
+
     return GridView.builder(
-      padding: const EdgeInsets.all(8),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
+      padding: EdgeInsets.all(padding / 2),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: columnCount,
         childAspectRatio: 0.85,
         mainAxisSpacing: 8,
         crossAxisSpacing: 8,
