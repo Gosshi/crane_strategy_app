@@ -30,5 +30,20 @@
   "experiencePremiumFor24h": "광고를 시청하고 24시간 프리미엄 기능을 체험하세요!",
   "allAdsHidden": "모든 광고 숨김",
   "loading": "로딩 중...",
-  "errorOccurred": "오류가 발생했습니다"
+  "errorOccurred": "오류가 발생했습니다",
+  "dangerZone": "위험 영역",
+  "deleteAccount": "계정 삭제",
+  "deleteAccountDescription": "계정을 영구적으로 삭제합니다. 이 작업은 취소할 수 없습니다.",
+  "deleteAccountTitle": "계정 삭제 확인",
+  "deleteAccountWarning": "이 작업은 계정과 모든 관련 데이터를 영구적으로 삭제합니다. 이 작업은 취소할 수 없습니다.",
+  "deleteAccountConfirm": "삭제",
+  "deleteAccountSuccess": "계정이 삭제되었습니다",
+  "deleteAccountError": "계정 삭제 오류: {error}",
+  "@deleteAccountError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }
