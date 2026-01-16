@@ -75,68 +75,135 @@ class _StrategyDiagramState extends State<StrategyDiagram>
 
   // ========================================
   // 縦ハメ用キーフレーム（正解フォーム）
+  // ドキュメント参照: Setup → Insertion(Walking) → Execution
   // ========================================
   static const List<BoxKeyframe> _verticalBoxKeyframes = [
-    // Phase 0: 初期状態（水平）
-    BoxKeyframe(time: 0.00, angle: 0, x: 0, y: 0, pivot: 0),
+    // ──────────────────────────────────────
+    // Phase 1: Setup（セットアップ/回転）
+    // 寄せ技術で箱を20-45度に傾ける
+    // ──────────────────────────────────────
+    BoxKeyframe(time: 0.00, angle: 0, x: 0, y: 0, pivot: 0), // 初期状態（水平）
+    // 1手目: 寄せ（右奥を引く → 左に傾く）
+    BoxKeyframe(time: 0.02, angle: 0, x: 0, y: 0, pivot: 1), // アーム右奥に配置
+    BoxKeyframe(time: 0.06, angle: 12, x: -4, y: 0, pivot: 1), // 引いて傾斜開始
+    BoxKeyframe(time: 0.10, angle: 18, x: -6, y: 1, pivot: 1), // 引き続ける
+    BoxKeyframe(time: 0.12, angle: 15, x: -5, y: 2, pivot: 1), // 少し戻る（摩擦）
+    // 2手目: 逆寄せ（左奥を引く → 右に傾く）
+    BoxKeyframe(time: 0.16, angle: 15, x: -5, y: 2, pivot: -1), // アーム左奥へ移動
+    BoxKeyframe(time: 0.20, angle: -8, x: 5, y: 2, pivot: -1), // 逆方向へ傾斜
+    BoxKeyframe(time: 0.24, angle: -12, x: 7, y: 3, pivot: -1), // さらに傾斜
+    BoxKeyframe(time: 0.26, angle: -10, x: 6, y: 3, pivot: -1), // 少し戻る
+    // 3手目: 再度寄せ（右奥を引く → 左に大きく傾く）
+    BoxKeyframe(time: 0.30, angle: -10, x: 6, y: 3, pivot: 1), // アーム右奥へ
+    BoxKeyframe(time: 0.34, angle: 25, x: -8, y: 4, pivot: 1), // 大きく傾斜
+    BoxKeyframe(
+      time: 0.38,
+      angle: 30,
+      x: -10,
+      y: 5,
+      pivot: 1,
+    ), // セットアップ完了（約30度）
+    BoxKeyframe(time: 0.40, angle: 28, x: -9, y: 6, pivot: 1), // 少し安定
+    // ──────────────────────────────────────
+    // Phase 2: Insertion（挿入/Walking歩行）
+    // 左奥→右奥を交互に持ち上げて「歩かせる」
+    // ──────────────────────────────────────
 
-    // Phase 1: きっかけ（右を払う → 左に傾く）
-    BoxKeyframe(time: 0.05, angle: 0, x: 0, y: 0, pivot: -1), // アーム接触直前
-    BoxKeyframe(time: 0.12, angle: 8, x: -3, y: 0, pivot: -1), // 衝撃
-    BoxKeyframe(time: 0.15, angle: 5, x: -2, y: 1, pivot: -1), // 少し戻る
-    // Phase 2: 対角線攻め（左を払う → 右に大きく傾く）
-    BoxKeyframe(time: 0.20, angle: 5, x: -2, y: 1, pivot: 1), // アーム移動中
-    BoxKeyframe(time: 0.30, angle: -15, x: 8, y: 2, pivot: 1), // 逆方向へ
-    BoxKeyframe(time: 0.35, angle: -12, x: 6, y: 3, pivot: 1), // 少し戻る
-    // Phase 3: 深いハマり（右を強く押す）
-    BoxKeyframe(time: 0.40, angle: -12, x: 6, y: 3, pivot: -1), // アーム移動中
-    BoxKeyframe(time: 0.50, angle: 35, x: -5, y: 8, pivot: -1), // 大きく傾く
-    BoxKeyframe(time: 0.55, angle: 30, x: -3, y: 10, pivot: -1), // 少し戻る
-    // Phase 4: 背面ずり上げ（裏側から引く）
-    BoxKeyframe(time: 0.60, angle: 30, x: -3, y: 10, pivot: -1), // 準備
-    BoxKeyframe(time: 0.68, angle: 55, x: 0, y: 18, pivot: -1), // 1回目ガガッ
-    BoxKeyframe(time: 0.72, angle: 50, x: 2, y: 16, pivot: -1), // 少し滑る
-    BoxKeyframe(time: 0.80, angle: 75, x: 0, y: 28, pivot: -1), // 2回目ガガッ
-    // Phase 5: 縦ハメ完成 → 落下
-    BoxKeyframe(time: 0.82, angle: 80, x: 0, y: 32, pivot: -1), // ほぼ垂直
-    BoxKeyframe(time: 0.84, angle: 80, x: 0, y: 32, pivot: -1), // 一瞬止まる
-    BoxKeyframe(time: 0.86, angle: 78, x: 0, y: 35, pivot: -1), // 重力で少し戻る
-    BoxKeyframe(time: 0.95, angle: 75, x: 0, y: 150, pivot: -1), // 加速落下
-    // Phase 6: リセット
+    // Walking 1歩目: 左奥を持ち上げ
+    BoxKeyframe(time: 0.44, angle: 28, x: -9, y: 6, pivot: -1), // アーム左奥へ
+    BoxKeyframe(time: 0.48, angle: 40, x: -6, y: 8, pivot: -1), // 持ち上げて角度増加
+    BoxKeyframe(time: 0.50, angle: 38, x: -5, y: 9, pivot: -1), // 着地
+    // Walking 2歩目: 右奥を持ち上げ
+    BoxKeyframe(time: 0.54, angle: 38, x: -5, y: 9, pivot: 1), // アーム右奥へ
+    BoxKeyframe(time: 0.58, angle: 52, x: -3, y: 12, pivot: 1), // 持ち上げて角度増加
+    BoxKeyframe(time: 0.60, angle: 50, x: -2, y: 13, pivot: 1), // 着地
+    // Walking 3歩目: 左奥を持ち上げ（ダイヤモンド形状へ）
+    BoxKeyframe(time: 0.64, angle: 50, x: -2, y: 13, pivot: -1), // アーム左奥へ
+    BoxKeyframe(time: 0.68, angle: 68, x: 0, y: 18, pivot: -1), // 持ち上げて角度増加
+    BoxKeyframe(time: 0.70, angle: 65, x: 1, y: 20, pivot: -1), // 着地（縦ハメ形状完成）
+    // ──────────────────────────────────────
+    // Phase 3: Execution（決済/落とし）
+    // スライド/ズリ落としで獲得
+    // ──────────────────────────────────────
+
+    // ズリ落とし（重心移動で自然落下）
+    BoxKeyframe(time: 0.74, angle: 65, x: 1, y: 20, pivot: 0), // 準備
+    BoxKeyframe(time: 0.78, angle: 72, x: 0, y: 25, pivot: 0), // 軽く押して重心移動
+    BoxKeyframe(time: 0.82, angle: 78, x: 0, y: 35, pivot: 0), // 滑り始める
+    BoxKeyframe(time: 0.84, angle: 80, x: 0, y: 45, pivot: 0), // 加速
+    BoxKeyframe(time: 0.86, angle: 82, x: 0, y: 60, pivot: 0), // 落下開始
+    BoxKeyframe(time: 0.92, angle: 85, x: 0, y: 150, pivot: 0), // 落下
+    // リセット
     BoxKeyframe(time: 1.00, angle: 0, x: 0, y: 0, pivot: 0),
   ];
 
   static const List<ArmKeyframe> _verticalArmKeyframes = [
-    // Phase 0: 初期
-    ArmKeyframe(time: 0.00, vertical: 0.0, horizontal: 0.4, visible: true),
+    // ──────────────────────────────────────
+    // Phase 1: Setup（セットアップ/回転）
+    // ──────────────────────────────────────
+    ArmKeyframe(
+      time: 0.00,
+      vertical: 0.0,
+      horizontal: 0.5,
+      visible: true,
+    ), // 初期
+    // 1手目: 右奥を寄せる（引く動作）
+    ArmKeyframe(time: 0.02, vertical: 0.0, horizontal: 0.5), // 右奥に配置
+    ArmKeyframe(time: 0.04, vertical: 0.8, horizontal: 0.5), // 降下
+    ArmKeyframe(time: 0.06, vertical: 1.0, horizontal: 0.5), // 掴む
+    ArmKeyframe(time: 0.10, vertical: 1.0, horizontal: 0.3), // 引く（寄せ）
+    ArmKeyframe(time: 0.12, vertical: 0.3, horizontal: 0.3), // 離す
+    // 2手目: 左奥を逆寄せ
+    ArmKeyframe(time: 0.14, vertical: 0.0, horizontal: 0.3),
+    ArmKeyframe(time: 0.16, vertical: 0.0, horizontal: -0.5), // 左奥へ移動
+    ArmKeyframe(time: 0.18, vertical: 0.8, horizontal: -0.5), // 降下
+    ArmKeyframe(time: 0.20, vertical: 1.0, horizontal: -0.5), // 掴む
+    ArmKeyframe(time: 0.24, vertical: 1.0, horizontal: -0.3), // 引く（逆寄せ）
+    ArmKeyframe(time: 0.26, vertical: 0.3, horizontal: -0.3), // 離す
+    // 3手目: 右奥を再度寄せ
+    ArmKeyframe(time: 0.28, vertical: 0.0, horizontal: -0.3),
+    ArmKeyframe(time: 0.30, vertical: 0.0, horizontal: 0.5), // 右奥へ移動
+    ArmKeyframe(time: 0.32, vertical: 0.8, horizontal: 0.5), // 降下
+    ArmKeyframe(time: 0.34, vertical: 1.0, horizontal: 0.5), // 掴む
+    ArmKeyframe(time: 0.38, vertical: 1.0, horizontal: 0.2), // 引く（寄せ）
+    ArmKeyframe(time: 0.40, vertical: 0.3, horizontal: 0.2), // 離す
+    // ──────────────────────────────────────
+    // Phase 2: Insertion（Walking歩行）
+    // ──────────────────────────────────────
 
-    // Phase 1: 右側を払う
-    ArmKeyframe(time: 0.05, vertical: 0.3, horizontal: 0.4),
-    ArmKeyframe(time: 0.10, vertical: 1.0, horizontal: 0.4), // 接触
-    ArmKeyframe(time: 0.15, vertical: 0.8, horizontal: 0.4), // 離れる
-    // Phase 2: 左側へ移動して払う
-    ArmKeyframe(time: 0.18, vertical: 0.0, horizontal: 0.4),
-    ArmKeyframe(time: 0.22, vertical: 0.0, horizontal: -0.4), // 左へ移動
-    ArmKeyframe(time: 0.28, vertical: 1.0, horizontal: -0.4), // 接触
-    ArmKeyframe(time: 0.35, vertical: 0.5, horizontal: -0.4), // 離れる
-    // Phase 3: 右側を強く押す
-    ArmKeyframe(time: 0.38, vertical: 0.0, horizontal: -0.4),
-    ArmKeyframe(time: 0.42, vertical: 0.0, horizontal: 0.4), // 右へ移動
-    ArmKeyframe(time: 0.48, vertical: 1.2, horizontal: 0.4), // 強く押す
-    ArmKeyframe(time: 0.55, vertical: 0.3, horizontal: 0.4), // 離れる
-    // Phase 4: 背面へ移動して深押し
-    ArmKeyframe(time: 0.58, vertical: 0.0, horizontal: 0.4),
-    ArmKeyframe(time: 0.62, vertical: 0.0, horizontal: 0.0), // 中央へ
-    ArmKeyframe(time: 0.66, vertical: 1.5, horizontal: 0.0), // 深押し1
-    ArmKeyframe(time: 0.70, vertical: 1.3, horizontal: 0.0), // 少し戻る
-    ArmKeyframe(time: 0.78, vertical: 1.8, horizontal: 0.0), // 深押し2
-    ArmKeyframe(time: 0.82, vertical: 1.8, horizontal: 0.0), // 維持
-    // Phase 5: 離脱
-    ArmKeyframe(time: 0.84, vertical: 0.5, horizontal: 0.0),
-    ArmKeyframe(time: 0.90, vertical: 0.0, horizontal: 0.0, visible: false),
+    // Walking 1歩目: 左奥を持ち上げ
+    ArmKeyframe(time: 0.42, vertical: 0.0, horizontal: 0.2),
+    ArmKeyframe(time: 0.44, vertical: 0.0, horizontal: -0.4), // 左奥へ移動
+    ArmKeyframe(time: 0.46, vertical: 0.8, horizontal: -0.4), // 降下
+    ArmKeyframe(time: 0.48, vertical: 1.2, horizontal: -0.4), // 持ち上げ（リフト）
+    ArmKeyframe(time: 0.50, vertical: 0.3, horizontal: -0.4), // 離す
+    // Walking 2歩目: 右奥を持ち上げ
+    ArmKeyframe(time: 0.52, vertical: 0.0, horizontal: -0.4),
+    ArmKeyframe(time: 0.54, vertical: 0.0, horizontal: 0.4), // 右奥へ移動
+    ArmKeyframe(time: 0.56, vertical: 0.8, horizontal: 0.4), // 降下
+    ArmKeyframe(time: 0.58, vertical: 1.2, horizontal: 0.4), // 持ち上げ（リフト）
+    ArmKeyframe(time: 0.60, vertical: 0.3, horizontal: 0.4), // 離す
+    // Walking 3歩目: 左奥を持ち上げ
+    ArmKeyframe(time: 0.62, vertical: 0.0, horizontal: 0.4),
+    ArmKeyframe(time: 0.64, vertical: 0.0, horizontal: -0.4), // 左奥へ移動
+    ArmKeyframe(time: 0.66, vertical: 0.8, horizontal: -0.4), // 降下
+    ArmKeyframe(time: 0.68, vertical: 1.2, horizontal: -0.4), // 持ち上げ（リフト）
+    ArmKeyframe(time: 0.70, vertical: 0.3, horizontal: -0.4), // 離す
+    // ──────────────────────────────────────
+    // Phase 3: Execution（決済）
+    // ──────────────────────────────────────
 
-    // Phase 6: リセット
-    ArmKeyframe(time: 1.00, vertical: 0.0, horizontal: 0.4, visible: true),
+    // ズリ落とし（軽く押して重心移動）
+    ArmKeyframe(time: 0.72, vertical: 0.0, horizontal: -0.4),
+    ArmKeyframe(time: 0.74, vertical: 0.0, horizontal: 0.0), // 中央へ
+    ArmKeyframe(time: 0.76, vertical: 0.6, horizontal: 0.0), // 降下
+    ArmKeyframe(time: 0.78, vertical: 0.8, horizontal: 0.0), // 軽く押す
+    ArmKeyframe(time: 0.82, vertical: 0.4, horizontal: 0.0), // 離れる
+    // 離脱
+    ArmKeyframe(time: 0.84, vertical: 0.0, horizontal: 0.0, visible: false),
+
+    // リセット
+    ArmKeyframe(time: 1.00, vertical: 0.0, horizontal: 0.5, visible: true),
   ];
 
   // ========================================
@@ -199,7 +266,7 @@ class _StrategyDiagramState extends State<StrategyDiagram>
 
   void _setupAnimation() {
     _controller = AnimationController(
-      duration: const Duration(seconds: 8),
+      duration: const Duration(seconds: 16),
       vsync: this,
     );
 
