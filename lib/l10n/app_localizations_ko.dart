@@ -266,4 +266,31 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get addToCollection =>
       'Also add to \"My Collection\" upon registration';
+
+  @override
+  String get dangerZone => '위험 영역';
+
+  @override
+  String get deleteAccount => '계정 삭제';
+
+  @override
+  String get deleteAccountDescription => '계정을 영구적으로 삭제합니다. 이 작업은 취소할 수 없습니다.';
+
+  @override
+  String get deleteAccountTitle => '계정 삭제 확인';
+
+  @override
+  String get deleteAccountWarning =>
+      '이 작업은 계정과 모든 관련 데이터를 영구적으로 삭제합니다. 이 작업은 취소할 수 없습니다.';
+
+  @override
+  String get deleteAccountConfirm => '삭제';
+
+  @override
+  String get deleteAccountSuccess => '계정이 삭제되었습니다';
+
+  @override
+  String deleteAccountError(String error) {
+    return '계정 삭제 오류: $error';
+  }
 }

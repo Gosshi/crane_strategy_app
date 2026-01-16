@@ -80,5 +80,20 @@
   "registerError": "登録エラー: {error}",
   "productRegistration": "商品登録",
   "barcode": "バーコード: {barcode}",
-  "addToCollection": "登録と同時に「獲得コレクション」にも追加されます"
+  "addToCollection": "登録と同時に「獲得コレクション」にも追加されます",
+  "dangerZone": "危険な操作",
+  "deleteAccount": "アカウントを削除",
+  "deleteAccountDescription": "アカウントを完全に削除します。この操作は取り消せません。",
+  "deleteAccountTitle": "アカウント削除の確認",
+  "deleteAccountWarning": "この操作を行うと、アカウントと関連するすべてのデータが完全に削除されます。この操作は取り消すことができません。",
+  "deleteAccountConfirm": "削除する",
+  "deleteAccountSuccess": "アカウントが削除されました",
+  "deleteAccountError": "アカウント削除エラー: {error}",
+  "@deleteAccountError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

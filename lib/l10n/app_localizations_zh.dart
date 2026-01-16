@@ -266,6 +266,32 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get addToCollection =>
       'Also add to \"My Collection\" upon registration';
+
+  @override
+  String get dangerZone => '危险操作';
+
+  @override
+  String get deleteAccount => '删除账户';
+
+  @override
+  String get deleteAccountDescription => '永久删除您的账户。此操作无法撤销。';
+
+  @override
+  String get deleteAccountTitle => '确认删除账户';
+
+  @override
+  String get deleteAccountWarning => '此操作将永久删除您的账户及所有相关数据。此操作无法撤销。';
+
+  @override
+  String get deleteAccountConfirm => '删除';
+
+  @override
+  String get deleteAccountSuccess => '账户已删除';
+
+  @override
+  String deleteAccountError(String error) {
+    return '账户删除错误: $error';
+  }
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -366,4 +392,30 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get errorOccurred => '發生錯誤';
+
+  @override
+  String get dangerZone => '危險操作';
+
+  @override
+  String get deleteAccount => '刪除帳戶';
+
+  @override
+  String get deleteAccountDescription => '永久刪除您的帳戶。此操作無法撤銷。';
+
+  @override
+  String get deleteAccountTitle => '確認刪除帳戶';
+
+  @override
+  String get deleteAccountWarning => '此操作將永久刪除您的帳戶及所有相關資料。此操作無法撤銷。';
+
+  @override
+  String get deleteAccountConfirm => '刪除';
+
+  @override
+  String get deleteAccountSuccess => '帳戶已刪除';
+
+  @override
+  String deleteAccountError(String error) {
+    return '帳戶刪除錯誤: $error';
+  }
 }

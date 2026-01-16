@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'dart:io';
 import '../../data/providers/auth_provider.dart';
 import '../../data/providers/audio_service_provider.dart';
@@ -204,6 +205,11 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
 
               // 効果音設定
               _buildSoundSettingsSection(theme),
+
+              const SizedBox(height: 24),
+
+              // アカウント削除セクション (非匿名ユーザーのみ)
+              if (!isAnonymous) _buildDeleteAccountSection(theme),
             ],
           ),
         ),
@@ -481,5 +487,83 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         ),
       ],
     );
+  }
+
+  Widget _buildDeleteAccountSection(ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          AppLocalizations.of(context)!.dangerZone,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Colors.red,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Card(
+          color: Colors.red.withValues(alpha: 0.1),
+          child: ListTile(
+            leading: const Icon(Icons.delete_forever, color: Colors.red),
+            title: Text(
+              AppLocalizations.of(context)!.deleteAccount,
+              style: const TextStyle(color: Colors.red),
+            ),
+            subtitle: Text(
+              AppLocalizations.of(context)!.deleteAccountDescription,
+              style: TextStyle(color: Colors.red.withValues(alpha: 0.7)),
+            ),
+            onTap: () => _showDeleteAccountDialog(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _showDeleteAccountDialog() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(AppLocalizations.of(context)!.deleteAccountTitle),
+        content: Text(AppLocalizations.of(context)!.deleteAccountWarning),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(AppLocalizations.of(context)!.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: Text(AppLocalizations.of(context)!.deleteAccountConfirm),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      try {
+        await ref.read(authRepositoryProvider).deleteAccount();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.deleteAccountSuccess),
+            ),
+          );
+          // Navigate to home after account deletion
+          context.go('/');
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                AppLocalizations.of(context)!.deleteAccountError(e.toString()),
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
   }
 }

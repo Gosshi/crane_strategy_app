@@ -80,5 +80,20 @@
   "registerError": "Registration error: {error}",
   "productRegistration": "Product Registration",
   "barcode": "Barcode: {barcode}",
-  "addToCollection": "Also add to \"My Collection\" upon registration"
+  "addToCollection": "Also add to \"My Collection\" upon registration",
+  "dangerZone": "Danger Zone",
+  "deleteAccount": "Delete Account",
+  "deleteAccountDescription": "Permanently delete your account. This action cannot be undone.",
+  "deleteAccountTitle": "Confirm Account Deletion",
+  "deleteAccountWarning": "This will permanently delete your account and all associated data. This action cannot be undone.",
+  "deleteAccountConfirm": "Delete",
+  "deleteAccountSuccess": "Account deleted successfully",
+  "deleteAccountError": "Account deletion error: {error}",
+  "@deleteAccountError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

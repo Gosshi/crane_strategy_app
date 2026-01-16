@@ -267,4 +267,32 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get addToCollection =>
       'Also add to \"My Collection\" upon registration';
+
+  @override
+  String get dangerZone => 'Danger Zone';
+
+  @override
+  String get deleteAccount => 'Delete Account';
+
+  @override
+  String get deleteAccountDescription =>
+      'Permanently delete your account. This action cannot be undone.';
+
+  @override
+  String get deleteAccountTitle => 'Confirm Account Deletion';
+
+  @override
+  String get deleteAccountWarning =>
+      'This will permanently delete your account and all associated data. This action cannot be undone.';
+
+  @override
+  String get deleteAccountConfirm => 'Delete';
+
+  @override
+  String get deleteAccountSuccess => 'Account deleted successfully';
+
+  @override
+  String deleteAccountError(String error) {
+    return 'Account deletion error: $error';
+  }
 }

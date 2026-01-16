@@ -264,4 +264,31 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get addToCollection => '登録と同時に「獲得コレクション」にも追加されます';
+
+  @override
+  String get dangerZone => '危険な操作';
+
+  @override
+  String get deleteAccount => 'アカウントを削除';
+
+  @override
+  String get deleteAccountDescription => 'アカウントを完全に削除します。この操作は取り消せません。';
+
+  @override
+  String get deleteAccountTitle => 'アカウント削除の確認';
+
+  @override
+  String get deleteAccountWarning =>
+      'この操作を行うと、アカウントと関連するすべてのデータが完全に削除されます。この操作は取り消すことができません。';
+
+  @override
+  String get deleteAccountConfirm => '削除する';
+
+  @override
+  String get deleteAccountSuccess => 'アカウントが削除されました';
+
+  @override
+  String deleteAccountError(String error) {
+    return 'アカウント削除エラー: $error';
+  }
 }

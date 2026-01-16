@@ -127,4 +127,25 @@ class FirebaseAuthRepository implements AuthRepository {
     }
     await _firebaseAuth.signOut();
   }
+
+  @override
+  Future<void> deleteAccount() async {
+    final user = _firebaseAuth.currentUser;
+    if (user == null) {
+      throw FirebaseAuthException(
+        code: 'ERROR_NO_USER',
+        message: 'No user to delete',
+      );
+    }
+
+    // Sign out from Google if linked
+    try {
+      await gsi.GoogleSignIn.instance.signOut();
+    } catch (e) {
+      debugPrint('Google sign out failed: $e');
+    }
+
+    // Delete the user account
+    await user.delete();
+  }
 }

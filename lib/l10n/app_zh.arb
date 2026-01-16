@@ -30,5 +30,20 @@
   "experiencePremiumFor24h": "观看广告体验24小时高级功能！",
   "allAdsHidden": "所有广告已隐藏",
   "loading": "加载中...",
-  "errorOccurred": "发生错误"
+  "errorOccurred": "发生错误",
+  "dangerZone": "危险操作",
+  "deleteAccount": "删除账户",
+  "deleteAccountDescription": "永久删除您的账户。此操作无法撤销。",
+  "deleteAccountTitle": "确认删除账户",
+  "deleteAccountWarning": "此操作将永久删除您的账户及所有相关数据。此操作无法撤销。",
+  "deleteAccountConfirm": "删除",
+  "deleteAccountSuccess": "账户已删除",
+  "deleteAccountError": "账户删除错误: {error}",
+  "@deleteAccountError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }
